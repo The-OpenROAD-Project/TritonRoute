@@ -102,9 +102,14 @@ void fr::DRCWorker::setupEdges_net(DRCNet* net) {
     frLayerNum layerNum = it->first;
     for (auto &origPoly: it->second) {
       std::vector<Polygon> polys;
-      getPolyWithHole(origPoly, polys);
+      getPolyWithHole_new(origPoly, polys);
       if (!polys.empty() && winding(polys.back()) != boost::polygon::LOW) {
-        std::cout << "Error: outline poly must be clockwise\n";
+        std::cout << "Error: outline poly must be clockwise (layer2FixedPolySet)\n";
+        std::cout << "layer " << layerNum << "\n";
+        for (auto ptIt = begin_points(origPoly); ptIt != end_points(origPoly); ++ptIt) {
+          std::cout << "(" << (*ptIt).x() << ", " << (*ptIt).y() << ") -- ";
+        }
+        std::cout << std::endl;
       }
       for (auto &poly:polys) {
         frVector<Point> vertices;
@@ -153,9 +158,9 @@ void fr::DRCWorker::setupEdges_net(DRCNet* net) {
     frLayerNum layerNum = it->first;
     for (auto &origPoly: it->second) {
       std::vector<Polygon> polys;
-      getPolyWithHole(origPoly, polys);
+      getPolyWithHole_new(origPoly, polys);
       if (!polys.empty() && winding(polys.back()) != boost::polygon::LOW) {
-        std::cout << "Error: outline poly must be clockwise\n";
+        std::cout << "Error: outline poly must be clockwise (layer2MergedPolySet edge intv set)\n";
       }
       for (auto &poly: polys) {
         frVector<Point> vertices;
@@ -197,9 +202,9 @@ void fr::DRCWorker::setupEdges_net(DRCNet* net) {
     // the poly may have hole, need to call getPolyWithHole
     for (auto &origPoly: polySet) {
       std::vector<Polygon> polys;
-      getPolyWithHole(origPoly, polys);
+      getPolyWithHole_new(origPoly, polys);
       if (!polys.empty() && winding(polys.back()) != boost::polygon::LOW) {
-        std::cout << "Error: outline poly must be clockwise\n";
+        std::cout << "Error: outline poly must be clockwise (layer2MergedPolySet edges)\n";
       }
       // the last one is outline and the others are holes
       for (auto &poly: polys) {

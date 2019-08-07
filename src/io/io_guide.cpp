@@ -923,6 +923,10 @@ bool io::Parser::genGuides_astar(frNet* net, vector<bool> &adjVisited, vector<in
     }
     adjVisited = onPathIdx;
   }
+  // skip one-pin net
+  if (nCnt == gCnt + 1) {
+    return true;
+  }
   if (enableOutput) {
   cout <<"stat: " <<net->getName() <<" #guide/#pin/#unused = " <<gCnt <<"/" <<nCnt - gCnt <<"/" 
        <<nCnt - count(adjVisited.begin(), adjVisited.end(), true) <<endl;

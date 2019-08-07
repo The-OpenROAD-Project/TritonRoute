@@ -382,8 +382,10 @@ void FlexDRWorker::endAddNets_merge(frNet* net, set<pair<frPoint, frLayerNum> > 
   vector<frBlockObject*> drObjs;
   vector<frPathSeg*> horzPathSegs;
   vector<frPathSeg*> vertPathSegs;
+  bool hasPatchMetal = false;
   auto regionQuery = getRegionQuery();
   for (auto &[pt, lNum]: boundPts) {
+    hasPatchMetal = false;
     bool skip = false;
     result.clear();
     regionQuery->query(frBox(pt, pt), lNum, result);
@@ -427,10 +429,21 @@ void FlexDRWorker::endAddNets_merge(frNet* net, set<pair<frPoint, frLayerNum> > 
             horzPathSegs.push_back(ps);
           }
         }
+      } else if (obj->typeId() == frcPatchWire) {
+        auto pwire = static_cast<frPatchWire*>(obj);
+        if (!(pwire->getNet() == net)) {
+          continue;
+        }
+        frPoint bp;
+        pwire->getOrigin(bp);
+        if (bp == pt) {
+          hasPatchMetal = true;
+          break;
+        }
       }
     }
     // merge horz pathseg
-    if ((int)horzPathSegs.size() == 2 && vertPathSegs.empty()) {
+    if ((int)horzPathSegs.size() == 2 && vertPathSegs.empty() && !hasPatchMetal) {
       unique_ptr<frShape> uShape = make_unique<frPathSeg>(*horzPathSegs[0]);
       auto rptr = static_cast<frPathSeg*>(uShape.get());
       frPoint bp1, ep1, bp2, ep2;
@@ -448,7 +461,7 @@ void FlexDRWorker::endAddNets_merge(frNet* net, set<pair<frPoint, frLayerNum> > 
       net->addShape(uShape);
       regionQuery->addDRObj(rptr);
     }
-    if ((int)vertPathSegs.size() == 2 && horzPathSegs.empty()) {
+    if ((int)vertPathSegs.size() == 2 && horzPathSegs.empty() && !hasPatchMetal) {
       unique_ptr<frShape> uShape = make_unique<frPathSeg>(*vertPathSegs[0]);
       auto rptr = static_cast<frPathSeg*>(uShape.get());
       frPoint bp1, ep1, bp2, ep2;

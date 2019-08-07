@@ -1489,7 +1489,7 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     //routeBox.set(156*2000, 108.3*2000, 177*2000, 128.25*2000);
     // routeBox.set(175*2000, 3.5*2000, 185*2000, 13.5*2000);
     // routeBox.set(0*2000, 0*2000, 200*2000, 200*2000);
-    routeBox.set(126*2000, 126*2000, 147*2000, 147*2000);
+    routeBox.set(618*2000, 198*2000, 639*2000, 219*2000);
     worker.setRouteBox(routeBox);
     frBox extBox;
     frBox drcBox;
@@ -1500,7 +1500,7 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     worker.setDrcBox(drcBox);
     worker.setMazeEndIter(mazeEndIter);
     worker.setTest(true);
-    worker.setQuickDRCTest(true);
+    //worker.setQuickDRCTest(true);
     //worker.setDRCTest(true);
     worker.setDRIter(iter);
     worker.setEnableDRC(enableDRC);
@@ -1790,19 +1790,15 @@ int FlexDR::main() {
   //end();
   //searchRepair(1,  7, -4,  1, DRCCOST, 0,          0, 0, true, 1, false, 0, true); // test mode
   end();
-  searchRepair(1,  7, -4,  1, DRCCOST, 0,          0, 0, true, 1, false, 0); // func as fully rerouting iter, no marker cost
-  //end();
-  //searchRepair(1,  7, 3,  1, DRCCOST, MARKERCOST, 1, 0, true, 1, false, 0); // func as fully rerouting iter, no marker cost
-  //end();
-  //searchRepair(2,  7, 0,  5, DRCCOST, 0,          0, 0, true, 0, false, 0); // true search and repair
+  searchRepair(1,  7, -4, 1, DRCCOST, 0,          0, 0, true, 1, false, 0); // func as fully rerouting iter, no marker cost
   end();
   searchRepair(2,  7,  0, 4, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
   end();
   searchRepair(3,  7, -4, 4, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
   end();
-  searchRepair(4,  7,  0, 4, DRCCOST, MARKERCOST,  8, 2, true, 0, false, 3); // true search and repair
+  searchRepair(4,  7,  0, 4, DRCCOST, MARKERCOST,  4, 2, true, 0, false, 3); // true search and repair
   end();
-  searchRepair(5,  7, -4, 4, DRCCOST, MARKERCOST,  8, 2, true, 0, false, 3); // true search and repair
+  searchRepair(5,  7, -4, 4, DRCCOST, MARKERCOST,  4, 2, true, 0, false, 3); // true search and repair
   end();
   searchRepair(6,  7,  0, 4, DRCCOST, MARKERCOST,  8, 2, true, 0, false, 3); // true search and repair
   end();

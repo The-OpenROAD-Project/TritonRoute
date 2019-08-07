@@ -357,6 +357,9 @@ void FlexPinPrep::instTermPinPrep(frInstTerm *instTerm, const std::set<frInst*, 
         map<frCoord, map<frLayerNum, frTrackPattern*> > xLoc2TrackPatterns; // track xCoord
         map<frCoord, map<frLayerNum, frTrackPattern*> > yLoc2TrackPatterns; // track yCoord
         frLayerNum currLayerNum = layerIt->first;
+        if (getTech()->getLayer(currLayerNum)->getType() != frLayerTypeEnum::ROUTING) {
+          continue;
+        }
         PolygonSet layerPS = layerNum2PS[currLayerNum];
         map<frPoint, int> startPoints; // startPoint with cost, lower is more preferrable
         // set<pair<frLayerNum, frPoint> > endPoints;
@@ -691,6 +694,9 @@ void FlexPinPrep::instTermPinPrep(frInstTerm *instTerm, const std::set<frInst*, 
         map<frCoord, map<frLayerNum, frTrackPattern*> > xLoc2TrackPatterns; // track xCoord
         map<frCoord, map<frLayerNum, frTrackPattern*> > yLoc2TrackPatterns; // track yCoord
         frLayerNum currLayerNum = layerIt->first;
+        if (getTech()->getLayer(currLayerNum)->getType() != frLayerTypeEnum::ROUTING) {
+          continue;
+        }
         PolygonSet layerPS = layerNum2PS[currLayerNum];
         map<frPoint, int> startPoints; // startPoint with cost, lower is more preferrable
         // set<pair<frLayerNum, frPoint> > endPoints;
@@ -1325,7 +1331,12 @@ void FlexPinPrep::getPinLayerBBoxTrackPatterns(const frLayerNum &currLayerNum,
       }
     }
     if (!hasTrack) {
-      cout <<"Error: no tracks in pin layer!" <<endl;
+      cout <<"Error: no tracks in pin layer " <<currLayer->getName() <<" @(" 
+           <<bbox.left()   <<" " 
+           <<bbox.bottom() <<" " 
+           <<bbox.right()  <<" " 
+           <<bbox.top()
+           <<" )!" <<endl;
       exit(1);
     }
     // bloat the bbox if there is no track found in the current bbox;

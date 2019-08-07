@@ -957,7 +957,15 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
     }
   }
   if (bestTrackIdx == -1) {
-    cout <<"Error: assignIroute_bestTrack select no track" <<endl;
+    auto guide = iroute->getGuide();
+    frBox box;
+    guide->getBBox(box);
+    cout <<"Error: assignIroute_bestTrack select no track for " 
+         <<guide->getNet()->getName() <<" @(" 
+         <<box.left()  / dbu <<", " <<box.bottom() / dbu <<") ("
+         <<box.right() / dbu <<", " <<box.top()    / dbu <<" "
+         <<getDesign()->getTech()->getLayer(lNum)->getName()
+         <<endl;
     exit(1);
   }
   if (enableOutput) {

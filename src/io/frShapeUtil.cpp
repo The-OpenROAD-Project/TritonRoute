@@ -689,6 +689,34 @@ namespace fr {
 
   }
 
+  void getPolyWithHole_new(const Polygon &polyIn, std::vector<Polygon> &polys) {
+    using namespace boost::polygon::operators;
+    using PolygonX = boost::polygon::polygon_90_with_holes_data<int>;
+    using PolygonSetData = boost::polygon::polygon_90_set_data<int>;
+    PolygonSetData psd;
+    psd += polyIn;
+    std::vector<PolygonX> psx;
+    psd.get(psx);
+    
+    for (auto &poly: psx) {
+      Polygon outlinePoly;
+      std::vector<Point> outlinePolyVtx;
+      for (auto it = poly.begin(); it != poly.end(); it++) {
+        outlinePolyVtx.push_back(*it);
+      }
+      boost::polygon::set_points(outlinePoly, outlinePolyVtx.rbegin(), outlinePolyVtx.rend());
+      for (auto it1 = poly.begin_holes(); it1 != poly.end_holes(); it1++) {
+        std::vector<Point> vtx;
+        Polygon holePoly;
+        for (auto it2 = (*it1).begin(); it2 != (*it1).end(); it2++) {
+          vtx.push_back(*it2);
+        }
+        boost::polygon::set_points(holePoly, vtx.rbegin(), vtx.rend());
+        polys.push_back(holePoly);
+      }
+      polys.push_back(outlinePoly);
+    }
+  }
 
   void getPolyWithHole(const Polygon &polyIn, std::vector<Polygon> &polys) {
     typedef boost::icl::interval_map<int, int> IntvMap;

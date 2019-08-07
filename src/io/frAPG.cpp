@@ -77,6 +77,9 @@ void fr::APGWorker::init() {
 // get the pin order
 void fr::APGWorker::setup() {
   //bool enableOutput = true;
+  if (unConnectedPins.empty()) {
+    return;
+  }
   auto unProcessedLayer2APRtree = layer2APRTree;
   // first sort the unconnected pins to get the start pin
   // std::set<std::pair<frCoord, frPin*> > areaPinPairs;

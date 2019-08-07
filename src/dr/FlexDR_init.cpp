@@ -1594,7 +1594,8 @@ void FlexDRWorker::initNets_boundaryArea() {
                   if (pt2 == psEp) {
                     viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
                                 boostB2.max_corner().x(), boostB2.max_corner().y());
-                    currArea += viaBox2.width() * viaBox2.length() / 2;
+                    //currArea += viaBox2.width() * viaBox2.length() / 2;
+                    currArea += viaBox2.width() * viaBox2.length(); // patch wire no need / 2
                     break;
                   }
                 }
@@ -1636,7 +1637,8 @@ void FlexDRWorker::initNets_boundaryArea() {
                   if (pt2 == psBp) {
                     viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
                                 boostB2.max_corner().x(), boostB2.max_corner().y());
-                    currArea += viaBox2.width() * viaBox2.length() / 2;
+                    //currArea += viaBox2.width() * viaBox2.length() / 2;
+                    currArea += viaBox2.width() * viaBox2.length();
                     break;
                   }
                 }
@@ -2604,7 +2606,8 @@ bool FlexDRWorker::initMazeCost_marker_fixMode_3_addHistoryCost(const frMarker &
       //obj->getOffsetBox(offsetBox);
       //gridGraph.get
       gridGraph.addMarkerCostPlanar(objMIdx1.x(), objMIdx1.y(), objMIdx1.z());
-      //gridGraph.addMarkerCostVia(objMIdx1.x(), objMIdx1.y(), objMIdx1.z()); // always block upper via in case stack via
+      gridGraph.addMarkerCost(objMIdx1.x(), objMIdx1.y(), objMIdx1.z(), frDirEnum::U); // always block upper via in case stack via
+      gridGraph.addMarkerCost(objMIdx1.x(), objMIdx1.y(), objMIdx1.z(), frDirEnum::D); // always block upper via in case stack via
       if (enableOutput) {
         cout <<"add marker cost patchwire @(" <<objMIdx1.x() <<", " <<objMIdx1.y() <<", " <<objMIdx1.z() <<")" <<endl;
       }

@@ -59,6 +59,7 @@ namespace fr {
   void getPolyWithHole(const std::vector<Point> &vertices, Polygon &outline, std::vector<Polygon> &holes);
   void getPolyWithHole(const std::vector<Point> &vertices, std::vector<Polygon> &polys);
   void getPolyWithHole(const Polygon &polyIn, std::vector<Polygon> &polys);
+  void getPolyWithHole_new(const Polygon &polyIn, std::vector<Polygon> &polys);
   bool isColinear(const Point &pt1, const Point &pt2, const Point &pt3);
 
 }

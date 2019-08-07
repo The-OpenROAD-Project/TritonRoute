@@ -1118,6 +1118,9 @@ void FlexDRWorker::modMinSpacingCostVia(const frBox &box, frMIdx z, int type, bo
   frCoord bloatDist = 0;
   for (auto con: getDesign()->getTech()->getLayer(lNum)->getCutSpacing()) {
     bloatDist = max(bloatDist, con->getCutSpacing());
+    if (con->getAdjacentCuts() != -1 && isBlockage) {
+      bloatDist = max(bloatDist, con->getCutWithin());
+    }
   }
   //frCoord bloatDistSquare = bloatDist * bloatDist;
   
@@ -2671,8 +2674,14 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
   if (ENABLE_BOUNDARY_MAR_FIX) {
     if (areaMap.find(points[0]) != areaMap.end()) {
       currArea = areaMap.find(points[0])->second;
+      //if (TEST) {
+      //  cout <<"currArea[0] = " <<currArea <<", from areaMap" <<endl;
+      //}
     } else {
       currArea = (minAreaConstraint) ? minAreaConstraint->getMinArea() : 0;
+      //if (TEST) {
+      //  cout <<"currArea[0] = " <<currArea <<", from rule" <<endl;
+      //}
     }
   } else {
     currArea = (minAreaConstraint) ? minAreaConstraint->getMinArea() : 0;
@@ -2697,6 +2706,9 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
       }
       // push to minArea violation
       if (currArea < reqArea) {
+        //if (TEST) {
+        //  cout <<"currArea[" <<i <<"] = " <<currArea <<", add pwire " <<i - 2 <<", " <<i - 1 <<endl;
+        //}
         FlexMazeIdx bp, ep;
         frCoord gapArea = reqArea - (currArea - startViaHalfEncArea - endViaHalfEncArea) - std::min(startViaHalfEncArea, endViaHalfEncArea);
         // bp = std::min(prevIdx, currIdx);
@@ -2711,7 +2723,26 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
         auto patchWidth = getDesign()->getTech()->getLayer(layerNum)->getWidth();
         // FlexDRMinAreaVio minAreaVio(net, bp, ep, reqArea - (currArea - startViaHalfEncArea) - std::min(startViaHalfEncArea, endViaHalfEncArea));
         // minAreaVios.push_back(minAreaVio);
+        // non-pref dir boundary add patch on other end
+        //if ((getDesign()->getTech()->getLayer(layerNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir && 
+        //     bp.x() == ep.x() && bp.y() != ep.y()) ||
+        //    (getDesign()->getTech()->getLayer(layerNum)->getDir() == frPrefRoutingDirEnum::frcVertPrefRoutingDir && 
+        //     bp.y() == ep.y() && bp.x() != ep.x())
+        //    ) {
+        //  frPoint pt1, pt2;
+        //  gridGraph.getPoint(pt1, bp.x(), bp.y());
+        //  gridGraph.getPoint(pt2, ep.x(), ep.y());
+        //  if (!getRouteBox().contains(pt1, false)) {
+        //    bp.set(ep);
+        //  } else if (!getRouteBox().contains(pt2, false)) {
+        //    ep.set(bp);
+        //  }
+        //}
         routeNet_postAstarAddPatchMetal(net, bp, ep, gapArea, patchWidth);
+      } else {
+        //if (TEST) {
+        //  cout <<"currArea[" <<i <<"] = " <<currArea <<", no pwire" <<endl;
+        //}
       }
       // init for next path
       if (currIdx.z() < prevIdx.z()) {
@@ -2731,6 +2762,9 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
       gridGraph.getPoint(ep, currIdx.x(), currIdx.y());
       frCoord pathLength = abs(bp.x() - ep.x()) + abs(bp.y() - ep.y());
       currArea += pathLength * pathWidth;
+      //if (TEST) {
+      //  cout <<"currArea[" <<i <<"] = " <<currArea <<", no pwire planar" <<endl;
+      //}
     }
     prevIdx = currIdx;
   }
@@ -2744,6 +2778,9 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
     }
     endViaHalfEncArea = 0;
     if (currArea < reqArea) {
+      //if (TEST) {
+      //  cout <<"currArea[" <<i <<"] = " <<currArea <<", add pwire end" <<endl;
+      //}
       FlexMazeIdx bp, ep;
       frCoord gapArea = reqArea - (currArea - startViaHalfEncArea - endViaHalfEncArea) - std::min(startViaHalfEncArea, endViaHalfEncArea);
       // bp = std::min(prevIdx, currIdx);
@@ -2758,7 +2795,26 @@ void FlexDRWorker::routeNet_postAstarPatchMinAreaVio(drNet* net, const vector<Fl
       auto patchWidth = getDesign()->getTech()->getLayer(layerNum)->getWidth();
       // FlexDRMinAreaVio minAreaVio(net, bp, ep, reqArea - (currArea - startViaHalfEncArea) - std::min(startViaHalfEncArea, endViaHalfEncArea));
       // minAreaVios.push_back(minAreaVio);
+      // non-pref dir boundary add patch on other end to avoid pwire in the middle of non-pref dir routing segment
+      //if ((getDesign()->getTech()->getLayer(layerNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir && 
+      //     bp.x() == ep.x() && bp.y() != ep.y()) ||
+      //    (getDesign()->getTech()->getLayer(layerNum)->getDir() == frPrefRoutingDirEnum::frcVertPrefRoutingDir && 
+      //     bp.y() == ep.y() && bp.x() != ep.x())
+      //    ) {
+      //  frPoint pt1, pt2;
+      //  gridGraph.getPoint(pt1, bp.x(), bp.y());
+      //  gridGraph.getPoint(pt2, ep.x(), ep.y());
+      //  if (!getRouteBox().contains(pt1, false)) {
+      //    bp.set(ep);
+      //  } else if (!getRouteBox().contains(pt2, false)) {
+      //    ep.set(bp);
+      //  }
+      //}
       routeNet_postAstarAddPatchMetal(net, bp, ep, gapArea, patchWidth);
+    } else {
+      //if (TEST) {
+      //  cout <<"currArea[" <<i <<"] = " <<currArea <<", no pwire end" <<endl;
+      //}
     }
   }
 }
@@ -2910,6 +2966,13 @@ void FlexDRWorker::routeNet_postAstarAddPatchMetal_addPWire(drNet* net, const Fl
   auto &workerRegionQuery = getWorkerRegionQuery();
   workerRegionQuery.add(tmp.get());
   net->addRoute(tmp);
+  //if (TEST) {
+  //  double dbu = getDesign()->getTopBlock()->getDBUPerUU();
+  //  cout <<"pwire@(" <<origin.x() / dbu <<", " <<origin.y() / dbu <<"), (" 
+  //       <<patchLL.x() / dbu <<", " <<patchLL.y() / dbu <<", "
+  //       <<patchUR.x() / dbu <<", " <<patchUR.y() / dbu 
+  //       <<endl;
+  //}
 }
 
 void FlexDRWorker::routeNet_postAstarAddPatchMetal(drNet* net, 
@@ -2973,8 +3036,14 @@ void FlexDRWorker::routeNet_postAstarAddPatchMetal(drNet* net,
   //}
   if (costL <= costR) {
     routeNet_postAstarAddPatchMetal_addPWire(net, bpIdx, isPatchHorz, true, patchLength, patchWidth);
+    //if (TEST) {
+    //  cout <<"pwire added L" <<endl;
+    //}
   } else {
     routeNet_postAstarAddPatchMetal_addPWire(net, epIdx, isPatchHorz, false, patchLength, patchWidth);
+    //if (TEST) {
+    //  cout <<"pwire added R" <<endl;
+    //}
   }
 }
 

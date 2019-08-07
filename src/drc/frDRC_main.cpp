@@ -542,8 +542,8 @@ void fr::DRCWorker::checkCutSpacingRules() {
 void fr::DRCWorker::checkCutSpacingRule(const bgi::rtree<std::pair<segment_t, DRCEdge*>, bgi::quadratic<16> > &edgeRTree,
                                         frCutSpacingConstraint* constraint) {
   // double dbu = design->getTech()->getDBUPerUU();
-  frCoord spacingVal = constraint->getCutSpacing();
   for (auto segEdgeIt = edgeRTree.begin(); segEdgeIt != edgeRTree.end(); ++segEdgeIt) {
+    frCoord spacingVal = constraint->getCutSpacing();
     auto &seg = segEdgeIt->first;
     Rectangle segSpanRect;
     auto &edge = segEdgeIt->second;
@@ -556,9 +556,11 @@ void fr::DRCWorker::checkCutSpacingRule(const bgi::rtree<std::pair<segment_t, DR
       continue;
     }
     // skip if triggering condition is not met
+    //bool hasOBS = false;
+    //bool isAdjCut = false;
     // adjacent cuts
     if (constraint->getAdjacentCuts() != -1) {
-      int adjCutCnt = -1;
+      int adjCutCnt = -1; // to exclude self count
       frCoord cutWithin = constraint->getCutWithin();
       Rectangle adjCutQueryRect = segSpanRect;
       adjCutQueryRect = bloat(adjCutQueryRect, cutWithin);
@@ -571,8 +573,11 @@ void fr::DRCWorker::checkCutSpacingRule(const bgi::rtree<std::pair<segment_t, DR
         auto boxDist = frBox2BoxDist(adjCutBoxPair.first, adjCutBox);
         if (boxDist < cutWithin) {
           // cut OBS always violates adjcut as long as it's within
-          if (adjCutBoxPair.second == int(drcSpecialNetIdEnum::OBS)) {
-            adjCutCnt += constraint->getAdjacentCuts();
+          if (edge->getNetId() == int(drcSpecialNetIdEnum::OBS) || adjCutBoxPair.second == int(drcSpecialNetIdEnum::OBS)) {
+            adjCutCnt += 5;
+            //isAdjCut = true;
+            //hasOBS = true;
+            spacingVal = cutWithin; // < cut OBS within always results in violation
           } else {
             ++adjCutCnt;
           }
@@ -674,8 +679,7 @@ void fr::DRCWorker::checkCutSpacingRule(const bgi::rtree<std::pair<segment_t, DR
         }
 
       }
-      frCoord reqSpacing = constraint->getCutSpacing();
-      if (actSpacing < reqSpacing) {
+      if (actSpacing < spacingVal) {
         // skip on violation with both edge fixed
         if (edge->getType() == drcEdgeTypeEnum::FIXED && queryEdge->getType() == drcEdgeTypeEnum::FIXED) {
         
