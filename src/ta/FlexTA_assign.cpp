@@ -848,6 +848,7 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
   // if wlen2, then try from  wlen2
   // else try from wlen1 dir
   if (iroute->hasWlenHelper2()) {
+    //cout <<"if" <<endl;
     frCoord wlen2coord = iroute->getWlenHelper2();
     if (iroute->getWlenHelper() > 0) {
       if (enableOutput) {
@@ -877,7 +878,8 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
       int startTrackIdx = int(std::lower_bound(trackLocs[lNum].begin(), trackLocs[lNum].end(), wlen2coord) - trackLocs[lNum].begin());
       startTrackIdx = min(startTrackIdx, idx2);
       startTrackIdx = max(startTrackIdx, idx1);
-      for (int i = 0; i < idx2 - idx1; i++) {
+      //cout <<"startTrackIdx " <<startTrackIdx <<endl;
+      for (int i = 0; i <= idx2 - idx1; i++) {
         int currTrackIdx = startTrackIdx + i;
         if (currTrackIdx >= idx1 && currTrackIdx <= idx2) {
           assignIroute_bestTrack_helper(iroute, lNum, currTrackIdx, bestCost, bestTrackLoc, bestTrackIdx, drcCost);
@@ -916,6 +918,7 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
       }
     }
   } else {
+    //cout <<"else" <<endl;
     if (iroute->getWlenHelper() > 0) {
       if (enableOutput) {
         cout <<" use wlen@" <<iroute->getWlenHelper() <<endl;
@@ -964,7 +967,8 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
          <<guide->getNet()->getName() <<" @(" 
          <<box.left()  / dbu <<", " <<box.bottom() / dbu <<") ("
          <<box.right() / dbu <<", " <<box.top()    / dbu <<" "
-         <<getDesign()->getTech()->getLayer(lNum)->getName()
+         <<getDesign()->getTech()->getLayer(lNum)->getName() <<" idx1/2="
+         <<idx1 <<"/" <<idx2
          <<endl;
     exit(1);
   }
