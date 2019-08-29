@@ -1,0 +1,10 @@
+Dockerfile
+.dockerignore
+.gitignore
+
+# from .gitignore file
+*.o
+
+build
+build/*.*
+Makefile
