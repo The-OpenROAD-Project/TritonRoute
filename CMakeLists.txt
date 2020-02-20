@@ -38,7 +38,7 @@ add_subdirectory(${LEFLIB_HOME})
 find_package(ZLIB REQUIRED)
 find_package(BISON REQUIRED)
 
-find_package(Boost 1.68.0 REQUIRED)
+find_package(Boost 1.67.0 REQUIRED)
 find_package(Threads REQUIRED)
 
 set (FLEXROUTE_SRC
