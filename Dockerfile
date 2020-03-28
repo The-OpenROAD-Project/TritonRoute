@@ -25,8 +25,8 @@ RUN wget https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.sh && \
     ./cmake-3.14.0-Linux-x86_64.sh --skip-license --prefix=/usr/local
 
 # installing boost for build dependency
-RUN wget https://github.com/boostorg/boost/archive/boost-1.72.0.tar.gz && \
-    tar -xf boost_1_72_0.tar.gz && \
+RUN wget https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.bz2/download && \
+    tar -xf download && \
     cd boost_1_72_0 && \
     ./bootstrap.sh && \
     ./b2 install
