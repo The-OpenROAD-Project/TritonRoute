@@ -13,11 +13,6 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
   message(FATAL_ERROR "TritonRoute requires GCC 7 and above! \nuse -DCMAKE_CXX_COMPILER to assign your compiler path")
 endif()
 
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 set(FLEXROUTE_HOME ${PROJECT_SOURCE_DIR} )
@@ -38,7 +33,7 @@ add_subdirectory(${LEFLIB_HOME})
 find_package(ZLIB REQUIRED)
 find_package(BISON REQUIRED)
 
-find_package(Boost 1.68.0 REQUIRED)
+find_package(Boost 1.67.0 REQUIRED)
 find_package(Threads REQUIRED)
 
 set (FLEXROUTE_SRC
@@ -159,18 +154,9 @@ set (FLEXROUTE_HEADER
 # include directories 
 ############################################################
 include_directories(
-  ${BOOST_INCLUDEDIR}
-  ${BOOST_ROOT}/include
-
+  ${Boost_INCLUDE_DIR}
   ${DEFLIB_HOME}/def
-  ${DEFLIB_HOME}/defzlib
-  ${DEFLIB_HOME}/cdef
-  ${DEFLIB_HOME}/cdefzlib
-
   ${LEFLIB_HOME}/lef
-  ${LEFLIB_HOME}/lefzlib
-  ${LEFLIB_HOME}/clef
-  ${LEFLIB_HOME}/clefzlib
 
   ${FLEXROUTE_HOME}/src
 )
@@ -178,7 +164,7 @@ include_directories(
 ############################################################
 # Create a library 
 ############################################################
-add_library( flexroutelib STATIC
+add_library( flexroutelib
   ${FLEXROUTE_SRC}
 )
 
@@ -202,17 +188,10 @@ add_dependencies( flexroutelib lef )
 target_link_libraries( TritonRoute 
   PUBLIC
   def
-  #defzlib
-  #cdef
-  #cdefzlib
   lef
-  #lefzlib
-  #clef
-  #clefzlib
 
   ${ZLIB_LIBRARIES}
   Threads::Threads
-  -static 
   )
 
 ############################################################
