@@ -94,16 +94,13 @@ namespace fr {
     void printDRObj();
 
   protected:
-    template<typename T>
-    using rtree = bgi::rtree<rq_rptr_value_t<T>, bgi::quadratic<16>>;
-    
     frDesign*         design;
-    std::vector<rtree<frBlockObject>> shapes; // only for pin shapes, obs and snet
-    std::vector<rtree<frGuide>>       guides;
-    std::vector<rtree<frNet>>         origGuides; // non-processed guides;
-    rtree<frBlockObject>              grPins;
-    std::vector<rtree<frBlockObject>> drObjs; // only for dr objs, via only in via layer
-    std::vector<rtree<frMarker>>      markers; // use init()
+    std::vector<bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> > > shapes; // only for pin shapes, obs and snet
+    std::vector<bgi::rtree<rq_rptr_value_t<frGuide>, bgi::quadratic<16> > >       guides;
+    std::vector<bgi::rtree<rq_rptr_value_t<frNet>, bgi::quadratic<16> > >         origGuides; // non-processed guides;
+    bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> >               grPins;
+    std::vector<bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> > > drObjs; // only for dr objs, via only in via layer
+    std::vector<bgi::rtree<rq_rptr_value_t<frMarker>, bgi::quadratic<16> > >      markers; // use init()
   };
 }
 
