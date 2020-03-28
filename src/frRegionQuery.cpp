@@ -592,7 +592,7 @@ void frRegionQuery::init(frLayerNum numLayers) {
   }
 
   for (auto i = 0; i < numLayers; i++) {
-    shapes.at(i) = boost::move(rtree<frBlockObject>(allShapes.at(i)));
+    shapes.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> >(allShapes.at(i)));
     allShapes.at(i).clear();
     allShapes.at(i).shrink_to_fit();
     if (VERBOSE > 0) {
@@ -626,7 +626,7 @@ void frRegionQuery::initOrigGuide(frLayerNum numLayers, map<frNet*, vector<frRec
     }
   }
   for (auto i = 0; i < numLayers; i++) {
-    origGuides.at(i) = boost::move(rtree<frNet>(allShapes.at(i)));
+    origGuides.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<frNet>, bgi::quadratic<16> >(allShapes.at(i)));
     allShapes.at(i).clear();
     allShapes.at(i).shrink_to_fit();
     if (VERBOSE > 0) {
@@ -663,7 +663,7 @@ void frRegionQuery::initGuide(frLayerNum numLayers) {
     }
   }
   for (auto i = 0; i < numLayers; i++) {
-    guides.at(i) = boost::move(rtree<frGuide>(allGuides.at(i)));
+    guides.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<frGuide>, bgi::quadratic<16> >(allGuides.at(i)));
     allGuides.at(i).clear();
     allGuides.at(i).shrink_to_fit();
     if (VERBOSE > 0) {
@@ -682,7 +682,7 @@ void frRegionQuery::initGRPin(vector<pair<frBlockObject*, frPoint> > &in) {
   }
   in.clear();
   in.shrink_to_fit();
-  grPins = boost::move(rtree<frBlockObject>(allGRPins));
+  grPins = boost::move(bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> >(allGRPins));
 }
 
 void frRegionQuery::initDRObj(frLayerNum numLayers) {
@@ -714,7 +714,7 @@ void frRegionQuery::initDRObj(frLayerNum numLayers) {
   }
 
   for (auto i = 0; i < numLayers; i++) {
-    drObjs.at(i) = boost::move(rtree<frBlockObject>(allShapes.at(i)));
+    drObjs.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<frBlockObject>, bgi::quadratic<16> >(allShapes.at(i)));
     allShapes.at(i).clear();
     allShapes.at(i).shrink_to_fit();
     //if (VERBOSE > 0) {

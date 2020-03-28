@@ -1,1 +1,0 @@
-docker run -v $(pwd):/tritonroute tritonroute bash -c "echo Tests are not ready yet!"
