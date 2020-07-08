@@ -96,6 +96,11 @@ namespace fr {
       frCoord ySpan = box.top()   - box.bottom();
       return (xSpan > ySpan) ? ySpan : xSpan;
     }
+    frCoord length() const {
+      frCoord xSpan = box.right() - box.left();
+      frCoord ySpan = box.top()   - box.bottom();
+      return (xSpan < ySpan) ? ySpan : xSpan;
+    }    
     frBlockObjectEnum typeId() const override {
       return frcRect;
     }

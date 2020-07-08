@@ -43,6 +43,18 @@ void frInst::getBBox (frBox &boxIn) const {
   boxIn.transform(xform);
 }
 
+void frInst::getBoundaryBBox (frBox &boxIn) const {
+  getRefBlock()->getBoundaryBBox(boxIn);
+  frTransform xform;
+  getTransform(xform);
+  frPoint origin(boxIn.left(), boxIn.bottom());
+  origin.transform(frTransform(0, 0, xform.orient()));
+  xform.set(xform.xOffset() + origin.x(), xform.yOffset() + origin.y());
+  frPoint s(boxIn.right(), boxIn.top());
+  xform.updateXform(s);
+  boxIn.transform(xform);
+}
+
 void frInst::getUpdatedXform(frTransform &in, bool noOrient) const {
   getTransform(in);
   frBox mbox;

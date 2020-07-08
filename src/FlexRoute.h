@@ -46,6 +46,7 @@ namespace fr {
   
     void init();
     //void pinPrep();
+    void prep();
     void ta();
     void dr();
     void endFR();

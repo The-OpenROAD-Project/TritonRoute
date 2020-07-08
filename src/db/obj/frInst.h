@@ -41,7 +41,7 @@ namespace fr {
   class frInst: public frRef {
   public:
     // constructors
-    frInst(): frRef() {}
+    frInst(): frRef(), name(), refBlock(nullptr), instTerms(), instBlockages(), xform(), pinAccessIdx(0) {}
     //frInst(const frInst &instIn): frRef(), name(instIn.name), cellName(instIn.cellName),
     //                              instTerms(), xform(instIn.xform) {
     //  instTerms.clear();
@@ -69,6 +69,9 @@ namespace fr {
     std::vector<std::unique_ptr<frInstBlockage> >& getInstBlockages() {
       return instBlockages;
     }
+    int getPinAccessIdx() const {
+      return pinAccessIdx;
+    }
     // setters
     void setName(const frString &tmpString) {
       name = tmpString;
@@ -81,6 +84,9 @@ namespace fr {
     }
     void addInstBlockage(std::unique_ptr<frInstBlockage> &in) {
       instBlockages.push_back(std::move(in));
+    }
+    void setPinAccessIdx(int in) {
+      pinAccessIdx = in;
     }
     // others
     frBlockObjectEnum typeId() const override {
@@ -171,13 +177,17 @@ namespace fr {
     bool overlaps(const frBox &box) const override {
       return false;
     }
+    // others
     void getUpdatedXform(frTransform &in, bool noOrient = false) const;
+    void getBoundaryBBox(frBox &in) const;
+
   protected:
     frString                                       name;
     frBlock*                                       refBlock;
     std::vector<std::unique_ptr<frInstTerm> >      instTerms;
     std::vector<std::unique_ptr<frInstBlockage> >  instBlockages;
     frTransform                                    xform;
+    int                                            pinAccessIdx;
   };
 }
 

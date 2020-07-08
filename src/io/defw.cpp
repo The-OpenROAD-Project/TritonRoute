@@ -35,6 +35,7 @@
 #   include <unistd.h>
 #endif /* not WIN32 */
 #include "defrReader.hpp"
+#include "defwWriterCalls.hpp"
 #include "defiAlias.hpp"
 #include "io/io.h"
 #include "global.h"
@@ -1620,6 +1621,7 @@ int ndr(defrCallbackType_e c, defiNonDefault* nd, defiUserData ud) {
                 break;
     }
   }
+  fprintf(fout, " ;\n");
   --numObjs;
   if (numObjs <= 0)
     fprintf(fout, "END NONDEFAULTRULES\n");
@@ -2417,7 +2419,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
          re = (defiRegion*)cl;
          fprintf(fout, "- %s ", re->name());
          for (i = 0; i < re->numRectangles(); i++)
-             fprintf(fout, "%d %d %d %d \n", re->xl(i),
+             fprintf(fout, "( %d %d ) ( %d %d ) ", re->xl(i),
                      re->yl(i), re->xh(i),
                      re->yh(i));
          if (re->hasType())
@@ -2816,7 +2818,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
              }
 
              for (i = 0; i < block->numRectangles(); i++) {
-                fprintf(fout, "   RECT %d %d %d %d\n", 
+                fprintf(fout, "   RECT ( %d %d ) ( %d %d )\n", 
                         block->xl(i), block->yl(i),
                         block->xh(i), block->yh(i));
              } 
@@ -2910,7 +2912,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                  fprintf(fout, "END FILLS\n");
          }
          break;
-  case defrStylesCbkType :
+  case defrStylesCbkType : {
          struct defiPoints points;
          styles = (defiStyles*)cl;
          fprintf(fout, "- STYLE %d ", styles->style());
@@ -2922,6 +2924,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
          if (numObjs <= 0)
              fprintf(fout, "END STYLES\n");
          break;
+  }
 
   default: fprintf(fout, "BOGUS callback to cls.\n"); return 1;
   }
@@ -3039,8 +3042,10 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
 //  start_mem = (long)sbrk(0);
 
   // inFile[0] = defaultName;
-  char *cstr = new char[DEF_FILE.length() + 1];
-  strcpy(cstr, DEF_FILE.c_str());
+  // char *cstr = new char[DEF_FILE.length() + 1];
+  // strcpy(cstr, DEF_FILE.c_str());
+  char *cstr = new char[REF_OUT_FILE.length() + 1];
+  strcpy(cstr, REF_OUT_FILE.c_str());
   inFile[numInFile++] = cstr;
   // std::cout << inFile[0] << std::endl;
   //outFile = defaultOut;

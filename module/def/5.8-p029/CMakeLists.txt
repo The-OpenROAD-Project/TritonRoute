@@ -7,9 +7,6 @@ cmake_minimum_required(VERSION 3.1)
 
 set(DEFLIB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
 # BISON and ZLIB is required to compile DEF/LEF Parsers.
 find_package(BISON)
 find_package(ZLIB)
@@ -58,40 +55,6 @@ set( DEFLIB_DEFZLIB_SRC
   defzlib/defzlib.cpp
   )
 
-set ( DEFLIB_CDEF_SRC 
-  cdef/xdefiAssertion.cpp
-  cdef/xdefiBlockage.cpp
-  cdef/xdefiComponent.cpp
-  cdef/xdefiDebug.cpp
-  cdef/xdefiFill.cpp
-  cdef/xdefiFPC.cpp
-  cdef/xdefiGroup.cpp
-  cdef/xdefiIOTiming.cpp
-  cdef/xdefiMisc.cpp
-  cdef/xdefiNet.cpp
-  cdef/xdefiNonDefault.cpp
-  cdef/xdefiPartition.cpp
-  cdef/xdefiPath.cpp
-  cdef/xdefiPinCap.cpp
-  cdef/xdefiPinProp.cpp
-  cdef/xdefiProp.cpp
-  cdef/xdefiPropType.cpp
-  cdef/xdefiRegion.cpp
-  cdef/xdefiRowTrack.cpp
-  cdef/xdefiScanchain.cpp
-  cdef/xdefiSite.cpp
-  cdef/xdefiSlot.cpp
-  cdef/xdefiTimingDisable.cpp
-  cdef/xdefiVia.cpp
-  cdef/xdefrReader.cpp
-  cdef/xdefwWriterCalls.cpp
-  cdef/xdefwWriter.cpp
-  )
-
-set (DEFLIB_CDEFZLIB_SRC
-  cdefzlib/cdefzlib.c
-  )
-
 set (DEFLIB_HEADERS
   def/def.tab.h
   def/lex.h
@@ -132,42 +95,6 @@ set (DEFLIB_HEADERS
   def/defwWriter.hpp
 
   defzlib/defzlib.hpp
-
-  cdef/defiAlias.h
-  cdef/defiAssertion.h
-  cdef/defiBlockage.h
-  cdef/defiComponent.h
-  cdef/defiDebug.h
-  cdef/defiDefs.h
-  cdef/defiFill.h
-  cdef/defiFPC.h
-  cdef/defiGroup.h
-  cdef/defiIOTiming.h
-  cdef/defiKRDefs.h
-  cdef/defiMisc.h
-  cdef/defiNet.h
-  cdef/defiNonDefault.h
-  cdef/defiPartition.h
-  cdef/defiPath.h
-  cdef/defiPinCap.h
-  cdef/defiPinProp.h
-  cdef/defiProp.h
-  cdef/defiPropType.h
-  cdef/defiRegion.h
-  cdef/defiRowTrack.h
-  cdef/defiScanchain.h
-  cdef/defiSite.h
-  cdef/defiSlot.h
-  cdef/defiTimingDisable.h
-  cdef/defiTypedefs.h
-  cdef/defiUser.h
-  cdef/defiVia.h
-  cdef/defMsgTable.h
-  cdef/defrReader.h
-  cdef/defwWriterCalls.h
-  cdef/defwWriter.h
-
-  cdefzlib/defzlib.h
 )
 
 
@@ -181,18 +108,16 @@ add_custom_command(
 add_custom_target(DefBisonTarget ALL DEPENDS def/def.tab.cpp)
 
 
-add_library( def STATIC ${DEFLIB_DEF_SRC} )
-add_library( defzlib STATIC ${DEFLIB_DEFZLIB_SRC} )
-
-add_library( cdef STATIC ${DEFLIB_CDEF_SRC} )
-add_library( cdefzlib STATIC ${DEFLIB_CDEFZLIB_SRC})
-
+add_library( def ${DEFLIB_DEF_SRC} )
+add_library( defzlib ${DEFLIB_DEFZLIB_SRC} )
 
 set_target_properties( def
   PROPERTIES
   ARCHIVE_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
   LIBRARY_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
   RUNTIME_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
+  # python regression requirement (gag me) -cherry
+  POSITION_INDEPENDENT_CODE ON
 )
 
 set_target_properties( defzlib
@@ -200,57 +125,27 @@ set_target_properties( defzlib
   ARCHIVE_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
   LIBRARY_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
   RUNTIME_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-)
-
-set_target_properties( cdef
-  PROPERTIES
-  ARCHIVE_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-  LIBRARY_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-  RUNTIME_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-)
-
-set_target_properties( cdefzlib 
-  PROPERTIES 
-  ARCHIVE_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-  LIBRARY_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-  RUNTIME_OUTPUT_DIRECTORY ${DEFLIB_HOME}/lib
-  LINKER_LANGUAGE CXX 
+  # python regression requirement (gag me) -cherry
+  POSITION_INDEPENDENT_CODE ON
 )
 
 # include directory settings
 target_include_directories( def
   PUBLIC
-  def/
+  def
   )
 
 target_include_directories( defzlib
   PUBLIC
-  def/
-  defzlib/
+  def
+  defzlib
   )
 
-target_include_directories( cdef 
-  PUBLIC
-  def/
-  cdef/
-  )
-
-target_include_directories( cdefzlib
-  PUBLIC
-  def/
-  defzlib/
-  cdef/
-  cdefzlib/
-  )
-
-add_dependencies( cdef def )
 add_dependencies( def DefBisonTarget )
 add_dependencies( defzlib def )
-add_dependencies( cdefzlib cdef )
 
 ######################################################
 # install
 
 install(FILES ${DEFLIB_HEADERS} DESTINATION include)
-install(TARGETS def defzlib cdef cdefzlib DESTINATION lib)
-
+install(TARGETS def defzlib DESTINATION lib)

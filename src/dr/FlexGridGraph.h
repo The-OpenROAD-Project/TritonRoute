@@ -62,6 +62,13 @@ namespace fr {
     }
     // getters
     // unsafe access, no check
+    bool hasAStarCost(frMIdx x, frMIdx y, frMIdx z) const {
+      return (getAStarCost(x, y, z) != UINT_MAX);
+    }
+    frCost getAStarCost(frMIdx x, frMIdx y, frMIdx z) const {
+      return astarCosts[getIdx(x, y, z)];
+    }
+    // unsafe access, no check
     bool isAstarVisited(frMIdx x, frMIdx y, frMIdx z) const {
       return (getPrevAstarNodeDir(x, y, z) == frDirEnum::UNKNOWN);
     }
@@ -104,13 +111,13 @@ namespace fr {
       return getBit(getIdx(x, y, z), 9);
     }
     // unsafe access, no check
-    bool hasShapePlanar(frMIdx x, frMIdx y, frMIdx z) const {
-      return getBit(getIdx(x, y, z), 10);
-    }
+    // bool hasShapePlanar(frMIdx x, frMIdx y, frMIdx z) const {
+    //   return getBit(getIdx(x, y, z), 10);
+    // }
     // unsafe access, no check
-    bool hasShapeVia(frMIdx x, frMIdx y, frMIdx z) const {
-      return getBit(getIdx(x, y, z), 11);
-    }
+    // bool hasShapeVia(frMIdx x, frMIdx y, frMIdx z) const {
+    //   return getBit(getIdx(x, y, z), 11);
+    // }
     // unsafe access, no check
     bool hasGridCostE(frMIdx x, frMIdx y, frMIdx z) const {
       return getBit(getIdx(x, y, z), 12);
@@ -225,16 +232,39 @@ namespace fr {
       }
       return sol;
     }
+    // bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    //   bool sol = false;
+    //   if (dir != frDirEnum::D && dir != frDirEnum::U) {
+    //     reverse(x, y, z, dir);
+    //     sol = hasShapePlanar(x, y, z);
+    //   } else {
+    //     correctU(x, y, z, dir);
+    //     sol = hasShapeVia(x, y, z);
+    //   }
+    //   return sol;
+    // }
+    // new
     bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
-      bool sol = false;
+      frUInt4 sol = 0;
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
         reverse(x, y, z, dir);
-        sol = hasShapePlanar(x, y, z);
+        auto idx = getIdx(x, y, z);
+        sol = (getBits(idx, 56, GRIDGRAPHDRCCOSTSIZE));
       } else {
         correctU(x, y, z, dir);
-        sol = hasShapeVia(x, y, z);
+        auto idx = getIdx(x, y, z);
+        sol = isOverrideShapeCost(x, y, z, dir) ? 0 : (getBits(idx, 48, GRIDGRAPHDRCCOSTSIZE));
       }
-      return sol;
+      return (sol);
+    }
+    bool isOverrideShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+      if (dir != frDirEnum::D && dir != frDirEnum::U) {
+        return false;
+      } else {
+        correctU(x, y, z, dir);
+        auto idx = getIdx(x, y, z);
+        return getBit(idx, 11);
+      }
     }
     bool hasDRCCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       frUInt4 sol = 0;
@@ -454,11 +484,14 @@ namespace fr {
         auto idx = getIdx(x, y, z);
         switch (dir) {
           case frDirEnum::E:
-            addToBits(idx, 56, GRIDGRAPHDRCCOSTSIZE, 10);
+            addToBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, 10);
+            break;
           case frDirEnum::N:
-            addToBits(idx, 48, GRIDGRAPHDRCCOSTSIZE, 10);
+            addToBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, 10);
+            break;
           case frDirEnum::U:
             addToBits(idx, 40, GRIDGRAPHDRCCOSTSIZE, 10);
+            break;
           default:
             ;
         }
@@ -480,6 +513,22 @@ namespace fr {
       setBits(idx, 40, GRIDGRAPHDRCCOSTSIZE, currCost);
       return (currCost == 0);
     }
+    bool decayMarkerCostPlanar(frMIdx x, frMIdx y, frMIdx z) {
+      auto idx = getIdx(x, y, z);
+      int currCost = (getBits(idx, 32, GRIDGRAPHDRCCOSTSIZE));
+      currCost--;
+      currCost = std::max(0, currCost);
+      setBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, currCost);
+      return (currCost == 0);
+    }
+    bool decayMarkerCostVia(frMIdx x, frMIdx y, frMIdx z) {
+      auto idx = getIdx(x, y, z);
+      int currCost = (getBits(idx, 40, GRIDGRAPHDRCCOSTSIZE));
+      currCost--;
+      currCost = std::max(0, currCost);
+      setBits(idx, 40, GRIDGRAPHDRCCOSTSIZE, currCost);
+      return (currCost == 0);
+    }
     bool decayMarkerCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir, float d) {
       correct(x, y, z, dir);
       int currCost = 0;
@@ -487,15 +536,15 @@ namespace fr {
         auto idx = getIdx(x, y, z);
         switch (dir) {
           case frDirEnum::E:
-            currCost = getBits(idx, 56, GRIDGRAPHDRCCOSTSIZE);
+            currCost = getBits(idx, 32, GRIDGRAPHDRCCOSTSIZE);
             currCost *= d;
             currCost = std::max(0, currCost);
-            setBits(idx, 56, GRIDGRAPHDRCCOSTSIZE, currCost);
+            setBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, currCost);
           case frDirEnum::N:
-            currCost = getBits(idx, 48, GRIDGRAPHDRCCOSTSIZE);
+            currCost = getBits(idx, 32, GRIDGRAPHDRCCOSTSIZE);
             currCost *= d;
             currCost = std::max(0, currCost);
-            setBits(idx, 48, GRIDGRAPHDRCCOSTSIZE, currCost);
+            setBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, currCost);
           case frDirEnum::U:
             currCost = getBits(idx, 40, GRIDGRAPHDRCCOSTSIZE);
             currCost *= d;
@@ -507,6 +556,30 @@ namespace fr {
       }
       return (currCost == 0);
     }
+    void addShapeCostPlanar(frMIdx x, frMIdx y, frMIdx z) {
+      if (isValid(x, y, z)) {
+        auto idx = getIdx(x, y, z);
+        addToBits(idx, 56, GRIDGRAPHDRCCOSTSIZE, 1);
+      }
+    }
+    void addShapeCostVia(frMIdx x, frMIdx y, frMIdx z) {
+      if (isValid(x, y, z)) {
+        auto idx = getIdx(x, y, z);
+        addToBits(idx, 48, GRIDGRAPHDRCCOSTSIZE, 1);
+      }
+    }
+    void subShapeCostPlanar(frMIdx x, frMIdx y, frMIdx z) {
+      if (isValid(x, y, z)) {
+        auto idx = getIdx(x, y, z);
+        subToBits(idx, 56, GRIDGRAPHDRCCOSTSIZE, 1);
+      }
+    }
+    void subShapeCostVia(frMIdx x, frMIdx y, frMIdx z) {
+      if (isValid(x, y, z)) {
+        auto idx = getIdx(x, y, z);
+        subToBits(idx, 48, GRIDGRAPHDRCCOSTSIZE, 1);
+      }
+    }
     //void resetMarkerCostPlanar(frMIdx x, frMIdx y, frMIdx z) {
     //  auto idx = getIdx(x, y, z);
     //  setBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, 0);
@@ -517,6 +590,9 @@ namespace fr {
     //}
     //void resetCost(frMIdx x, frMIdx y, frMIdx z);
 
+    void setAStarCost(frMIdx x, frMIdx y, frMIdx z, frCost cost) {
+      astarCosts[getIdx(x, y, z)] = cost;
+    }
     // unsafe access, no idx check
     void setPrevAstarNodeDir(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       auto baseIdx = 3 * getIdx(x, y, z);
@@ -546,11 +622,17 @@ namespace fr {
     void setSVia(frMIdx x, frMIdx y, frMIdx z) {
       setBit(getIdx(x, y, z), 9);
     }
-    void setShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
-      setBit(getIdx(x, y, z), 10);
-    }
-    void setShapeVia(frMIdx x, frMIdx y, frMIdx z) {
+    // void setShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
+    //   setBit(getIdx(x, y, z), 10);
+    // }
+    // void setShapeVia(frMIdx x, frMIdx y, frMIdx z) {
+    //   setBit(getIdx(x, y, z), 11);
+    // }
+    void setOverrideShapeCostVia(frMIdx x, frMIdx y, frMIdx z) {
       setBit(getIdx(x, y, z), 11);
+    }
+    void resetOverrideShapeCostVia(frMIdx x, frMIdx y, frMIdx z) {
+      resetBit(getIdx(x, y, z), 11);
     }
     void setGridCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       correct(x, y, z, dir);
@@ -599,12 +681,12 @@ namespace fr {
     //void resetSVia(frMIdx x, frMIdx y, frMIdx z) {
     //  resetBit(getIdx(x, y, z), 9);
     //}
-    void resetShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
-      resetBit(getIdx(x, y, z), 10);
-    }
-    void resetShapeVia(frMIdx x, frMIdx y, frMIdx z) {
-      resetBit(getIdx(x, y, z), 11);
-    }
+    // void resetShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
+    //   resetBit(getIdx(x, y, z), 10);
+    // }
+    // void resetShapeVia(frMIdx x, frMIdx y, frMIdx z) {
+    //   resetBit(getIdx(x, y, z), 11);
+    // }
     void resetGridCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       correct(x, y, z, dir);
       if (isValid(x, y, z)) {
@@ -710,6 +792,7 @@ namespace fr {
               bool initDR, bool followGuide);
     void print();
     void resetStatus();
+    void resetAStarCosts();
     void resetPrevNodeDir();
     void resetSrc();
     void resetDst();
@@ -736,24 +819,49 @@ namespace fr {
     frCoord getVia2TurnMinLen(frMIdx z, bool isPrevViaUp, bool isCurrDirY) const {
       return (*via2turnMinLen)[z][((unsigned)isPrevViaUp << 1) + (unsigned)isCurrDirY];
     }
+    void cleanup() {
+      bits.clear();
+      bits.shrink_to_fit();
+      astarCosts.clear();
+      astarCosts.shrink_to_fit();
+      srcs.clear();
+      srcs.shrink_to_fit();
+      dsts.clear();
+      dsts.shrink_to_fit();
+      guides.clear();
+      guides.shrink_to_fit();
+      xCoords.clear();
+      xCoords.shrink_to_fit();
+      yCoords.clear();
+      yCoords.shrink_to_fit();
+      zHeights.clear();
+      zHeights.shrink_to_fit();
+      zDirs.clear();
+      yCoords.shrink_to_fit();
+      yCoords.clear();
+      yCoords.shrink_to_fit();
+      wavefront.cleanup();
+      wavefront.fit();
+    }
 
   protected:
     frDesign*     design;
     FlexDRWorker* drWorker;
 
     //frBox     routeBox;
-    // new
+    // new // X == planar
     // [0] hasEEdge; [1] hasNEdge; [2] hasUpEdge
     // [3] blockE;   [4] blockN;   [5] blockU
     // [6] empty;    [7] empty;    [8] empty
     // [9] hasSpecialVia
-    // [10] shape X cost; [11] shape U cost; 
+    // [10] shape X cost; [11] override U shape cost; 
     // [12] is W/E on grid; [13] is N/S on grid; [14] is U on grid
     // [23-16] quick drc X cost; [31-24] quick drc U cost
     // [39-32] markerdrc X cost; [47-40] markerdrc U cost
-    // [63-56] markerdrc E cost; [55-48] markerdrc N cost
+    // [63-56] shape     X cost; [55-48] shape U cost
     //frVector<unsigned long long>      bits;
     frVector<unsigned long long>               bits;
+    std::vector<unsigned int>                  astarCosts; // astar cost
     std::vector<bool>                          prevDirs;
     std::vector<bool>                          srcs;
     std::vector<bool>                          dsts;

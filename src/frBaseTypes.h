@@ -131,7 +131,15 @@ namespace fr {
       tacTrack,
       tacPin,
       tacPathSeg,
-      tacVia
+      tacVia,
+      gccBlockObject,
+      gccNet,
+      gccPin,
+      gccEdge,
+      gccRect,
+      gccPolygon,
+      frcAccessPoint,
+      frcAccessPoints
   };
   //enum class drBlockObjectEnum {
   //  drcBlockObject = 0,
@@ -185,7 +193,10 @@ namespace fr {
     frcLef58CutSpacingLayerConstraint = 16, // not supported
     frcCutSpacingConstraint = 17,
     frcMinStepConstraint,
+    frcLef58MinStepConstraint,
     frcMinimumcutConstraint,
+    frcOffGridConstraint,
+    frcMinEnclosedAreaConstraint,
     frcLef58CornerSpacingConstraint, // not supported
     frcLef58CornerSpacingConcaveCornerConstraint, // not supported
     frcLef58CornerSpacingConvexCornerConstraint, // not supported
@@ -197,7 +208,26 @@ namespace fr {
     frcLef58SpacingEndOfLineWithinEndToEndConstraint, // not supported
     frcLef58SpacingEndOfLineWithinParallelEdgeConstraint, // not supported
     frcLef58SpacingEndOfLineWithinMaxMinLengthConstraint, // not supported
-    frcLef58CutClassConstraint // not supported
+    frcLef58CutClassConstraint, // not supported
+    frcNonSufficientMetalConstraint,
+    frcSpacingSamenetConstraint,
+    frcLef58RightWayOnGridOnlyConstraint,
+    frcLef58RectOnlyConstraint,
+    frcRecheckConstraint
+  };
+
+  enum class frCornerTypeEnum {
+    UNKNOWN,
+    CONCAVE,
+    CONVEX
+  };
+
+  enum class frCornerDirEnum {
+    UNKNOWN,
+    NE,
+    SE,
+    SW,
+    NW
   };
 
   enum class frMinimumcutConnectionEnum {
@@ -206,15 +236,23 @@ namespace fr {
     FROMBELOW = 1
   };
 
+  enum class frMinstepTypeEnum {
+    UNKNOWN = -1,
+    INSIDECORNER = 0,
+    OUTSIDECORNER = 1,
+    STEP = 2
+  };
+
   //enum class frDirEnum { UNKNOWN = 0, E = 1, S = 2, W = 3, N = 4, U = 5, D = 6 };
   //enum class frDirEnum { UNKNOWN = 0, E = 4, S = 2, W = 3, N = 1, U = 6, D = 5 };
-  #define OPPOSITEDIR 7
+  #define OPPOSITEDIR 7 // used in FlexGC_main.cpp
   enum class frDirEnum { UNKNOWN = 0, D = 1, S = 2, W = 3, E = 4, N = 5, U = 6 };
 
   enum class frLayerTypeEnum {
     CUT,
     ROUTING,
-    IMPLANT
+    IMPLANT,
+    MASTERSLICE
   };
 
 
@@ -233,14 +271,34 @@ namespace fr {
     CORE_WELLTAP,
     CORE_SPACER,
     CORE_ANTENNACELL,
+    COVER, // GF14
     ENDCAP_PRE,
-    BLOCK
+    BLOCK,
+    RING, // ispd19
+    PAD, // ispd19
+    PAD_POWER, // ispd19
+    PAD_SPACER, // GF14
+    ENDCAP_BOTTOMLEFT // ispd19
   };
 
-  enum class drNetOrderingEnum {
-    NETDRIVEN,
-    MARKERDRIVEN
+  // note: FlexPA hardcoded the cost, don't change here
+  enum class frAccessPointEnum {
+    frcOnGridAP   = 0,
+    frcHalfGridAP = 1,
+    frcCenterAP   = 2,
+    frcEncOptAP   = 3
   };
+
+  //enum class drNetOrderingEnum {
+  //  NETDRIVEN,
+  //  MARKERDRIVEN
+  //};
+
+  //enum class gcPinTypeEnum {
+  //  FIXED,
+  //  ROUTE,
+  //  MERGED
+  //};
 
   //enum frShapeEnum {
   //    frcRect    = 0,

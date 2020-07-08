@@ -34,6 +34,7 @@
 #include "io/io.h"
 #include "frBaseTypes.h"
 #include <fstream>
+#include <sstream>
 
 //#include "frGuidePrep.h"
 using namespace std;
@@ -191,10 +192,198 @@ void io::Parser::initDefaultVias() {
     }
     if (!layerNum2ViaDefs[layerNum][1].empty()) {
       auto defaultSingleCutVia = (layerNum2ViaDefs[layerNum][1].begin())->second;
-      tech->getLayer(layerNum)->setDefaultViaDef(defaultSingleCutVia);
+      // if (tech->getLayer(layerNum)->getDefaultViaDef() == nullptr) {
+        tech->getLayer(layerNum)->setDefaultViaDef(defaultSingleCutVia);
+      // }
     } else {
-      std::cout << "Error: " << tech->getLayer(layerNum)->getName() << " does not have single-cut via\n";
-      exit(1);
+      if (layerNum >= BOTTOM_ROUTING_LAYER) {
+        std::cout << "Error: " << tech->getLayer(layerNum)->getName() << " does not have single-cut via\n";
+        exit(1);
+      }
+    }
+    // generate via if default via enclosure is not along pref dir
+    if (ENABLE_VIA_GEN && layerNum >= BOTTOM_ROUTING_LAYER) {
+      auto techDefautlViaDef = tech->getLayer(layerNum)->getDefaultViaDef();
+      frVia via(techDefautlViaDef);
+      frBox layer1Box;
+      frBox layer2Box;
+      frLayerNum layer1Num;
+      frLayerNum layer2Num;
+      via.getLayer1BBox(layer1Box);
+      via.getLayer2BBox(layer2Box);
+      layer1Num = techDefautlViaDef->getLayer1Num();
+      layer2Num = techDefautlViaDef->getLayer2Num();
+      bool isLayer1EncHorz = (layer1Box.right() - layer1Box.left()) > (layer1Box.top() - layer1Box.bottom());
+      bool isLayer2EncHorz = (layer2Box.right() - layer2Box.left()) > (layer2Box.top() - layer2Box.bottom());
+      bool isLayer1Horz = (tech->getLayer(layer1Num)->getDir() == frcHorzPrefRoutingDir);
+      bool isLayer2Horz = (tech->getLayer(layer2Num)->getDir() == frcHorzPrefRoutingDir);
+      bool needViaGen = false;
+      if (isLayer1EncHorz != isLayer1Horz || isLayer2EncHorz != isLayer2Horz) {
+        needViaGen = true;
+      }
+
+      // generate new via def if needed
+      if (needViaGen) {
+        // reference output file for writing def hack
+        REF_OUT_FILE = OUT_FILE + string(".ref");
+        string viaDefName = tech->getLayer(techDefautlViaDef->getCutLayerNum())->getName();
+        viaDefName += string("_FR");
+        cout << "Warning: " << tech->getLayer(layer1Num)->getName() << " does not have viaDef align with layer direction, generating new viaDef " << viaDefName << "...\n";
+        // routing layer shape
+        // rotate if needed
+        if (isLayer1EncHorz != isLayer1Horz) {
+          layer1Box.set(layer1Box.bottom(), layer1Box.left(), layer1Box.top(), layer1Box.right());
+        }
+        if (isLayer2EncHorz != isLayer2Horz) {
+          layer2Box.set(layer2Box.bottom(), layer2Box.left(), layer2Box.top(), layer2Box.right());
+        }
+
+        unique_ptr<frShape> uBotFig = make_unique<frRect>();
+        auto botFig = static_cast<frRect*>(uBotFig.get());
+        unique_ptr<frShape> uTopFig = make_unique<frRect>();
+        auto topFig = static_cast<frRect*>(uTopFig.get());
+
+        botFig->setBBox(layer1Box);
+        topFig->setBBox(layer2Box);
+        botFig->setLayerNum(layer1Num);
+        topFig->setLayerNum(layer2Num);
+
+        // cut layer shape
+        unique_ptr<frShape> uCutFig = make_unique<frRect>();
+        auto cutFig = static_cast<frRect*>(uCutFig.get());
+        frBox cutBox;
+        via.getCutBBox(cutBox);
+        cutFig->setBBox(cutBox);
+        cutFig->setLayerNum(techDefautlViaDef->getCutLayerNum());
+
+        // create via
+        auto viaDef = make_unique<frViaDef>(viaDefName);
+        viaDef->addLayer1Fig(uBotFig);
+        viaDef->addLayer2Fig(uTopFig);
+        viaDef->addCutFig(uCutFig);
+        viaDef->setAddedByRouter(true);
+        tech->getLayer(layerNum)->setDefaultViaDef(viaDef.get());
+        tech->addVia(viaDef);
+      }
+    }
+  }
+}
+
+// initialize secondLayerNum for rules that apply, reset the samenet rule if corresponding diffnet rule does not exist
+void io::Parser::initConstraintLayerIdx() {
+  for (auto layerNum = design->getTech()->getBottomLayerNum(); layerNum <= design->getTech()->getTopLayerNum(); ++layerNum) {
+    auto layer = design->getTech()->getLayer(layerNum);
+    // non-LEF58
+    auto &interLayerCutSpacingConstraints = layer->getInterLayerCutSpacingConstraintRef(false);
+    // diff-net
+    if (interLayerCutSpacingConstraints.empty()) {
+      interLayerCutSpacingConstraints.resize(design->getTech()->getTopLayerNum() + 1, nullptr);
+    }
+    for (auto &[secondLayerName, con]: layer->getInterLayerCutSpacingConstraintMap(false)) {
+      auto secondLayer = design->getTech()->getLayer(secondLayerName);
+      if (secondLayer == nullptr) {
+        cout << "Error: second layer " << secondLayerName << " does not exist\n";
+        continue;
+      }
+      auto secondLayerNum = design->getTech()->getLayer(secondLayerName)->getLayerNum();
+      con->setSecondLayerNum(secondLayerNum);
+      cout << "  updating diff-net cut spacing rule between " << design->getTech()->getLayer(layerNum)->getName()
+           << " and " << design->getTech()->getLayer(secondLayerNum)->getName() << "\n";
+      interLayerCutSpacingConstraints[secondLayerNum] = con;
+    }
+    // same-net
+    auto &interLayerCutSpacingSamenetConstraints = layer->getInterLayerCutSpacingConstraintRef(true);
+    if (interLayerCutSpacingSamenetConstraints.empty()) {
+      interLayerCutSpacingSamenetConstraints.resize(design->getTech()->getTopLayerNum() + 1, nullptr);
+    }
+    for (auto &[secondLayerName, con]: layer->getInterLayerCutSpacingConstraintMap(true)) {
+      auto secondLayer = design->getTech()->getLayer(secondLayerName);
+      if (secondLayer == nullptr) {
+        cout << "Error: second layer " << secondLayerName << " does not exist\n";
+        continue;
+      }
+      auto secondLayerNum = design->getTech()->getLayer(secondLayerName)->getLayerNum();
+      con->setSecondLayerNum(secondLayerNum);
+      cout << "  updating same-net cut spacing rule between " << design->getTech()->getLayer(layerNum)->getName()
+           << " and " << design->getTech()->getLayer(secondLayerNum)->getName() << "\n";
+      interLayerCutSpacingSamenetConstraints[secondLayerNum] = con;
+    }
+    // reset same-net if diff-net does not exist
+    for (int i = 0; i < (int)interLayerCutSpacingConstraints.size(); i++) {
+      if (interLayerCutSpacingConstraints[i] == nullptr) {
+        // cout << i << endl << flush; 
+        interLayerCutSpacingSamenetConstraints[i] = nullptr;
+      } else {
+        interLayerCutSpacingConstraints[i]->setSameNetConstraint(interLayerCutSpacingSamenetConstraints[i]);
+      }
+    }
+    // LEF58
+    // diff-net
+    for (auto &con: layer->getLef58CutSpacingConstraints(false)) {
+      if (con->hasSecondLayer()) {
+        frLayerNum secondLayerNum = design->getTech()->getLayer(con->getSecondLayerName())->getLayerNum();
+        con->setSecondLayerNum(secondLayerNum);
+      }
+    }
+    // same-net
+    for (auto &con: layer->getLef58CutSpacingConstraints(true)) {
+      if (con->hasSecondLayer()) {
+        frLayerNum secondLayerNum = design->getTech()->getLayer(con->getSecondLayerName())->getLayerNum();
+        con->setSecondLayerNum(secondLayerNum);
+      }
+    }
+  }
+  cout << "done initConstraintLayerIdx\n" << flush;
+}
+
+// initialize cut layer width for cut OBS DRC check if not specified in LEF
+void io::Parser::initCutLayerWidth() {
+  for (auto layerNum = design->getTech()->getBottomLayerNum(); layerNum <= design->getTech()->getTopLayerNum(); ++layerNum) {
+    if (design->getTech()->getLayer(layerNum)->getType() != frLayerTypeEnum::CUT) {
+      continue;
+    }
+    auto layer = design->getTech()->getLayer(layerNum);
+    // update cut layer width is not specifed in LEF
+    if (layer->getWidth() == 0) {
+      // first check default via size, if it is square, use that size
+      auto viaDef = layer->getDefaultViaDef();
+      if (viaDef) {
+        auto cutFig = viaDef->getCutFigs()[0].get();
+        if (cutFig->typeId() != frcRect) {
+          cout << "Error: non-rect shape in via definition\n";
+          exit(1);
+        }
+        auto cutRect = static_cast<frRect*>(cutFig);
+        auto viaWidth = cutRect->width();
+        layer->setWidth(viaWidth);
+        if (viaDef->getNumCut() == 1) {
+          if (cutRect->width() != cutRect->length()) {
+            cout << "Warning: CUT layer " << layer->getName() << " does not have square single-cut via, cut layer width may be set incorrectly\n";
+          }
+        } else {
+          cout << "Warning: CUT layer " << layer->getName() << " does not have single-cut via as default via, cut layer width may be set incorrectly\n";
+        }
+      } else {
+        if (layerNum >= BOTTOM_ROUTING_LAYER) {
+          cout << "Error: CUT layer " << layer->getName() << " does not have default via\n";
+          exit(1);
+        }
+      }
+    } else {
+      auto viaDef = layer->getDefaultViaDef();
+      int cutLayerWidth = layer->getWidth();
+      if (viaDef) {
+        auto cutFig = viaDef->getCutFigs()[0].get();
+        if (cutFig->typeId() != frcRect) {
+          cout << "Error: non-rect shape in via definition\n";
+          exit(1);
+        }
+        auto cutRect = static_cast<frRect*>(cutFig);
+        int viaWidth = cutRect->width();
+        if (cutLayerWidth < viaWidth) {
+          cout << "Warning: CUT layer " << layer->getName() << " has smaller width defined in LEF compared to default via\n";
+        }
+      }
     }
   }
 }
@@ -236,6 +425,90 @@ void io::Parser::getViaRawPriority(frViaDef* viaDef, viaRawPriorityTuple &priori
   frCoord layer2Area = area(viaLayerPS2);
 
   priority = std::make_tuple(isNotDefaultVia, layer1Width, layer2Width, isNotUpperAlign, layer2Area, layer1Area, isNotLowerAlign);
+}
+
+// 13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB
+void io::Parser::initDefaultVias_GF14(const string &node) {
+  for (int layerNum = 1; layerNum < (int)tech->getLayers().size(); layerNum += 2) {
+    for (auto &uViaDef: tech->getVias()) {
+      auto viaDef = uViaDef.get();
+      if (viaDef->getCutLayerNum() == layerNum && node == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+        switch(layerNum) {
+          // case 1 : // VIA0
+          //          if (viaDef->getName() == "NR_VIA1_PH") {
+          //            tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+          //          }
+          //          break;
+          case 3 : // VIA1
+                   if (viaDef->getName() == "V1_0_15_0_25_VH_Vx") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 5 : // VIA2
+                   if (viaDef->getName() == "V2_0_25_0_25_HV_Vx") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 7 : // VIA3
+                   if (viaDef->getName() == "J3_0_25_4_40_VH_Jy") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 9 : // VIA4
+                   if (viaDef->getName() == "A4_0_50_0_50_HV_Ax") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 11: // VIA5
+                   if (viaDef->getName() == "CK_23_28_0_26_VH_CK") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 13: // VIA6
+                   if (viaDef->getName() == "U1_0_26_0_26_HV_Ux") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 15: // VIA7
+                   if (viaDef->getName() == "U2_0_26_0_26_VH_Ux") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 17: // VIA8
+                   if (viaDef->getName() == "U3_0_26_0_26_HV_Ux") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 19: // VIA9
+                   if (viaDef->getName() == "KH_18_45_0_45_VH_KH") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 21: // VIA10
+                   if (viaDef->getName() == "N1_0_45_0_45_HV_Nx") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 23: // VIA11
+                   if (viaDef->getName() == "HG_18_72_18_72_VH_HG") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 25: // VIA12
+                   if (viaDef->getName() == "T1_18_72_18_72_HV_Tx") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          case 27: // VIA13
+                   if (viaDef->getName() == "VV_450_450_450_450_XX_VV") {
+                     tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
+                   }
+                   break;
+          default: ;
+        }
+      }
+    }
+  }
 }
 
 // 11m_2xa1xd3xe2y2r
@@ -400,14 +673,139 @@ void io::Parser::initDefaultVias_N16(const string &node) {
   }
 }
 
+void io::Parser::writeRefDef() {
+  vector<frViaDef*> genViaDefs;
+  for (auto &uViaDef: tech->getVias()) {
+    auto viaDef = uViaDef.get();
+    if (viaDef->isAddedByRouter()) {
+      genViaDefs.push_back(viaDef);
+    }
+  }
+
+  if (REF_OUT_FILE != DEF_FILE) {
+    cout << "Writing reference output def...\n";
+    bool hasVia = false;
+    ifstream fin(DEF_FILE);
+    ofstream fout(REF_OUT_FILE);
+    if (!fin.is_open()) {
+      cout << "Error: cannot open input DEF\n";
+      exit(1);
+    }
+    if (!fout.is_open()) {
+      cout << "Error: cannot open reference output DEF\n";
+      exit(1);
+    }
+    string line;
+    string a;
+    int b;
+    while (getline(fin, line)) {
+      istringstream iss(line);
+      if (!(iss >> a >> b)) {
+        continue;
+      }
+      if (a == string("VIAS")) {
+        hasVia = true;
+        break;
+      }
+    }
+
+    // reset and write ref
+    fin.clear();
+    fin.seekg(0, ios::beg);
+
+    while (getline(fin, line)) {
+      bool skip = false;
+      istringstream iss(line);
+      if (iss >> a >> b) {
+        // write empty VIAS section if does not exist
+        if (!hasVia) {
+          if (a == string("COMPONENTS")) {
+            fout << "\nVIAS " << genViaDefs.size() << " ;\n";
+            for (auto viaDef: genViaDefs) {
+              frVia via(viaDef);
+              frBox layer1Box, layer2Box, cutBox;
+              via.getLayer1BBox(layer1Box);
+              via.getCutBBox(cutBox);
+              via.getLayer2BBox(layer2Box);
+
+              fout << "- " << viaDef->getName() << endl;
+              fout << "  + RECT " << tech->getLayer(viaDef->getLayer1Num())->getName() 
+                   << " ( " << layer1Box.left() << " " << layer1Box.bottom() << " )"
+                   << " ( " << layer1Box.right() << " " << layer1Box.top() << " )\n";
+              fout << "  + RECT " << tech->getLayer(viaDef->getCutLayerNum())->getName() 
+                   << " ( " << cutBox.left() << " " << cutBox.bottom() << " )"
+                   << " ( " << cutBox.right() << " " << cutBox.top() << " )\n";
+              fout << "  + RECT " << tech->getLayer(viaDef->getLayer2Num())->getName() 
+                   << " ( " << layer2Box.left() << " " << layer2Box.bottom() << " )"
+                   << " ( " << layer2Box.right() << " " << layer2Box.top() << " )\n";
+              fout << "  ;\n";
+            }
+            fout << "END VIAS\n\n";
+          }
+        } else {
+          if (a == string("VIAS")) {
+            skip = true;
+            fout << "\nVIAS " << b + (int)genViaDefs.size() << " ;\n";
+            for (auto viaDef: genViaDefs) {
+              frVia via(viaDef);
+              frBox layer1Box, layer2Box, cutBox;
+              via.getLayer1BBox(layer1Box);
+              via.getCutBBox(cutBox);
+              via.getLayer2BBox(layer2Box);
+
+              fout << "- " << viaDef->getName() << endl;
+              fout << "  + RECT " << tech->getLayer(viaDef->getLayer1Num())->getName() 
+                   << " ( " << layer1Box.left() << " " << layer1Box.bottom() << " )"
+                   << " ( " << layer1Box.right() << " " << layer1Box.top() << " )\n";
+              fout << "  + RECT " << tech->getLayer(viaDef->getCutLayerNum())->getName() 
+                   << " ( " << cutBox.left() << " " << cutBox.bottom() << " )"
+                   << " ( " << cutBox.right() << " " << cutBox.top() << " )\n";
+              fout << "  + RECT " << tech->getLayer(viaDef->getLayer2Num())->getName() 
+                   << " ( " << layer2Box.left() << " " << layer2Box.bottom() << " )"
+                   << " ( " << layer2Box.right() << " " << layer2Box.top() << " )\n";
+              fout << "  ;\n";
+            }
+          }
+        }
+        // append generated via 
+
+      }
+      if (!skip) {
+        fout << line << endl;
+      }
+    }
+
+    fin.close();
+    fout.close();
+  }
+}
+
 void io::Parser::postProcess() {
+  if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+    VIAINPIN_BOTTOMLAYERNUM = 2;
+    VIAINPIN_TOPLAYERNUM = 2;
+    USENONPREFTRACKS = false;
+    BOTTOM_ROUTING_LAYER = 4;
+    TOP_ROUTING_LAYER = 18;
+    ENABLE_VIA_GEN = false;
+    // VIAONLY_STDCELLPIN_BOTTOMLAYERNUM = 2;
+    // VIAONLY_STDCELLPIN_TOPLAYERNUM = 2;
+  }
+
+  initDefaultVias();
   if (DBPROCESSNODE == "N16_11m_2xa1xd3xe2y2r_utrdl") {
     initDefaultVias_N16(DBPROCESSNODE);
+  } else if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+    initDefaultVias_GF14(DBPROCESSNODE);
   } else {
-    initDefaultVias();
+    ;
   }
+  initCutLayerWidth();
+  initConstraintLayerIdx();
   tech->printDefaultVias();
 
+  // write reference def for def writing hack flow if needed
+  writeRefDef();
 
   instAnalysis();
 
@@ -415,9 +813,10 @@ void io::Parser::postProcess() {
   cout <<endl <<"init region query ..." <<endl;
   design->getRegionQuery()->init(design->getTech()->getLayers().size());
   design->getRegionQuery()->print();
+  design->getRegionQuery()->initDRObj(design->getTech()->getLayers().size()); // second init from FlexDR.cpp
   // test
   /*
-  frBox box(372500, 1765500, 375500, 1768500);
+  frBox box(207.4045*2000, 256.2600*2000, 207.4045*2000, 256.2600*2000);
   for (frLayerNum i = 0; i < (int)design->getTech()->getLayers().size(); i++) {
     vector<rq_rptr_value_t<frBlockObject> > result;
     design->getRegionQuery()->query(box, i, result);
@@ -432,8 +831,8 @@ void io::Parser::postProcess() {
              <<static_cast<frInstTerm*>(rptr)->getTerm()->getName() <<endl;
       } else if (rptr->typeId() == frcTerm) {
         cout <<"     term PIN/" <<static_cast<frTerm*>(rptr)->getName() <<endl;
-      } else if (rptr->typeId() == frcLayerBlockage) {
-        cout <<"     lblk" <<endl;
+      } else if (rptr->typeId() == frcInstBlockage) {
+        cout <<"     inst blk" <<endl;
       } else if (rptr->typeId() == frcPathSeg) {
         cout <<"     pseg ";
         if (static_cast<frPathSeg*>(rptr)->hasNet()) {
@@ -450,7 +849,9 @@ void io::Parser::postProcess() {
         cout <<"Error: unknown type in rq test" <<endl;
       }
     }
-  }*/
+  }
+  exit(1);
+  */
 }
 
 void io::Parser::postProcessGuide() {
@@ -501,8 +902,13 @@ void io::Parser::postProcessGuide() {
   design->getRegionQuery()->initGRPin(tmpGRPins);
 
   if (OUTGUIDE_FILE == string("")) {
-    ;
+    if (VERBOSE > 0) {
+      cout <<"Waring: no output guide specified, skipped writing guide" <<endl;
+    }
   } else {
+    //if (VERBOSE > 0) {
+    //  cout <<endl <<"start writing output guide" <<endl;
+    //}
     writeGuideFile();
   }
 
@@ -638,11 +1044,14 @@ void io::Parser::buildGCellPatterns() {
   frGCellPattern xgp;
   xgp.setHorizontal(false);
   // find first coord >= dieBox.left()
-  frCoord startCoordX = dieBox.left() / (frCoord)GCELLGRIDX * (frCoord)GCELLGRIDX;
+  frCoord startCoordX = dieBox.left() / (frCoord)GCELLGRIDX * (frCoord)GCELLGRIDX + GCELLOFFSETX;
   //cout <<"here " <<dieBox.left() <<" " <<GCELLGRIDX <<endl;
-  if (startCoordX < dieBox.left()) {
-    startCoordX += (frCoord)GCELLGRIDX;
+  if (startCoordX > dieBox.left()) {
+    startCoordX -= (frCoord)GCELLGRIDX;
   }
+  // if (startCoordX < dieBox.left()) {
+  //   startCoordX += (frCoord)GCELLGRIDX;
+  // }
   xgp.setStartCoord(startCoordX);
   //xgp.setStartCoord(GCELLOFFSETX);
   xgp.setSpacing(GCELLGRIDX);
@@ -656,10 +1065,13 @@ void io::Parser::buildGCellPatterns() {
   frGCellPattern ygp;
   ygp.setHorizontal(true);
   // find first coord >= dieBox.bottom()
-  frCoord startCoordY = dieBox.bottom() / (frCoord)GCELLGRIDY * (frCoord)GCELLGRIDY;
-  if (startCoordY < dieBox.bottom()) {
-    startCoordY += (frCoord)GCELLGRIDY;
+  frCoord startCoordY = dieBox.bottom() / (frCoord)GCELLGRIDY * (frCoord)GCELLGRIDY + GCELLOFFSETY;
+  if (startCoordY > dieBox.bottom()) {
+    startCoordY -= (frCoord)GCELLGRIDY;
   }
+  // if (startCoordY < dieBox.bottom()) {
+  //   startCoordY += (frCoord)GCELLGRIDY;
+  // }
   ygp.setStartCoord(startCoordY);
   //ygp.setStartCoord(GCELLOFFSETY);
   ygp.setSpacing(GCELLGRIDY);

@@ -68,13 +68,13 @@ namespace fr {
     rectOut = Rectangle(rectInBox.left(), rectInBox.bottom(), rectInBox.right(), rectInBox.top());
   }
 
-  void frBlockage2Poly(frBlockage &blockageIn, boostPolygon &polyOut) {
-    auto points = blockageIn.getPoints();
-    polyOut = boostPolygon();
-    for (auto point: points) {
-      bg::append(polyOut, boostPoint(point.x(), point.y()));
-    }
-  }
+  //void frBlockage2Poly(frBlockage &blockageIn, boostPolygon &polyOut) {
+  //  auto points = blockageIn.getPoints();
+  //  polyOut = boostPolygon();
+  //  for (auto point: points) {
+  //    bg::append(polyOut, boostPoint(point.x(), point.y()));
+  //  }
+  //}
 
   // Use before checking overlapping
   double frBox2BoxDist(frBox &box1, frBox &box2) {

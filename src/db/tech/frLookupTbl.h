@@ -51,6 +51,13 @@ namespace fr {
   class fr1DLookupTbl {
   public:
     // constructor
+
+    fr1DLookupTbl(const fr1DLookupTbl &in): rows(in.rows), vals(in.vals),
+                                            rowName(in.rowName),
+                                            interpolateTypeRow(in.interpolateTypeRow),
+                                            interpolateTypeCol(in.interpolateTypeCol),
+                                            extrapolateTypeRowLower(in.extrapolateTypeRowLower),
+                                            extrapolateTypeRowUpper(in.extrapolateTypeRowUpper) {}
     fr1DLookupTbl(frString &rowNameIn,
                   frCollection<rowClass> &rowsIn,
                   frCollection<valClass> &valsIn) {
@@ -75,15 +82,21 @@ namespace fr {
     void setExtrapolateTypeRowUpper(frExtrapolateType &type);
 
     // others
-    valClass find(rowClass &rowVal) {
+    valClass find(const rowClass &rowVal) const {
       valClass retVal;
       frUInt4 rowIdx = getRowIdx(rowVal);
       retVal = vals[rowIdx];
       return retVal;
     }
+    valClass findMin() const {
+      return vals.front();
+    }
+    valClass findMax() const {
+      return vals.back();
+    }
 
   private:
-    frUInt4 getRowIdx(rowClass &rowVal) {
+    frUInt4 getRowIdx(const rowClass &rowVal) const {
       // currently only implement spacingtable style
       // interpolation
       frUInt4 retIdx;
@@ -199,6 +212,9 @@ namespace fr {
     }
     valClass findMin() const {
       return vals.front().front();
+    }
+    valClass findMax() const {
+      return vals.back().back();
     }
 
     // debug

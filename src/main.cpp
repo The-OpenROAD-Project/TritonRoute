@@ -51,7 +51,7 @@ int readParams(const string &fileName) {
         string value = line.substr(pos + 1);
         stringstream ss(value);
         if (field == "lef")           { LEF_FILE = value; ++readParamCnt;}
-        else if (field == "def")      { DEF_FILE = value; ++readParamCnt;}
+        else if (field == "def")      { DEF_FILE = value; REF_OUT_FILE = DEF_FILE; ++readParamCnt;}
         else if (field == "guide")    { GUIDE_FILE = value; ++readParamCnt;}
         else if (field == "outputTA") { OUTTA_FILE = value; ++readParamCnt;}
         else if (field == "output")   { OUT_FILE = value; ++readParamCnt;}
@@ -61,6 +61,17 @@ int readParams(const string &fileName) {
         else if (field == "threads")  { MAX_THREADS = atoi(value.c_str()); ++readParamCnt;}
         else if (field == "verbose")    VERBOSE = atoi(value.c_str());
         else if (field == "dbProcessNode") { DBPROCESSNODE = value; ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyPrefWireBottomLayerNum") { ONGRIDONLY_WIRE_PREF_BOTTOMLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyPrefWireTopLayerNum") { ONGRIDONLY_WIRE_PREF_TOPLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyNonPrefWireBottomLayerNum") { ONGRIDONLY_WIRE_NONPREF_BOTTOMLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyNonPrefWireTopLayerNum") { ONGRIDONLY_WIRE_NONPREF_TOPLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyViaBottomLayerNum") { ONGRIDONLY_VIA_BOTTOMLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteOnGridOnlyViaTopLayerNum") { ONGRIDONLY_VIA_TOPLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteViaInPinBottomLayerNum") { VIAINPIN_BOTTOMLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteViaInPinTopLayerNum") { VIAINPIN_TOPLAYERNUM = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "drouteEndIterNum") { END_ITERATION = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "OR_SEED") {OR_SEED = atoi(value.c_str()); ++readParamCnt;}
+        else if (field == "OR_K") {OR_K = atof(value.c_str()); ++readParamCnt;}
       }
     }
     fin.close();
@@ -81,34 +92,34 @@ int main(int argc, char** argv) {
   //double startTime = omp_get_wtime();
 
   //std::ios::sync_with_stdio(false);
-  cout <<"TritonRoute Version 0.0.6.0" <<endl;
-  cout <<"Developed by Lutong Wang and Bangqi Xu\n"
-       <<"\n"
-       <<"Copyright (c) 2019, The Regents of the University of California\n"
-       <<"All rights reserved.\n"
-       <<"\n"
-       <<"Redistribution and use in source and binary forms, with or without\n"
-       <<"modification, are permitted provided that the following conditions are met:\n"
-       <<"    * Redistributions of source code must retain the above copyright\n"
-       <<"      notice, this list of conditions and the following disclaimer.\n"
-       <<"    * Redistributions in binary form must reproduce the above copyright\n"
-       <<"      notice, this list of conditions and the following disclaimer in the\n"
-       <<"      documentation and/or other materials provided with the distribution.\n"
-       <<"    * Neither the name of the University nor the\n"
-       <<"      names of its contributors may be used to endorse or promote products\n"
-       <<"      derived from this software without specific prior written permission.\n"
-       <<"\n"
-       <<"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n"
-       <<"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
-       <<"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n"
-       <<"DISCLAIMED. IN NO EVENT SHALL THE REGENTS BE LIABLE FOR ANY\n"
-       <<"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
-       <<"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
-       <<"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
-       <<"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
-       <<"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n"
-       <<"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
-       <<"\n";
+  //cout <<"TritonRoute Version 0.0.6.0" <<endl;
+  //cout <<"Developed by Lutong Wang and Bangqi Xu\n"
+  //     <<"\n"
+  //     <<"Copyright (c) 2019, The Regents of the University of California\n"
+  //     <<"All rights reserved.\n"
+  //     <<"\n"
+  //     <<"Redistribution and use in source and binary forms, with or without\n"
+  //     <<"modification, are permitted provided that the following conditions are met:\n"
+  //     <<"    * Redistributions of source code must retain the above copyright\n"
+  //     <<"      notice, this list of conditions and the following disclaimer.\n"
+  //     <<"    * Redistributions in binary form must reproduce the above copyright\n"
+  //     <<"      notice, this list of conditions and the following disclaimer in the\n"
+  //     <<"      documentation and/or other materials provided with the distribution.\n"
+  //     <<"    * Neither the name of the University nor the\n"
+  //     <<"      names of its contributors may be used to endorse or promote products\n"
+  //     <<"      derived from this software without specific prior written permission.\n"
+  //     <<"\n"
+  //     <<"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n"
+  //     <<"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
+  //     <<"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n"
+  //     <<"DISCLAIMED. IN NO EVENT SHALL THE REGENTS BE LIABLE FOR ANY\n"
+  //     <<"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
+  //     <<"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
+  //     <<"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
+  //     <<"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+  //     <<"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n"
+  //     <<"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
+  //     <<"\n";
   if (argc == 1) {
     cout <<"Error: usage ./TritonRoute -lef <LEF_FILE> -def <DEF_FILE> -guide <GUIDE_FILE> -output <OUTPUT_DEF>" <<endl;
     return 2;
@@ -133,6 +144,7 @@ int main(int argc, char** argv) {
         argv++;
         argc--;
         DEF_FILE = *argv;
+        REF_OUT_FILE = DEF_FILE; 
         //cout <<"def: " <<DEF_FILE <<endl;
       } else if (strcmp(*argv, "-guide") == 0) {
         argv++;

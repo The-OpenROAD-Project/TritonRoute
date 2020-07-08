@@ -31,90 +31,129 @@
 
 #include <memory>
 #include "frBaseTypes.h"
-#include "db/obj/frFig.h"
+#include "db/obj/frPin.h"
 
 namespace fr {
-  class frBlockage: public frFig {
+  class frBlockage: public frBlockObject {
   public:
     // constructors
-    frBlockage(): frFig(), points(), owner(nullptr) {}
+    frBlockage(): frBlockObject(), pin(nullptr)/*, spacing(), designRuleWidth()*/ {}
     // getters
-    frBlockObject* getOwner() const {
-      return owner;
+    frPin* getPin() const {
+      return pin.get();
     }
-    const std::vector<frPoint>& getPoints() const {
-      return points;
-    }
-    std::vector<frPoint>& getPoints() {
-      return points;
-    }
-    frUInt4 getNumPoints() const {
-      return points.size();
-    }
+    //bool hasSpacing(frLayerNum in) const {
+    //  return !(spacing.find(in) == spacing.end());
+    //}
+    //frCoord getSpacing(frLayerNum in) const {
+    //  return spacing.find(in)->second;
+    //}
+    //bool hasDesignRuleWidth(frLayerNum in) const {
+    //  return !(designRuleWidth.find(in) == designRuleWidth.end());
+    //}
+    //frCoord getDesignRuleWidth(frLayerNum in) const {
+    //  return designRuleWidth.find(in)->second;
+    //}
     // setters
-    void setOwner(frBlockObject* in) {
-      owner = in;
+    void setPin(std::unique_ptr<frPin>& in) {
+      pin = std::move(in);
     }
-    void setPoints(const fr::frCollection<frPoint> &pIn) {
-      points = pIn;
-    }
+    //void setSpacing(frLayerNum lNum, frCoord in) {
+    //  spacing[lNum] = in;
+    //}
+    //void setDesignRuleWidth(frLayerNum lNum, frCoord in) {
+    //  designRuleWidth[lNum] = in;
+    //}
     // others
     frBlockObjectEnum typeId() const override {
       return frcBlockage;
     }
-
-    void getBBox(frBox &boxIn) const override {
-      frCoord llx = 0;
-      frCoord lly = 0;
-      frCoord urx = 0;
-      frCoord ury = 0;
-      if (points.size()) {
-        llx = points.begin()->x();
-        urx = points.begin()->x();
-        lly = points.begin()->y();
-        ury = points.begin()->y();
-      }
-      for (auto &point: points) {
-        llx = (llx < point.x()) ? llx : point.x();
-        lly = (lly < point.y()) ? lly : point.y();
-        urx = (urx > point.x()) ? urx : point.x();
-        ury = (ury > point.y()) ? ury : point.y();
-      }
-      boxIn.set(llx, lly, urx, ury);
-    }
-    void move(const frTransform &xform) override {
-      for (auto &point: points) {
-        point.transform(xform);
-      }
-    }
-    bool overlaps(const frBox &box) const override {
-      return false;
-    }
   protected:
-    std::vector<frPoint> points;
-    frBlockObject*       owner; // optional, set later
+    std::unique_ptr<frPin> pin;
+    //std::map<frLayerNum, frCoord> spacing;
+    //std::map<frLayerNum, frCoord> designRuleWidth;
   };
+  //class frBlockage: public frFig {
+  //public:
+  //  // constructors
+  //  frBlockage(): frFig(), points(), owner(nullptr) {}
+  //  // getters
+  //  frBlockObject* getOwner() const {
+  //    return owner;
+  //  }
+  //  const std::vector<frPoint>& getPoints() const {
+  //    return points;
+  //  }
+  //  std::vector<frPoint>& getPoints() {
+  //    return points;
+  //  }
+  //  frUInt4 getNumPoints() const {
+  //    return points.size();
+  //  }
+  //  // setters
+  //  void setOwner(frBlockObject* in) {
+  //    owner = in;
+  //  }
+  //  void setPoints(const fr::frCollection<frPoint> &pIn) {
+  //    points = pIn;
+  //  }
+  //  // others
+  //  frBlockObjectEnum typeId() const override {
+  //    return frcBlockage;
+  //  }
 
-  class frLayerBlockage: public frBlockage {
-  public:
-    // constructors
-    frLayerBlockage(): frBlockage() {}
-    // getters
-    frLayerNum getLayerNum() const {
-      return layerNum;
-    }
-    // setters
-    void setLayerNum(frLayerNum numIn) {
-      layerNum = numIn;
-    }
+  //  void getBBox(frBox &boxIn) const override {
+  //    frCoord llx = 0;
+  //    frCoord lly = 0;
+  //    frCoord urx = 0;
+  //    frCoord ury = 0;
+  //    if (points.size()) {
+  //      llx = points.begin()->x();
+  //      urx = points.begin()->x();
+  //      lly = points.begin()->y();
+  //      ury = points.begin()->y();
+  //    }
+  //    for (auto &point: points) {
+  //      llx = (llx < point.x()) ? llx : point.x();
+  //      lly = (lly < point.y()) ? lly : point.y();
+  //      urx = (urx > point.x()) ? urx : point.x();
+  //      ury = (ury > point.y()) ? ury : point.y();
+  //    }
+  //    boxIn.set(llx, lly, urx, ury);
+  //  }
+  //  void move(const frTransform &xform) override {
+  //    for (auto &point: points) {
+  //      point.transform(xform);
+  //    }
+  //  }
+  //  bool overlaps(const frBox &box) const override {
+  //    return false;
+  //  }
+  //protected:
+  //  std::vector<frPoint> points;
+  //  frBlockObject*       owner; // optional, set later
+  //};
 
-    // others
-    frBlockObjectEnum typeId() const override {
-      return frcLayerBlockage;
-    }
-  protected:
-    frLayerNum layerNum;
-  };
+  //class frLayerBlockage: public frBlockage {
+  //public:
+  //  // constructors
+  //  frLayerBlockage(): frBlockage() {}
+  //  // getters
+  //  frLayerNum getLayerNum() const {
+  //    return layerNum;
+  //  }
+  //  // setters
+  //  void setLayerNum(frLayerNum numIn) {
+  //    layerNum = numIn;
+  //  }
+
+  //  // others
+  //  frBlockObjectEnum typeId() const override {
+  //    return frcLayerBlockage;
+  //  }
+  //protected:
+  //  frLayerNum layerNum;
+  //};
 }
 
 #endif

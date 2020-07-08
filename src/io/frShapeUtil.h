@@ -46,7 +46,7 @@ namespace fr {
   void frRect2Rectangle(frRect &rectIn, Rectangle &rectOut);
   double frBox2BoxDist(frBox &box1, frBox &box2);
   double frBox2BoxDist(box_t &box1, box_t &box2);
-  void frBlockage2Poly(frBlockage &blockageIn, boostPolygon &polyOut);
+  //void frBlockage2Poly(frBlockage &blockageIn, boostPolygon &polyOut);
   bool isSamePoint(boostPoint &pt1, boostPoint &pt2);
   void polyCovering(boostPolygon &polygon, frCollection<frRect> &rects);
   void maintainMaxRects(std::tuple<int, int, int, int> &newRect, std::set<std::tuple<int, int, int, int> > &maxRectSet);

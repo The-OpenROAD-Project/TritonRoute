@@ -30,33 +30,49 @@
 #include "global.h"
 #include "FlexRoute.h"
 #include "io/io.h"
+#include "pa/FlexPA.h"
 #include "ta/FlexTA.h"
 #include "dr/FlexDR.h"
-#include "io/frPinPrep.h"
+//#include "io/frPinPrep.h"
+#include "gc/FlexGC.h"
+#include "rp/FlexRP.h"
 
 using namespace std;
 using namespace fr;
 
 void FlexRoute::init() {
+  //FlexGCWorker gcWorker;
+  //gcWorker.main();
+  //exit(1);
   io::Parser parser(getDesign());
   parser.readLefDef();
-  //exit(1);
   parser.readGuide();
   parser.postProcess();
+  FlexPA pa(getDesign());
+  pa.main();
+  // exit(1);
   // get access pattern for post process
-  FlexPinPrep pp(getDesign()->getTech(), getDesign(), parser.getPrefTrackPatterns(), parser.getTrackOffsetMap());
-  pp.init();
-  pp.main();
-  std::cout << "finished pinPrep\n" << std::flush;
+  //FlexPinPrep pp(getDesign()->getTech(), getDesign(), parser.getPrefTrackPatterns(), parser.getTrackOffsetMap());
+  //pp.init();
+  //pp.main();
+  //std::cout << "finished pinPrep\n" << std::flush;
+  //exit(1);
   parser.postProcessGuide();
   //parser.buildRtree4Routes();
   //parser.buildRtree4Insts();
   //exit(0);
 }
 
+void FlexRoute::prep() {
+  FlexRP rp(getDesign(), getDesign()->getTech());
+  rp.main();
+}
+
 void FlexRoute::ta() {
   FlexTA ta(getDesign());
   ta.main();
+  io::Writer writer(getDesign());
+  writer.writeFromTA();
 }
 
 void FlexRoute::dr() {
@@ -66,12 +82,12 @@ void FlexRoute::dr() {
 
 void FlexRoute::endFR() {
   io::Writer writer(getDesign());
-  writer.writeFromTA();
   writer.writeFromDR();
 }
 
 int FlexRoute::main() {
   init();
+  prep();
   ta();
   dr();
   endFR();

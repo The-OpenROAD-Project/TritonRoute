@@ -31,6 +31,7 @@
 
 #include "db/obj/frFig.h"
 //#include "db/tech/frConstraint.h"
+#include <tuple>
 
 namespace fr {
   class frConstraint;
@@ -74,9 +75,15 @@ namespace fr {
       // srcs.push_back(srcIn);
       srcs.insert(srcIn);
     }
-    void addSrcId(int netId) {
-      srcIds.insert(netId);
+    void addAggressor(frBlockObject *obj, const std::tuple<frLayerNum, frBox, bool> &tupleIn) {
+      aggressors.push_back(std::make_pair(obj, tupleIn));
     }
+    void addVictim(frBlockObject *obj, const std::tuple<frLayerNum, frBox, bool> &tupleIn) {
+      victims.push_back(std::make_pair(obj, tupleIn));
+    }
+    // void addSrcId(int netId) {
+    //   srcIds.insert(netId);
+    // }
     // getters
 
     /* from frFig
@@ -111,14 +118,26 @@ namespace fr {
       return srcs;
     }
     
-    const std::set<int>& getSrcIds() const {
-      return srcIds;
+    // const std::set<int>& getSrcIds() const {
+    //   return srcIds;
+    // }
+    // std::set<int>& getSrcIds() {
+    //   return srcIds;
+    // }
+
+    const std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getAggressors() const {
+      return aggressors;
     }
-    std::set<int>& getSrcIds() {
-      return srcIds;
+    std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getAggressors() {
+      return aggressors;
     }
 
-
+    const std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getVictims() const {
+      return victims;
+    }
+    std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getVictims() {
+      return victims;
+    }
 
     frConstraint* getConstraint() const {
       return constraint;
@@ -159,7 +178,9 @@ namespace fr {
     frLayerNum layerNum;
     // frVector<frBlockObject*> srcs; // either frNet or instTerm or term
     std::set<frBlockObject*> srcs;
-    std::set<int> srcIds;
+    std::vector<std::pair<frBlockObject*,std::tuple<frLayerNum, frBox, bool> > > victims; // obj, isFixed
+    std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > > aggressors; // obj, isFixed
+    // std::set<int> srcIds;
     frListIter<std::unique_ptr<frMarker> > iter;
     bool vioHasDir, vioIsH;
   };

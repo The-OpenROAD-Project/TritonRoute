@@ -26,4 +26,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "db/obj/frPin.h"
+#include "db/obj/frAccess.h"
+#include "db/tech/frViaDef.h"
+
+using namespace std;
+using namespace fr;
+
+void frAccessPoint::addViaDef(frViaDef *in) {
+  auto numCut = in->getNumCut();
+  int numCutIdx = numCut - 1;
+  if (numCut > (int)viaDefs.size()) {
+    viaDefs.resize(numCut, {});
+  }
+  viaDefs[numCutIdx].push_back(in);
+}

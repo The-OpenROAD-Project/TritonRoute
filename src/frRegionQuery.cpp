@@ -310,24 +310,19 @@ void frRegionQuery::add(frInstBlockage* instBlk) {
   frBox frb;
   box_t boostb;
 
-  //frTransform xform;
-  //instBlk->getInst()->getTransform(xform);
-
-  //instBlk->getInst()->getRefBlock()->getBoundaryBBox(frb);
-  //xform.updateXform(frb.upperRight());
   frTransform xform;
   instBlk->getInst()->getUpdatedXform(xform);
   auto blk = instBlk->getBlockage();
-  if (blk->getNumPoints() != 4) {
-    cout <<"Error: unsupported blockage type" <<endl;
-  } else {
-    if (blk->typeId() == frcLayerBlockage) {
-      blk->getBBox(frb);
+  auto pin = blk->getPin();
+  for (auto &uFig: pin->getFigs()) {
+    auto shape = uFig.get();
+    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
+      shape->getBBox(frb);
       frb.transform(xform);
       boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(static_cast<frLayerBlockage*>(blk)->getLayerNum()).insert(make_pair(boostb, instBlk));
+      shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, instBlk));
     } else {
-      cout <<"Error: unsupported blockage type" <<endl;
+      cout <<"Error: unsupported region query add" <<endl;
     }
   }
 }
@@ -336,24 +331,19 @@ inline void frRegionQuery::add(frInstBlockage* instBlk, vector<vector<rq_rptr_va
   frBox frb;
   box_t boostb;
 
-  //frTransform xform;
-  //instBlk->getInst()->getTransform(xform);
-
-  //instBlk->getInst()->getRefBlock()->getBoundaryBBox(frb);
-  //xform.updateXform(frb.upperRight());
   frTransform xform;
   instBlk->getInst()->getUpdatedXform(xform);
   auto blk = instBlk->getBlockage();
-  if (blk->getNumPoints() != 4) {
-    cout <<"Error: unsupported blockage type" <<endl;
-  } else {
-    if (blk->typeId() == frcLayerBlockage) {
-      blk->getBBox(frb);
+  auto pin = blk->getPin();
+  for (auto &uFig: pin->getFigs()) {
+    auto shape = uFig.get();
+    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
+      shape->getBBox(frb);
       frb.transform(xform);
       boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      allShapes.at(static_cast<frLayerBlockage*>(blk)->getLayerNum()).push_back(make_pair(boostb, instBlk));
+      allShapes.at(static_cast<frShape*>(shape)->getLayerNum()).push_back(make_pair(boostb, instBlk));
     } else {
-      cout <<"Error: unsupported blockage type" <<endl;
+      cout <<"Error: unsupported region query add" <<endl;
     }
   }
 }
@@ -361,16 +351,15 @@ inline void frRegionQuery::add(frInstBlockage* instBlk, vector<vector<rq_rptr_va
 void frRegionQuery::add(frBlockage* blk) {
   frBox frb;
   box_t boostb;
-  if (blk->getNumPoints() != 4) {
-    cout <<"Error: unsupported blockage type" <<endl;
-  } else {
-    blk->getBBox(frb);
-    if (blk->typeId() == frcLayerBlockage) {
-      blk->getBBox(frb);
+  auto pin = blk->getPin();
+  for (auto &uFig: pin->getFigs()) {
+    auto shape = uFig.get();
+    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
+      shape->getBBox(frb);
       boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(static_cast<frLayerBlockage*>(blk)->getLayerNum()).insert(make_pair(boostb, blk));
+      shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, blk));
     } else {
-      cout <<"Error: unsupported blockage type" <<endl;
+      cout <<"Error: unsupported region query add" <<endl;
     }
   }
 }
@@ -378,16 +367,15 @@ void frRegionQuery::add(frBlockage* blk) {
 inline void frRegionQuery::add(frBlockage* blk, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
   frBox frb;
   box_t boostb;
-  if (blk->getNumPoints() != 4) {
-    cout <<"Error: unsupported blockage type" <<endl;
-  } else {
-    blk->getBBox(frb);
-    if (blk->typeId() == frcLayerBlockage) {
-      blk->getBBox(frb);
+  auto pin = blk->getPin();
+  for (auto &uFig: pin->getFigs()) {
+    auto shape = uFig.get();
+    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
+      shape->getBBox(frb);
       boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      allShapes.at(static_cast<frLayerBlockage*>(blk)->getLayerNum()).push_back(make_pair(boostb, blk));
+      allShapes.at(static_cast<frShape*>(shape)->getLayerNum()).push_back(make_pair(boostb, blk));
     } else {
-      cout <<"Error: unsupported blockage type" <<endl;
+      cout <<"Error: unsupported region query add" <<endl;
     }
   }
 }
@@ -459,6 +447,11 @@ void frRegionQuery::queryGRPin(const frBox &box, vector<frBlockObject*> &result)
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   grPins.query(bgi::intersects(boostb), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
+}
+
+void frRegionQuery::queryDRObj(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frBlockObject> > &result) {
+  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
+  drObjs.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
 }
 
 void frRegionQuery::queryDRObj(const frBox &box, frLayerNum layerNum, vector<frBlockObject*> &result) {

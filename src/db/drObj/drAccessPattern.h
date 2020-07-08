@@ -38,7 +38,7 @@ namespace fr {
   class drAccessPattern: public drBlockObject {
   public:
     drAccessPattern(): beginPoint(), beginLayerNum(0), beginArea(0), pin(nullptr), validAccess(std::vector<bool>(6, true)),
-                       vU(nullptr), vD(nullptr), vUIdx(0), vDIdx(0), onTrackX(true), onTrackY(true) {}
+                       vU(nullptr), vD(nullptr), vUIdx(0), vDIdx(0), onTrackX(true), onTrackY(true), pinCost(0) {}
     // getters
     void getPoint(frPoint &bpIn) const {
       bpIn.set(beginPoint);
@@ -148,6 +148,9 @@ namespace fr {
     bool isOnTrack(bool isX) const {
       return (isX) ? onTrackX : onTrackY;
     }
+    frUInt4 getPinCost() const {
+      return pinCost;
+    }
     // setters
     void setPoint(const frPoint &bpIn) {
       beginPoint.set(bpIn);
@@ -182,6 +185,9 @@ namespace fr {
         onTrackY = in;
       }
     }
+    void setPinCost(frUInt4 in) {
+      pinCost = in;
+    }
 
     // others
     frBlockObjectEnum typeId() const override {
@@ -201,6 +207,7 @@ namespace fr {
     int                     vDIdx;
     bool                    onTrackX; // initialized in initMazeIdx_ap
     bool                    onTrackY; // initialized in initMazeIdx_ap
+    frUInt4                 pinCost; // is preferred ap
   };
 }
 

@@ -33,7 +33,7 @@
 //#include "db/tech/frTechObject.h"
 #include "frDesign.h"
 //#include "db/obj/frGuide.h"
-//#include "db/obj/frVia.h"
+#include "db/obj/frVia.h"
 //#include "db/taObj/taTrack.h"
 #include "db/taObj/taPin.h"
 #include <set>
@@ -258,9 +258,10 @@ namespace fr {
     }
     // others
     int main();
+    int main_mt();
     
   protected:
-    frTechObject*                      tech;
+    frTechObject*                      tech; // not set
     frDesign*                          design;
     frBox                              routeBox;
     frBox                              extBox;
@@ -284,6 +285,8 @@ namespace fr {
     //// others
     void init();
     void initFixedObjs();
+    frCoord initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const box_t &boostb);
+    frCoord initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const box_t &boostb, bool isOBS = true);
     void initFixedObjs_helper(const frBox &box, frCoord bloatDist, frLayerNum lNum, frNet* net);
     void initTracks();
     void initIroutes();
@@ -368,6 +371,7 @@ namespace fr {
     //                            bool checkLowerLayer, bool checkUpperLayer, bool isBegin, 
     //                            const std::shared_ptr<frBlockObject> &v, 
     //                            bool &init, frCoord &limit); // init and limit must be reference
+    friend class FlexTA;
   };
 
 }

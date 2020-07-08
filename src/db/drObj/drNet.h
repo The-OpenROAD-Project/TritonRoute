@@ -41,7 +41,7 @@ namespace fr {
   public:
     // constructors
     drNet(): drBlockObject(), pins(), extConnFigs(), routeConnFigs(), bestRouteConnFigs(),
-             fNet(nullptr), modified(false), numMarkers(0), numPinsIn(0), 
+             fNetTerms(), fNet(nullptr), modified(false), numMarkers(0), numPinsIn(0), 
              markerDist(std::numeric_limits<frCoord>::max()), allowRipup(true), pinBox(), ripup(false),
              numReroutes(0), inQueue(false), routed(false), origGuides() {}
     // getters
@@ -71,6 +71,12 @@ namespace fr {
     }
     frNet* getFrNet() const {
       return fNet;
+    }
+    const std::set<frBlockObject*>& getFrNetTerms() const {
+      return fNetTerms;
+    }
+    std::set<frBlockObject*>& getFrNetTerms() {
+      return fNetTerms;
     }
     bool isModified() const {
       return modified;
@@ -147,6 +153,9 @@ namespace fr {
     void setFrNet(frNet* in) {
       fNet = in;
     }
+    void setFrNetTerms(const std::set<frBlockObject*> &in) {
+      fNetTerms = in;
+    }
     void setModified(bool in) {
       modified = in;
     }
@@ -181,6 +190,9 @@ namespace fr {
     void addNumReroutes() {
       numReroutes++;
     }
+    void resetNumReroutes() {
+      numReroutes = 0;
+    }
     void setInQueue() {
       inQueue = true;
     }
@@ -195,6 +207,17 @@ namespace fr {
     }
     void setOrigGuides(std::vector<frRect> &in) {
       origGuides.assign(in.begin(), in.end());
+    }
+    void cleanup() {
+      pins.clear();
+      pins.shrink_to_fit();
+      extConnFigs.clear();
+      extConnFigs.shrink_to_fit();
+      routeConnFigs.clear();
+      routeConnFigs.shrink_to_fit();
+      fNetTerms.clear();
+      origGuides.clear();
+      origGuides.shrink_to_fit();
     }
 
     // others
@@ -211,6 +234,7 @@ namespace fr {
     std::vector<std::unique_ptr<drConnFig> >     extConnFigs;
     std::vector<std::unique_ptr<drConnFig> >     routeConnFigs;
     std::vector<std::unique_ptr<drConnFig> >     bestRouteConnFigs;
+    std::set<frBlockObject*>                     fNetTerms;
     frNet*                                       fNet;
     // old
     bool                                         modified;

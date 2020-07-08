@@ -44,7 +44,7 @@ namespace fr {
   public:
     // constructors
     //frNet(): frBlockObject() {}
-    frNet(const frString &in): frBlockObject(), name(in), instTerms(), terms(), shapes(), vias(), pwires(), guides(), type(frNetEnum::frcNormalNet) {}
+    frNet(const frString &in): frBlockObject(), name(in), instTerms(), terms(), shapes(), vias(), pwires(), guides(), type(frNetEnum::frcNormalNet), modified(false), isFakeNet(false) {}
     // getters
     const frString& getName() const {
       return name;
@@ -85,6 +85,13 @@ namespace fr {
     const std::vector<std::unique_ptr<frGuide> >& getGuides() const {
       return guides;
     }
+    const bool isModified() const {
+      return modified;
+    }
+    const bool isFake() const {
+      return isFakeNet;
+    }
+
     // setters
     void addInstTerm(frInstTerm* in) {
       instTerms.push_back(in);
@@ -131,6 +138,12 @@ namespace fr {
     void removePatchWire(frShape* in) {
       pwires.erase(in->getIter());
     }
+    void setModified(bool in) {
+      modified = in;
+    }
+    void setIsFake(bool in) {
+      isFakeNet = in;
+    }
     // others
     frNetEnum getType() const {
       return type;
@@ -151,6 +164,8 @@ namespace fr {
     //std::list<std::unique_ptr<frGuide> >    guides;
     std::vector<std::unique_ptr<frGuide> >    guides;
     frNetEnum                                 type;
+    bool                                      modified;
+    bool                                      isFakeNet; // indicate floating PG nets
   };
 }
 

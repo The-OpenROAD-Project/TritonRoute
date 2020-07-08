@@ -33,7 +33,7 @@
 #include "dr/FlexDR.h"
 #include "io/io.h"
 #include "db/infra/frTime.h"
-//#include <omp.h>
+#include <omp.h>
 
 using namespace std;
 using namespace fr;
@@ -67,13 +67,63 @@ int FlexDRWorker::main() {
   //mazeInst.init();
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //mazeInst.route();
-  //if (getDRIter() == 0) {
+  // if (getFixMode() != 9) {
     route();
-  //} else {
-  //  route_2();
-  //}
+  // } else {
+    // route_queue();
+  // }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   end();
+  //mazeInst.end();
+  high_resolution_clock::time_point t3 = high_resolution_clock::now();
+
+  duration<double> time_span0 = duration_cast<duration<double>>(t1 - t0);
+  //time_span_init  += time_span0;
+  duration<double> time_span1 = duration_cast<duration<double>>(t2 - t1);
+  //time_span_route += time_span1;
+  duration<double> time_span2 = duration_cast<duration<double>>(t3 - t2);
+  //time_span_end   += time_span2;
+
+  if (VERBOSE > 1) {
+    stringstream ss;
+    ss   <<"time (INIT/ROUTE/POST) " <<time_span0.count() <<" " 
+                                     <<time_span1.count() <<" "
+                                     <<time_span2.count() <<" "
+                                     <<endl;
+    cout <<ss.str() <<flush;
+  }
+  return 0;
+}
+
+int FlexDRWorker::main_mt() {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t0 = high_resolution_clock::now();
+  if (VERBOSE > 1) {
+    frBox scaledBox;
+    stringstream ss;
+    ss <<endl <<"start DR worker (BOX) "
+                <<"( " <<routeBox.left()   * 1.0 / getTech()->getDBUPerUU() <<" "
+                <<routeBox.bottom() * 1.0 / getTech()->getDBUPerUU() <<" ) ( "
+                <<routeBox.right()  * 1.0 / getTech()->getDBUPerUU() <<" "
+                <<routeBox.top()    * 1.0 / getTech()->getDBUPerUU() <<" )" <<endl;
+    cout <<ss.str() <<flush;
+  }
+  //return 0;
+
+  init();
+  //FlexMazeRoute mazeInst(getDesign(), routeBox, extBox);
+  //mazeInst.setInitDR(isInitDR());
+  //mazeInst.init();
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  //mazeInst.route();
+  if (getFixMode() != 9) {
+    route();
+  } else {
+   route_queue();
+  }
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  cleanup();
+  // end();
   //mazeInst.end();
   high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
@@ -907,6 +957,135 @@ frCoord FlexDR::init_via2viaMinLenNew_minSpc(frLayerNum lNum, frViaDef* viaDef1,
   return sol;
 }
 
+frCoord FlexDR::init_via2viaMinLenNew_cutSpc(frLayerNum lNum, frViaDef* viaDef1, frViaDef* viaDef2, bool isCurrDirY) {
+  if (!(viaDef1 && viaDef2)) {
+    return 0;
+  }
+
+  frCoord sol = 0;
+
+  // check min len in lNum assuming pre dir routing
+  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
+  //bool isCurrDirX = !isCurrDirY;
+  //frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
+
+  //bool isVia1Above = false;
+  frVia via1(viaDef1);
+  frBox viaBox1, cutBox1;
+  if (viaDef1->getLayer1Num() == lNum) {
+    via1.getLayer1BBox(viaBox1);
+    //isVia1Above = true;
+  } else {
+    via1.getLayer2BBox(viaBox1);
+    //isVia1Above = false;
+  }
+  via1.getCutBBox(cutBox1);
+  //auto width1    = viaBox1.width();
+  //auto length1   = viaBox1.length();
+  //bool isVia1Fat = isH ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
+  //auto prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
+
+  //bool isVia2Above = false;
+  frVia via2(viaDef2);
+  frBox viaBox2, cutBox2;
+  if (viaDef2->getLayer1Num() == lNum) {
+    via2.getLayer1BBox(viaBox2);
+    //isVia2Above = true;
+  } else {
+    via2.getLayer2BBox(viaBox2);
+    //isVia2Above = false;
+  }
+  via2.getCutBBox(cutBox2);
+  //auto width2    = viaBox2.width();
+  //auto length2   = viaBox2.length();
+  //bool isVia2Fat = isH ? (viaBox2.top() - viaBox2.bottom() > defaultWidth) : (viaBox2.right() - viaBox2.left() > defaultWidth);
+  //auto prl2      = isH ? (viaBox2.top() - viaBox2.bottom()) : (viaBox2.right() - viaBox2.left());
+
+  // same layer (use samenet rule if exist, otherwise use diffnet rule)
+  if (viaDef1->getCutLayerNum() == viaDef2->getCutLayerNum()) {
+    auto samenetCons = getDesign()->getTech()->getLayer(viaDef1->getCutLayerNum())->getCutSpacing(true);
+    auto diffnetCons = getDesign()->getTech()->getLayer(viaDef1->getCutLayerNum())->getCutSpacing(false);
+    if (!samenetCons.empty()) {
+      // check samenet spacing rule if exists
+      for (auto con: samenetCons) {
+        if (con == nullptr) {
+          continue;
+        }
+        // filter rule, assuming default via will never trigger cutArea
+        if (con->hasSecondLayer() || con->isAdjacentCuts() || con->isParallelOverlap() || con->isArea() || !con->hasSameNet()) {
+          continue;
+        }
+        auto reqSpcVal = con->getCutSpacing();
+        if (!con->hasCenterToCenter()) {
+          reqSpcVal += isCurrDirY ? (cutBox1.top() - cutBox1.bottom()) : (cutBox1.right() - cutBox1.left());
+        }
+        sol = max(sol, reqSpcVal);
+      }
+    } else {
+      // check diffnet spacing rule
+      // filter rule, assuming default via will never trigger cutArea
+      for (auto con: diffnetCons) {
+        if (con == nullptr) {
+          continue;
+        }
+        if (con->hasSecondLayer() || con->isAdjacentCuts() || con->isParallelOverlap() || con->isArea() || con->hasSameNet()) {
+          continue;
+        }
+        auto reqSpcVal = con->getCutSpacing();
+        // std::cout << "  reqSpcVal = " << reqSpcVal << "\n";
+        if (!con->hasCenterToCenter()) {
+          reqSpcVal += isCurrDirY ? (cutBox1.top() - cutBox1.bottom()) : (cutBox1.right() - cutBox1.left());
+          // std::cout << "    updated reqSpcVal = " << reqSpcVal << "\n";
+        }
+        sol = max(sol, reqSpcVal);
+      }
+    }
+  // TODO: diff layer 
+  } else {
+    auto layerNum1 = viaDef1->getCutLayerNum();
+    auto layerNum2 = viaDef2->getCutLayerNum();
+    frCutSpacingConstraint* samenetCon = nullptr;
+    if (getDesign()->getTech()->getLayer(layerNum1)->hasInterLayerCutSpacing(layerNum2, true)) {
+      samenetCon = getDesign()->getTech()->getLayer(layerNum1)->getInterLayerCutSpacing(layerNum2, true);
+    }
+    if (getDesign()->getTech()->getLayer(layerNum2)->hasInterLayerCutSpacing(layerNum1, true)) {
+      if (samenetCon) {
+        cout <<"Warning: duplicate diff layer samenet cut spacing, skipping cut spacing from " 
+             <<layerNum2 <<" to " <<layerNum1 <<endl;
+      } else {
+        samenetCon = getDesign()->getTech()->getLayer(layerNum2)->getInterLayerCutSpacing(layerNum1, true);
+      }
+    }
+    if (samenetCon == nullptr) {
+      if (getDesign()->getTech()->getLayer(layerNum1)->hasInterLayerCutSpacing(layerNum2, false)) {
+        samenetCon = getDesign()->getTech()->getLayer(layerNum1)->getInterLayerCutSpacing(layerNum2, false);
+      }
+      if (getDesign()->getTech()->getLayer(layerNum2)->hasInterLayerCutSpacing(layerNum1, false)) {
+        if (samenetCon) {
+          cout <<"Warning: duplicate diff layer diffnet cut spacing, skipping cut spacing from " 
+               <<layerNum2 <<" to " <<layerNum1 <<endl;
+        } else {
+          samenetCon = getDesign()->getTech()->getLayer(layerNum2)->getInterLayerCutSpacing(layerNum1, false);
+        }
+      }
+    }
+    if (samenetCon) {
+      // filter rule, assuming default via will never trigger cutArea
+      auto reqSpcVal = samenetCon->getCutSpacing();
+      if (reqSpcVal == 0) {
+        ;
+      } else {
+        if (!samenetCon->hasCenterToCenter()) {
+          reqSpcVal += isCurrDirY ? (cutBox1.top() - cutBox1.bottom()) : (cutBox1.right() - cutBox1.left());
+        }
+      }
+      sol = max(sol, reqSpcVal);
+    }
+  }
+
+  return sol;
+}
+
 void FlexDR::init_via2viaMinLenNew() {
   //bool enableOutput = false;
   bool enableOutput = true;
@@ -992,6 +1171,44 @@ void FlexDR::init_via2viaMinLenNew() {
     }
     i++;
   }
+
+  // check cut spacing
+  i = 0;
+  for (auto lNum = bottomLayerNum; lNum <= topLayerNum; lNum++) {
+    if (getDesign()->getTech()->getLayer(lNum)->getType() != frLayerTypeEnum::ROUTING) {
+      continue;
+    }
+    frViaDef* downVia = nullptr;
+    frViaDef* upVia   = nullptr;
+    if (getDesign()->getTech()->getBottomLayerNum() <= lNum - 1) {
+      downVia = getDesign()->getTech()->getLayer(lNum - 1)->getDefaultViaDef();
+    }
+    if (getDesign()->getTech()->getTopLayerNum() >= lNum + 1) {
+      upVia = getDesign()->getTech()->getLayer(lNum + 1)->getDefaultViaDef();
+    }
+    via2viaMinLenNew[i][0] = max(via2viaMinLenNew[i][0], init_via2viaMinLenNew_cutSpc(lNum, downVia, downVia, false));
+    via2viaMinLenNew[i][1] = max(via2viaMinLenNew[i][1], init_via2viaMinLenNew_cutSpc(lNum, downVia, downVia, true ));
+    via2viaMinLenNew[i][2] = max(via2viaMinLenNew[i][2], init_via2viaMinLenNew_cutSpc(lNum, downVia, upVia,   false));
+    via2viaMinLenNew[i][3] = max(via2viaMinLenNew[i][3], init_via2viaMinLenNew_cutSpc(lNum, downVia, upVia,   true ));
+    via2viaMinLenNew[i][4] = max(via2viaMinLenNew[i][4], init_via2viaMinLenNew_cutSpc(lNum, upVia,   downVia, false));
+    via2viaMinLenNew[i][5] = max(via2viaMinLenNew[i][5], init_via2viaMinLenNew_cutSpc(lNum, upVia,   downVia, true ));
+    via2viaMinLenNew[i][6] = max(via2viaMinLenNew[i][6], init_via2viaMinLenNew_cutSpc(lNum, upVia,   upVia,   false));
+    via2viaMinLenNew[i][7] = max(via2viaMinLenNew[i][7], init_via2viaMinLenNew_cutSpc(lNum, upVia,   upVia,   true ));
+    if (enableOutput) {
+      cout <<"initVia2ViaMinLenNew_cutSpc " <<getDesign()->getTech()->getLayer(lNum)->getName()
+           <<" (d2d-x, d2d-y, d2u-x, d2u-y, u2d-x, u2d-y, u2u-x, u2u-y) = (" 
+           <<via2viaMinLenNew[i][0] <<", "
+           <<via2viaMinLenNew[i][1] <<", "
+           <<via2viaMinLenNew[i][2] <<", "
+           <<via2viaMinLenNew[i][3] <<", "
+           <<via2viaMinLenNew[i][4] <<", "
+           <<via2viaMinLenNew[i][5] <<", "
+           <<via2viaMinLenNew[i][6] <<", "
+           <<via2viaMinLenNew[i][7] <<")" <<endl;
+    }
+    i++;
+  }
+
 }
 
 void FlexDR::init_halfViaEncArea() {
@@ -1197,7 +1414,7 @@ void FlexDR::init() {
   //if (VERBOSE > 0) {
   //  cout <<endl <<"init dr objs ..." <<endl;
   //}
-  getRegionQuery()->initDRObj(getTech()->getLayers().size());
+  getRegionQuery()->initDRObj(getTech()->getLayers().size()); // first init in postProcess
   //getRegionQuery()->printDRObj();
 
   init_halfViaEncArea();
@@ -1238,7 +1455,7 @@ map<frNet*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> FlexDR::initDR_m
 
 void FlexDR::initDR(int size, bool enableDRC) {
   bool TEST = false;
-  //bool TEST = true;
+  // bool TEST = true;
   //cout <<"sizeof listiter   = " <<sizeof(frListIter<frPathSeg>) <<endl;
   //cout <<"sizeof raw ptr    = " <<sizeof(frPathSeg*) <<endl;
   //cout <<"sizeof unique ptr = " <<sizeof(unique_ptr<frPathSeg>) <<endl;
@@ -1265,14 +1482,21 @@ void FlexDR::initDR(int size, bool enableDRC) {
   auto &xgp = gCellPatterns.at(0);
   auto &ygp = gCellPatterns.at(1);
 
+  int cnt = 0;
+  int tot = (((int)xgp.getCount() - 1) / size + 1) * (((int)ygp.getCount() - 1) / size + 1);
+  int prev_perc = 0;
+  bool isExceed = false;
+
   int numQuickMarkers = 0;
   if (TEST) {
     //FlexDRWorker worker(getDesign());
     FlexDRWorker worker(this);
     //frBox routeBox;
     //routeBox.set(0*2000, 0*2000, 1*2000, 1*2000);
-    frCoord xl = 63 * 2000;
-    frCoord yl = 84 * 2000;
+    //frCoord xl = 21 * 2000;
+    //frCoord yl = 42 * 2000;
+    frCoord xl = 241.92 * 2000;
+    frCoord yl = 241.92 * 2000;
     //frCoord xh = 129 * 2000;
     //frCoord yh = 94.05 * 2000;
     frPoint idx;
@@ -1351,7 +1575,7 @@ void FlexDR::initDR(int size, bool enableDRC) {
     cout <<"done"  <<endl <<flush;
     }
     */
-  } else {
+  /*} else if (MAX_THREADS == 1) {
     //vector<FlexDRWorker> workers;
     int cnt = 0;
     //int tot = (int)xgp.getCount() * (int)ygp.getCount();
@@ -1420,13 +1644,122 @@ void FlexDR::initDR(int size, bool enableDRC) {
         //  //cout <<"  elapsed time = 00:04:55, memory = ZZZZ.ZZ (MB)" <<endl;
         //}
       }
+    } 
+    checkConnectivity();*/
+  } else {
+    vector<unique_ptr<FlexDRWorker> > uworkers;
+    int batchStepX, batchStepY;
+
+    getBatchInfo(batchStepX, batchStepY);
+    // batchSizeX = ((int)xgp.getCount() / size + 1) / batchStepX + 1;
+    // batchSizeY = ((int)ygp.getCount() / size + 1) / batchStepY + 1;
+
+    // vector<vector<FlexDRWorker*> > workers(batchStepX * batchStepY, vector<FlexDRWorker*>(batchSizeX * batchSizeY, nullptr));
+
+    vector<vector<vector<unique_ptr<FlexDRWorker> > > > workers(batchStepX * batchStepY);
+
+    int xIdx = 0, yIdx = 0;
+    // sequential init
+    for (int i = 0; i < (int)xgp.getCount(); i += size) {
+      for (int j = 0; j < (int)ygp.getCount(); j += size) {
+        auto worker = make_unique<FlexDRWorker>(this);
+        frBox routeBox1;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox1);
+        frBox routeBox2;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(min((int)xgp.getCount() - 1, i + size-1), 
+                                                        min((int)ygp.getCount(), j + size-1)), routeBox2);
+        //frBox routeBox;
+        frBox routeBox(routeBox1.left(), routeBox1.bottom(), routeBox2.right(), routeBox2.top());
+        frBox extBox;
+        routeBox.bloat(MTSAFEDIST, extBox);
+        frBox drcBox;
+        routeBox.bloat(DRCSAFEDIST, drcBox);
+        worker->setRouteBox(routeBox);
+        worker->setExtBox(extBox);
+        worker->setDrcBox(drcBox);
+
+        auto bp = initDR_mergeBoundaryPin(i, j, size, routeBox);
+        worker->setDRIter(0, bp);
+        // set boundary pin
+        worker->setEnableDRC(enableDRC);
+        worker->setFollowGuide(false);
+        //worker->setFollowGuide(true);
+        worker->setCost(DRCCOST, 0, 0, 0);
+        // int workerIdx = xIdx * batchSizeY + yIdx;
+        int batchIdx = (xIdx % batchStepX) * batchStepY + yIdx % batchStepY;
+        // workers[batchIdx][workerIdx] = worker;
+        if (workers[batchIdx].empty() || (int)workers[batchIdx].back().size() >= BATCHSIZE) {
+          workers[batchIdx].push_back(vector<unique_ptr<FlexDRWorker> >());
+        }
+        workers[batchIdx].back().push_back(std::move(worker));
+
+        yIdx++;
+      }
+      yIdx = 0;
+      xIdx++;
+    }
+
+    omp_set_num_threads(MAX_THREADS);
+
+    // parallel execution
+    for (auto &workerBatch: workers) {
+      for (auto &workersInBatch: workerBatch) {
+        // multi thread
+        #pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < (int)workersInBatch.size(); i++) {
+          workersInBatch[i]->main_mt();
+          #pragma omp critical 
+          {
+            cnt++;
+            if (VERBOSE > 0) {
+              if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc < 90) {
+                if (prev_perc == 0 && t.isExceed(0)) {
+                  isExceed = true;
+                }
+                prev_perc += 10;
+                //if (true) {
+                if (isExceed) {
+                  if (enableDRC) {
+                    cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
+                  } else {
+                    cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+                  }
+                  cout <<"    " <<t <<endl <<flush;
+                }
+              }
+            }
+          }
+        }
+        // single thread
+        for (int i = 0; i < (int)workersInBatch.size(); i++) {
+          workersInBatch[i]->end();
+        }
+        workersInBatch.clear();
+      }
     }
     checkConnectivity();
+  }
+  if (VERBOSE > 0) {
+    if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc >= 90) {
+      if (prev_perc == 0 && t.isExceed(0)) {
+        isExceed = true;
+      }
+      prev_perc += 10;
+      //if (true) {
+      if (isExceed) {
+        if (enableDRC) {
+          cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
+        } else {
+          cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+        }
+        cout <<"    " <<t <<endl <<flush;
+      }
+    }
   }
 
   //cout <<"  number of violations = " <<numMarkers <<endl;
   removeGCell2BoundaryPin();
-
+  numViols.push_back(getDesign()->getTopBlock()->getNumMarkers());
   if (VERBOSE > 0) {
     if (enableDRC) {
       cout <<"  number of violations = "       <<getDesign()->getTopBlock()->getNumMarkers() <<endl;
@@ -1443,11 +1776,25 @@ void FlexDR::initDR(int size, bool enableDRC) {
   }
 }
 
+
+
+void FlexDR::getBatchInfo(int &batchStepX, int &batchStepY) {
+  batchStepX = 2;
+  batchStepY = 2;
+}
+
 void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter, 
                           frUInt4 workerDRCCost, frUInt4 workerMarkerCost, 
                           frUInt4 workerMarkerBloatWidth, frUInt4 workerMarkerBloatDepth,
                           bool enableDRC, int ripupMode, bool followGuide, 
                           int fixMode, bool TEST) {
+  if (iter > END_ITERATION) {
+    return;
+  }
+  if (ripupMode != 1 && getDesign()->getTopBlock()->getMarkers().size() == 0) {
+    return;
+  } 
+
   frTime t;
   //bool TEST = false;
   //bool TEST = true;
@@ -1473,6 +1820,11 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
   auto &xgp = gCellPatterns.at(0);
   auto &ygp = gCellPatterns.at(1);
   int numQuickMarkers = 0;
+  int clipSize = size;
+  int cnt = 0;
+  int tot = (((int)xgp.getCount() - 1 - offset) / clipSize + 1) * (((int)ygp.getCount() - 1 - offset) / clipSize + 1);
+  int prev_perc = 0;
+  bool isExceed = false;
   if (TEST) {
     cout <<"search and repair test mode" <<endl <<flush;
     //FlexDRWorker worker(getDesign());
@@ -1489,7 +1841,8 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     //routeBox.set(156*2000, 108.3*2000, 177*2000, 128.25*2000);
     // routeBox.set(175*2000, 3.5*2000, 185*2000, 13.5*2000);
     // routeBox.set(0*2000, 0*2000, 200*2000, 200*2000);
-    routeBox.set(618*2000, 198*2000, 639*2000, 219*2000);
+    // routeBox.set(420*1000, 816.1*1000, 441*1000, 837.1*1000);
+    routeBox.set(441*1000, 816.1*1000, 462*1000, 837.1*1000);
     worker.setRouteBox(routeBox);
     frBox extBox;
     frBox drcBox;
@@ -1503,16 +1856,21 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     //worker.setQuickDRCTest(true);
     //worker.setDRCTest(true);
     worker.setDRIter(iter);
+    if (!iter) {
+      // set boundary pin (need to manulally calculate for test mode)
+      auto bp = initDR_mergeBoundaryPin(147, 273, size, routeBox);
+      worker.setDRIter(0, bp);
+    }
     worker.setEnableDRC(enableDRC);
     worker.setRipupMode(ripupMode);
     worker.setFollowGuide(followGuide);
     worker.setFixMode(fixMode);
     //worker.setNetOrderingMode(netOrderingMode);
     worker.setCost(workerDRCCost, workerMarkerCost, workerMarkerBloatWidth, workerMarkerBloatDepth);
-    worker.main();
+    worker.main_mt();
     numQuickMarkers += worker.getNumQuickMarkers();
     cout <<"done"  <<endl <<flush;
-  } else {
+  /*} else if (MAX_THREADS == 1) {
     //vector<FlexDRWorker> workers;
     int clipSize = size;
     int cnt = 0;
@@ -1593,10 +1951,131 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
         //  //cout <<"  elapsed time = 00:04:55, memory = ZZZZ.ZZ (MB)" <<endl;
         //}
       }
+    }*/
+  } else {
+
+    vector<unique_ptr<FlexDRWorker> > uworkers;
+    int batchStepX, batchStepY;
+
+    getBatchInfo(batchStepX, batchStepY);
+    // batchSizeX = ((int)xgp.getCount() / size + 1) / batchStepX + 1;
+    // batchSizeY = ((int)ygp.getCount() / size + 1) / batchStepY + 1;
+
+    vector<vector<vector<unique_ptr<FlexDRWorker> > > > workers(batchStepX * batchStepY);
+
+    int xIdx = 0, yIdx = 0;
+    for (int i = offset; i < (int)xgp.getCount(); i += clipSize) {
+      for (int j = offset; j < (int)ygp.getCount(); j += clipSize) {
+        auto worker = make_unique<FlexDRWorker>(this);
+        // auto &worker = *(uworker.get());
+        frBox routeBox1;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox1);
+        frBox routeBox2;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(min((int)xgp.getCount() - 1, i + clipSize-1), 
+                                                        min((int)ygp.getCount(), j + clipSize-1)), routeBox2);
+        frBox routeBox(routeBox1.left(), routeBox1.bottom(), routeBox2.right(), routeBox2.top());
+        frBox extBox;
+        frBox drcBox;
+        routeBox.bloat(MTSAFEDIST, extBox);
+        routeBox.bloat(DRCSAFEDIST, drcBox);
+        worker->setRouteBox(routeBox);
+        worker->setExtBox(extBox);
+        worker->setDrcBox(drcBox);
+        worker->setMazeEndIter(mazeEndIter);
+        worker->setDRIter(iter);
+        if (!iter) {
+          // if (routeBox.left() == 441000 && routeBox.bottom() == 816100) {
+          //   cout << "@@@ debug: " << i << " " << j << endl;
+          // }
+          // set boundary pin
+          auto bp = initDR_mergeBoundaryPin(i, j, size, routeBox);
+          worker->setDRIter(0, bp);
+        }
+        worker->setEnableDRC(enableDRC);
+        worker->setRipupMode(ripupMode);
+        worker->setFollowGuide(followGuide);
+        //worker->setNetOrderingMode(netOrderingMode);
+        worker->setFixMode(fixMode);
+        worker->setCost(workerDRCCost, workerMarkerCost, workerMarkerBloatWidth, workerMarkerBloatDepth);
+
+        int batchIdx = (xIdx % batchStepX) * batchStepY + yIdx % batchStepY;
+        if (workers[batchIdx].empty() || (int)workers[batchIdx].back().size() >= BATCHSIZE) {
+          workers[batchIdx].push_back(vector<unique_ptr<FlexDRWorker> >());
+        }
+        workers[batchIdx].back().push_back(std::move(worker));
+
+        yIdx++;
+      }
+      yIdx = 0;
+      xIdx++;
+    }
+
+
+    omp_set_num_threads(MAX_THREADS);
+    // if (iter >= 2) {
+    //   omp_set_num_threads(1);
+    // }
+
+    // parallel execution
+    for (auto &workerBatch: workers) {
+      for (auto &workersInBatch: workerBatch) {
+        // multi thread
+        #pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < (int)workersInBatch.size(); i++) {
+          workersInBatch[i]->main_mt();
+          #pragma omp critical 
+          {
+            cnt++;
+            if (VERBOSE > 0) {
+              if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc < 90) {
+                if (prev_perc == 0 && t.isExceed(0)) {
+                  isExceed = true;
+                }
+                prev_perc += 10;
+                //if (true) {
+                if (isExceed) {
+                  if (enableDRC) {
+                    cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
+                  } else {
+                    cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+                  }
+                  cout <<"    " <<t <<endl <<flush;
+                }
+              }
+            }
+          }
+        }
+        // single thread
+        for (int i = 0; i < (int)workersInBatch.size(); i++) {
+          workersInBatch[i]->end();
+        }
+        workersInBatch.clear();
+      }
     }
   }
   //cout <<"  number of violations = " <<numMarkers <<endl;
-  checkConnectivity();
+  if (!iter) {
+    removeGCell2BoundaryPin();
+  }
+  if (VERBOSE > 0) {
+    if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc >= 90) {
+      if (prev_perc == 0 && t.isExceed(0)) {
+        isExceed = true;
+      }
+      prev_perc += 10;
+      //if (true) {
+      if (isExceed) {
+        if (enableDRC) {
+          cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
+        } else {
+          cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+        }
+        cout <<"    " <<t <<endl <<flush;
+      }
+    }
+  }
+  checkConnectivity(iter);
+  numViols.push_back(getDesign()->getTopBlock()->getNumMarkers());
   if (VERBOSE > 0) {
     if (enableDRC) {
       cout <<"  number of violations = " <<getDesign()->getTopBlock()->getNumMarkers() <<endl;
@@ -1611,6 +2090,7 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     t.print();
     cout <<flush;
   }
+  end();
 }
 
 void FlexDR::end() {
@@ -1712,51 +2192,120 @@ void FlexDR::end() {
 
 void FlexDR::reportDRC() {
   double dbu = design->getTech()->getDBUPerUU();
-  cout << DRC_RPT_FILE << "\n";
-  if (DRC_RPT_FILE != string("")) {
-    ofstream drcRpt(DRC_RPT_FILE.c_str());
-    if (drcRpt.is_open()) {
-      for (auto &marker: getDesign()->getTopBlock()->getMarkers()) {
-        drcRpt << "  violation type: " << int(marker->getConstraint()->typeId()) << "\n";
-        // get source(s) of violation
-        drcRpt << "    srcs: ";
-        for (auto src: marker->getSrcs()) {
-          if (src) {
-            switch (src->typeId()) {
-              case frcNet:
-                drcRpt << (static_cast<frNet*>(src))->getName() << " ";
-                break;
-              case frcInstTerm: {
-                frInstTerm* instTerm = (static_cast<frInstTerm*>(src));
-                // drcRpt << instTerm->getInst()->getName() 
-                       // << "/" << instTerm->getTerm()->getName() << " ";
-                drcRpt << "Pin of Cell " << instTerm->getInst()->getName() << " ";
-                break;
-              }
-              case frcTerm: {
-                frTerm* term = (static_cast<frTerm*>(src));
-                drcRpt << term->getName() << " ";
-                break;
-              }
-              default:
-                std::cout << "Error: unexpected src type in marker\n";
+
+  if (DRC_RPT_FILE == string("")) {
+    if (VERBOSE > 0) {
+      cout <<"Waring: no DRC report specified, skipped writing DRC report" <<endl;
+    }
+    return;
+  }
+  //cout << DRC_RPT_FILE << "\n";
+  ofstream drcRpt(DRC_RPT_FILE.c_str());
+  if (drcRpt.is_open()) {
+    for (auto &marker: getDesign()->getTopBlock()->getMarkers()) {
+      auto con = marker->getConstraint();
+      drcRpt << "  violation type: ";
+      if (con) {
+        if (con->typeId() == frConstraintTypeEnum::frcShortConstraint) {
+          if (getTech()->getLayer(marker->getLayerNum())->getType() == frLayerTypeEnum::ROUTING) {
+            drcRpt <<"Short";
+          } else if (getTech()->getLayer(marker->getLayerNum())->getType() == frLayerTypeEnum::CUT) {
+            drcRpt <<"CShort";
+          }
+        } else if (con->typeId() == frConstraintTypeEnum::frcMinWidthConstraint) {
+          drcRpt <<"MinWid";
+        } else if (con->typeId() == frConstraintTypeEnum::frcSpacingConstraint) {
+          drcRpt <<"MetSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcSpacingEndOfLineConstraint) {
+          drcRpt <<"EOLSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTablePrlConstraint) {
+          drcRpt <<"MetSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcCutSpacingConstraint) {
+          drcRpt <<"CutSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcMinStepConstraint) {
+          drcRpt <<"MinStp";
+        } else if (con->typeId() == frConstraintTypeEnum::frcNonSufficientMetalConstraint) {
+          drcRpt <<"NSMet";
+        } else if (con->typeId() == frConstraintTypeEnum::frcSpacingSamenetConstraint) {
+          drcRpt <<"MetSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcOffGridConstraint) {
+          drcRpt <<"OffGrid";
+        } else if (con->typeId() == frConstraintTypeEnum::frcMinEnclosedAreaConstraint) {
+          drcRpt <<"MinHole";
+        } else if (con->typeId() == frConstraintTypeEnum::frcAreaConstraint) {
+          drcRpt <<"MinArea";
+        } else if (con->typeId() == frConstraintTypeEnum::frcLef58CornerSpacingConstraint) {
+          drcRpt <<"CornerSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcLef58CutSpacingConstraint) {
+          drcRpt <<"CutSpc";
+        } else if (con->typeId() == frConstraintTypeEnum::frcLef58RectOnlyConstraint) {
+          drcRpt <<"RectOnly";
+        } else if (con->typeId() == frConstraintTypeEnum::frcLef58RightWayOnGridOnlyConstraint) {
+          drcRpt <<"RightWayOnGridOnly";
+        } else if (con->typeId() == frConstraintTypeEnum::frcLef58MinStepConstraint) {
+          drcRpt <<"MinStp";
+        } else {
+          drcRpt << "unknown";
+        }
+      } else {
+        drcRpt << "nullptr";
+      }
+      drcRpt <<endl;
+      // get source(s) of violation
+      drcRpt << "    srcs: ";
+      for (auto src: marker->getSrcs()) {
+        if (src) {
+          switch (src->typeId()) {
+            case frcNet:
+              drcRpt << (static_cast<frNet*>(src))->getName() << " ";
+              break;
+            case frcInstTerm: {
+              frInstTerm* instTerm = (static_cast<frInstTerm*>(src));
+              // drcRpt << instTerm->getInst()->getName() 
+                     // << "/" << instTerm->getTerm()->getName() << " ";
+              //drcRpt << "Pin of Cell " << instTerm->getInst()->getName() << " ";
+              drcRpt <<instTerm->getInst()->getName() <<"/" <<instTerm->getTerm()->getName() << " ";
+              break;
             }
+            case frcTerm: {
+              frTerm* term = (static_cast<frTerm*>(src));
+              drcRpt <<"PIN/" << term->getName() << " ";
+              break;
+            }
+            case frcInstBlockage: {
+              frInstBlockage* instBlockage = (static_cast<frInstBlockage*>(src));
+              // drcRpt << instTerm->getInst()->getName() 
+                     // << "/" << instTerm->getTerm()->getName() << " ";
+              //drcRpt << "Blockage of Cell " << instBlockage->getInst()->getName() << " ";
+              drcRpt <<instBlockage->getInst()->getName() <<"/OBS" << " ";
+              break;
+            }
+            case frcBlockage: {
+              drcRpt << "PIN/OBS" << " ";
+              break;
+            }
+            default:
+              std::cout << "Error: unexpected src type in marker\n";
           }
         }
-        drcRpt << "\n";
-        // get violation bbox
-        frBox bbox;
-        marker->getBBox(bbox);
-        drcRpt << "    bbox = (" << bbox.left() / dbu << ", " << bbox.bottom() / dbu << ") - ("
-               << bbox.right() / dbu << ", " << bbox.top() / dbu << ") on Layer " 
-               << getTech()->getLayer(marker->getLayerNum())->getName() << "\n";
       }
-    } else {
-      cout << "Error: Fail to open DRC report file\n";
+      drcRpt << "\n";
+      // get violation bbox
+      frBox bbox;
+      marker->getBBox(bbox);
+      drcRpt << "    bbox = ( " << bbox.left() / dbu << ", " << bbox.bottom() / dbu << " ) - ( "
+             << bbox.right() / dbu << ", " << bbox.top() / dbu << " ) on Layer ";
+      if (getTech()->getLayer(marker->getLayerNum())->getType() == frLayerTypeEnum::CUT && 
+          marker->getLayerNum() - 1 >= getTech()->getBottomLayerNum()) {
+        drcRpt << getTech()->getLayer(marker->getLayerNum() - 1)->getName() << "\n";
+      } else {
+        drcRpt << getTech()->getLayer(marker->getLayerNum())->getName() << "\n";
+      }
     }
   } else {
-    cout << "Error: DRC report file is not specified\n";
+    cout << "Error: Fail to open DRC report file\n";
   }
+  
 }
 
 
@@ -1768,7 +2317,7 @@ int FlexDR::main() {
     cout <<endl <<endl <<"start detail routing ...";
   }
   // initDR: enableDRC
-  initDR(7, true);
+  // initDR(7, true);
   //cout   <<endl
   //       <<"time (INIT/ROUTE/POST) " <<time_span_init.count() <<" " 
   //                                   <<time_span_route.count() <<" "
@@ -1786,24 +2335,164 @@ int FlexDR::main() {
   //   4 - general fix, ripup left/bottom net (touching), currently DISABLED
   //   5 - general fix, ripup right/top net (touching), currently DISABLED
   //   6 - two-net viol
+  //   9 - search-and-repair queue
   // assume only mazeEndIter > 1 if enableDRC and ripupMode == 0 (partial ripup)
   //end();
   //searchRepair(1,  7, -4,  1, DRCCOST, 0,          0, 0, true, 1, false, 0, true); // test mode
-  end();
-  searchRepair(1,  7, -4, 1, DRCCOST, 0,          0, 0, true, 1, false, 0); // func as fully rerouting iter, no marker cost
-  end();
-  searchRepair(2,  7,  0, 4, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
-  end();
-  searchRepair(3,  7, -4, 4, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
-  end();
-  searchRepair(4,  7,  0, 4, DRCCOST, MARKERCOST,  4, 2, true, 0, false, 3); // true search and repair
-  end();
-  searchRepair(5,  7, -4, 4, DRCCOST, MARKERCOST,  4, 2, true, 0, false, 3); // true search and repair
-  end();
-  searchRepair(6,  7,  0, 4, DRCCOST, MARKERCOST,  8, 2, true, 0, false, 3); // true search and repair
-  end();
-  searchRepair(7,  7, -4, 4, DRCCOST, MARKERCOST,  8, 2, true, 0, false, 3); // true search and repair
-  reportDRC();
+
+  // need three different offsets to resolve boundary corner issues
+
+  int iterNum = 0;
+  searchRepair(iterNum++/*  0 */,  7,  0, 3, DRCCOST, 0/*MAARKERCOST*/,  0, 0, true, 1, true, 9); // true search and repair
+  searchRepair(iterNum++/*  1 */,  7, -2, 3, DRCCOST, DRCCOST/*MAARKERCOST*/,  0, 0, true, 1, true, 9); // true search and repair
+  searchRepair(iterNum++/*  1 */,  7, -5, 3, DRCCOST, DRCCOST/*MAARKERCOST*/,  0, 0, true, 1, true, 9); // true search and repair
+  searchRepair(iterNum++/*  3 */,  7,  0, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  4 */,  7, -1, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  5 */,  7, -2, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  6 */,  7, -3, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  7 */,  7, -4, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  8 */,  7, -5, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/*  9 */,  7, -6, 8, DRCCOST, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 10 */,  7,  0, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 11 */,  7, -1, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 12 */,  7, -2, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 13 */,  7, -3, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 14 */,  7, -4, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 15 */,  7, -5, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 16 */,  7, -6, 8, DRCCOST*2, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  7, -3, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 17 */,  7,  0, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 18 */,  7, -1, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 19 */,  7, -2, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 20 */,  7, -3, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 21 */,  7, -4, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 22 */,  7, -5, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 23 */,  7, -6, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  5, -2, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 24 */,  7,  0, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 25 */,  7, -1, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 26 */,  7, -2, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 27 */,  7, -3, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 28 */,  7, -4, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 29 */,  7, -5, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 30 */,  7, -6, 8, DRCCOST*8, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  3, -1, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 31 */,  7,  0, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 32 */,  7, -1, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 33 */,  7, -2, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 34 */,  7, -3, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 35 */,  7, -4, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 36 */,  7, -5, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 37 */,  7, -6, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  3, -2, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 38 */,  7,  0, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 39 */,  7, -1, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 40 */,  7, -2, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 41 */,  7, -3, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 42 */,  7, -4, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 43 */,  7, -5, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 44 */,  7, -6, 16, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  3, -0, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 45 */,  7,  0, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 46 */,  7, -1, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 47 */,  7, -2, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 48 */,  7, -3, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 49 */,  7, -4, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 50 */,  7, -5, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 51 */,  7, -6, 32, DRCCOST*32, MARKERCOST*8,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* ra'*/,  3, -1, 8, DRCCOST, MARKERCOST,  0, 0, true, 1, false, 9); // true search and repair
+  searchRepair(iterNum++/* 52 */,  7,  0, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 53 */,  7, -1, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 54 */,  7, -2, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 55 */,  7, -3, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 56 */,  7, -4, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 57 */,  7, -5, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  searchRepair(iterNum++/* 58 */,  7, -6, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
+  
+
+
+  // int iterNum = 0;
+  // // int iterNum = 1;
+  // // end();
+  // searchRepair(iterNum++/*  0 */,  7,  0, 3, DRCCOST, 0/*MAARKERCOST*/,  0, 0, true, 1, false, 9); // true search and repair
+  // // initDR(7, true);
+  // // end();
+  // searchRepair(iterNum++/*  1 */,  7, -3, 3, DRCCOST, DRCCOST/*MAARKERCOST*/,  0, 0, true, 1, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  2 */,  7, -6, 8, DRCCOST*1, MARKERCOST / 2,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  3 */,  7, -2, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  4 */,  7, -5, 8, DRCCOST*8, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  5 */,  7, -1, 8, DRCCOST*16, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  6 */,  7, -4, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  7 */,  7,  0, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  8 */,  7, -3, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/*  9 */,  7, -6, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 10 */,  7, -2, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 11 */,  7, -5, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 12 */,  7, -1, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 13 */,  7, -4, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 14 */,  7,  0, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 15 */,  7, -3, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 16 */,  7, -6, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 17 */,  7, -2, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 18 */,  7, -5, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 19 */,  7, -1, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+  // // end();
+  // searchRepair(iterNum++/* 20 */,  7, -4, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
+
+
+
+  // for (; iterNum <= 40; iterNum++) {
+  //   if (numViols.back() == 0) {
+  //     break;
+  //   }
+  //   end();
+  //   int offset = (iterNum % 2) ? -4 : 0;
+  //   searchRepair(iterNum,  7,  offset, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
+  //   if ((double)numViols.back() / numViols[numViols.size() - 5] > 0.95) {
+  //     break;
+  //   }
+  // }
+  // for (; iterNum <= 80; iterNum++) {
+  //   if (numViols.back() == 0) {
+  //     break;
+  //   }
+  //   end();
+  //   int offset = (iterNum % 2) ? -4 : 0;
+  //   searchRepair(iterNum,  7,  offset, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
+  //   if ((double)numViols.back() / numViols[numViols.size() - 5] > 0.95) {
+  //     break;
+  //   }
+  // }
+  // searchRepair(6,  7,  0, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
+  // end();
+  // searchRepair(7,  7, -4, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
+  // end();
+  // searchRepair(8,  7,  0, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
+  // end();
+  // searchRepair(9,  7, -4, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
+  
+
+  if (DRC_RPT_FILE != string("")) {
+    reportDRC();
+  }
   //time_span_init  = std::chrono::duration<double>(0);
   //time_span_route = std::chrono::duration<double>(0);
   //time_span_end   = std::chrono::duration<double>(0);

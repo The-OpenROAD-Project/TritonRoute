@@ -45,24 +45,24 @@ namespace fr {
                          vLengthX(std::numeric_limits<frCoord>::max()), 
                          vLengthY(std::numeric_limits<frCoord>::max()), 
                          dist(0), prevViaUp(false), 
-                         tLength(std::numeric_limits<frCoord>::max()), backTraceBuffer() {}
+                         tLength(std::numeric_limits<frCoord>::max()), /*preTurnDir(frDirEnum::UNKNOWN),*/ backTraceBuffer() {}
     //FlexWavefrontGrid(int xIn, int yIn, int zIn, frCost pathCostIn, frCost costIn, std::bitset<WAVEFRONTBITSIZE> backTraceBufferIn): 
     //                  xIdx(xIn), yIdx(yIn), zIdx(zIn), pathCost(pathCostIn), cost(costIn), layerPathLength(0), backTraceBuffer(backTraceBufferIn) {}
     FlexWavefrontGrid(int xIn, int yIn, int zIn, frCoord layerPathAreaIn, 
                       frCoord vLengthXIn, frCoord vLengthYIn,
                       bool prevViaUpIn, frCoord tLengthIn,
-                      frCoord distIn, frCost pathCostIn, frCost costIn): 
+                      frCoord distIn, frCost pathCostIn, frCost costIn/*, frDirEnum preTurnDirIn*/): 
                       xIdx(xIn), yIdx(yIn), zIdx(zIn), pathCost(pathCostIn), cost(costIn), 
                       layerPathArea(layerPathAreaIn), vLengthX(vLengthXIn), vLengthY(vLengthYIn),
-                      dist(distIn), prevViaUp(prevViaUpIn), tLength(tLengthIn), backTraceBuffer() {}
+                      dist(distIn), prevViaUp(prevViaUpIn), tLength(tLengthIn), /*preTurnDir(preTurnDirIn),*/ backTraceBuffer() {}
     FlexWavefrontGrid(int xIn, int yIn, int zIn, frCoord layerPathAreaIn, 
                       frCoord vLengthXIn, frCoord vLengthYIn,
                       bool prevViaUpIn, frCoord tLengthIn,
-                      frCoord distIn, frCost pathCostIn, frCost costIn, 
+                      frCoord distIn, frCost pathCostIn, frCost costIn, /*frDirEnum preTurnDirIn,*/
                       std::bitset<WAVEFRONTBITSIZE> backTraceBufferIn): 
                       xIdx(xIn), yIdx(yIn), zIdx(zIn), pathCost(pathCostIn), cost(costIn), 
                       layerPathArea(layerPathAreaIn), vLengthX(vLengthXIn), vLengthY(vLengthYIn),
-                      dist(distIn), prevViaUp(prevViaUpIn), tLength(tLengthIn), backTraceBuffer(backTraceBufferIn) {}
+                      dist(distIn), prevViaUp(prevViaUpIn), tLength(tLengthIn), /*preTurnDir(preTurnDirIn),*/ backTraceBuffer(backTraceBufferIn) {}
     // bool operator<(const FlexWavefrontGrid &b) const {
     //   return this->cost > b.cost;
     // }
@@ -77,7 +77,7 @@ namespace fr {
             return this->zIdx < b.zIdx; // prefer upper layer
           } else {
             return this->pathCost < b.pathCost; //prefer larger pathcost, DFS-style
-            //return this->pathCost < b.pathCost; //prefer smaller pathcost, BFS-style, test1 shows better results
+            // return this->pathCost > b.pathCost; //prefer smaller pathcost, BFS-style, test1 shows better results
           }
         }
       }
@@ -135,6 +135,9 @@ namespace fr {
     void setPrevViaUp(bool in) {
       prevViaUp = in;
     }
+    // void setPreTurnDir(frDirEnum &in) {
+    //   preTurnDir = in;
+    // }
 
     //void addTLength(frCoord tLengthIn, bool isX) {
     //  if (isX) {
@@ -171,6 +174,9 @@ namespace fr {
       backTraceBuffer |= newBS;
       return retBS;
     }
+    // frDirEnum getPreTurnDir() const {
+    //   return preTurnDir;
+    // }
   protected:
     frMIdx xIdx, yIdx, zIdx;
     frCost pathCost; // path cost
@@ -181,13 +187,30 @@ namespace fr {
     frCoord dist; // to maze center
     bool    prevViaUp;
     frCoord tLength; // length since last turn
+    // frDirEnum preTurnDir; // direction before last turn
     std::bitset<WAVEFRONTBITSIZE> backTraceBuffer;
   };
 
+  class myPriorityQueue: public std::priority_queue<FlexWavefrontGrid> {
+  public:
+    void cleanup() {
+      this->c.clear();
+    }
+    void fit() {
+      this->c.clear();
+      this->c.shrink_to_fit();
+    }
+    void init(int val) {
+      this->c.reserve(val);
+    }
+  };
 
   class FlexWavefront {
   public:
     // void init(std::shared_ptr<FlexMazePin> rootPin);
+    // FlexWavefront(int val) {
+    //   wavefrontPQ.init(val);
+    // }
     bool empty() const {
       return wavefrontPQ.empty();
     }
@@ -203,8 +226,16 @@ namespace fr {
     unsigned int size() const {
       return wavefrontPQ.size();
     }
+    void cleanup() {
+      //wavefrontPQ = std::priority_queue<FlexWavefrontGrid>();
+      wavefrontPQ.cleanup();
+    }
+    void fit() {
+      wavefrontPQ.fit();
+    }
   protected:
-    std::priority_queue<FlexWavefrontGrid> wavefrontPQ;
+    //std::priority_queue<FlexWavefrontGrid> wavefrontPQ;
+    myPriorityQueue wavefrontPQ;
     //std::priority_queue<FlexWavefrontGrid, std::vector<FlexWavefrontGrid, boost::fast_pool_allocator<FlexWavefrontGrid> > > wavefrontPQ; // slower always
   };
 }

@@ -659,6 +659,25 @@ frUInt4 FlexTAWorker::assignIroute_getPinCost(taPin* iroute, frCoord trackLoc) {
   frUInt4 sol = 0;
   if (iroute->hasWlenHelper2()) {
     sol = abs(trackLoc - iroute->getWlenHelper2());
+    if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+      bool isH = (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
+      auto layerNum = iroute->getGuide()->getBeginLayerNum();
+      int zIdx = layerNum / 2 - 1;
+      if (sol) {
+        if (isH) {
+          // if cannot use bottom or upper layer to bridge, then add cost
+          if ((getTech()->isVia2ViaForbiddenLen(zIdx, false, false, false, sol, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
+              (getTech()->isVia2ViaForbiddenLen(zIdx, true, true, false, sol, false) || layerNum + 2 > getTech()->getTopLayerNum())) {
+            sol += TADRCCOST;
+          }
+        } else {
+          if ((getTech()->isVia2ViaForbiddenLen(zIdx, false, false, true, sol, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
+              (getTech()->isVia2ViaForbiddenLen(zIdx, true, true, true, sol, false) || layerNum + 2 > getTech()->getTopLayerNum())) {
+            sol += TADRCCOST;
+          }
+        }
+      }
+    }
   }
   return sol;
 }
@@ -765,7 +784,7 @@ frUInt4 FlexTAWorker::assignIroute_getAlignCost(taPin* iroute, frCoord trackLoc)
   bool isH = (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
   for (auto &uPinFig: iroute->getFigs()) {
     if (uPinFig->typeId() == tacPathSeg) {
-      auto obj=  static_cast<taPathSeg*>(uPinFig.get());
+      auto obj = static_cast<taPathSeg*>(uPinFig.get());
       frPoint bp, ep;
       obj->getPoints(bp, ep);
       auto lNum = obj->getLayerNum();
@@ -805,6 +824,7 @@ frUInt4 FlexTAWorker::assignIroute_getCost(taPin* iroute, frCoord trackLoc, frUI
   int pinCost    = (tmpPinCost == 0) ? 0 : TAPINCOST * irouteLayerPitch + tmpPinCost;
   int tmpAlignCost = assignIroute_getAlignCost(iroute, trackLoc);
   int alignCost  = (tmpAlignCost == 0) ? 0 : TAALIGNCOST * irouteLayerPitch + tmpAlignCost;
+  // int misalignCost = assignIroute_getMisalignCost(iroute, trackLoc);
   if (enableOutput) {
     cout <<"    drc/wlen/pin/align cost = " <<drcCost <<"/" <<wlenCost <<"/" <<pinCost <<"/" <<alignCost <<endl;
   }

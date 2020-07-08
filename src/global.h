@@ -41,15 +41,48 @@ extern std::string OUTGUIDE_FILE;
 extern std::string LEF_FILE;
 extern std::string OUTTA_FILE;
 extern std::string OUT_FILE;
+extern std::string REF_OUT_FILE;
 extern std::string DBPROCESSNODE;
 extern std::string OUT_MAZE_FILE;
 extern std::string DRC_RPT_FILE;
+// to be removed
+extern int OR_SEED;
+extern double OR_K;
+
 extern int MAX_THREADS ;
+extern int BATCHSIZE ;
+extern int BATCHSIZETA;
+extern int MTSAFEDIST ;
+extern int DRCSAFEDIST ;
 extern int VERBOSE     ;
 extern int BOTTOM_ROUTING_LAYER;
+extern int TOP_ROUTING_LAYER;
 extern bool ALLOW_PIN_AS_FEEDTHROUGH;
 extern bool USENONPREFTRACKS;
+extern bool USEMINSPACING_OBS;
+extern bool RESERVE_VIA_ACCESS;
+extern bool ENABLE_BOUNDARY_MAR_FIX;
+extern bool ENABLE_VIA_GEN;
 //extern int TEST;
+extern fr::frLayerNum VIAINPIN_BOTTOMLAYERNUM;
+extern fr::frLayerNum VIAINPIN_TOPLAYERNUM;
+extern fr::frLayerNum VIAONLY_MACROCELLPIN_BOTTOMLAYERNUM;
+extern fr::frLayerNum VIAONLY_MACROCELLPIN_TOPLAYERNUM;
+extern fr::frLayerNum VIAONLY_STDCELLPIN_BOTTOMLAYERNUM;
+extern fr::frLayerNum VIAONLY_STDCELLPIN_TOPLAYERNUM;
+// uni-directional routing related
+extern fr::frLayerNum ONGRIDONLY_WIRE_PREF_BOTTOMLAYERNUM;
+extern fr::frLayerNum ONGRIDONLY_WIRE_PREF_TOPLAYERNUM;
+extern fr::frLayerNum ONGRIDONLY_WIRE_NONPREF_BOTTOMLAYERNUM;
+extern fr::frLayerNum ONGRIDONLY_WIRE_NONPREF_TOPLAYERNUM;
+extern fr::frLayerNum ONGRIDONLY_VIA_BOTTOMLAYERNUM;
+extern fr::frLayerNum ONGRIDONLY_VIA_TOPLAYERNUM;
+
+extern fr::frLayerNum VIA_ACCESS_LAYERNUM;
+
+extern int MINNUMACCESSPOINT_MACROCELLPIN;
+extern int MINNUMACCESSPOINT_STDCELLPIN;
+extern int ACCESS_PATTERN_END_ITERATION_NUM;
 
 extern int END_ITERATION;
 
@@ -60,9 +93,6 @@ extern fr::frUInt4 TADRCCOST;
 extern float       TASHAPEBLOATWIDTH;
 
 extern fr::frUInt4 VIACOST;
-extern bool USEMINSPACING_OBS;
-extern bool RESERVE_VIA_ACCESS;
-extern bool ENABLE_BOUNDARY_MAR_FIX;
 
 extern fr::frUInt4 GRIDCOST;
 extern fr::frUInt4 SHAPECOST;
@@ -73,6 +103,7 @@ extern fr::frUInt4 BLOCKCOST;
 extern fr::frUInt4 GUIDECOST;
 extern float       MARKERDECAY;
 extern float       SHAPEBLOATWIDTH;
+extern int MISALIGNMENTCOST;
 
 #define DIRBITSIZE 3
 #define WAVEFRONTBUFFERSIZE 2
@@ -95,7 +126,7 @@ extern std::ostream& operator<< (std::ostream& os, const fr::frPin &pinIn);
 extern std::ostream& operator<< (std::ostream& os, const fr::frRect &pinFig);
 extern std::ostream& operator<< (std::ostream& os, const fr::frPolygon &pinFig);
 extern std::ostream& operator<< (std::ostream& os, const fr::frNet &net);
-extern std::ostream& operator<< (std::ostream& os, const fr::frLayerBlockage &blk);
+//extern std::ostream& operator<< (std::ostream& os, const fr::frLayerBlockage &blk);
 
 extern std::ostream& operator<< (std::ostream& os, const fr::frPoint &pIn);
 extern std::ostream& operator<< (std::ostream& os, const fr::frBox &box);

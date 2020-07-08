@@ -97,6 +97,7 @@ namespace fr {
       static int getDefString(defrCallbackType_e type, const char* str, defiUserData data);
       static int getDefVoid(defrCallbackType_e type, void* variable, defiUserData data);
       static int getDefUnits(defrCallbackType_e type, double number, defiUserData data);
+      static int getDefBlockages(defrCallbackType_e type, defiBlockage* blockage, defiUserData data);
       static int getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data);
       static int getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData data);
       static int getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUserData data);
@@ -106,8 +107,8 @@ namespace fr {
       static int getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUserData data);
       static int getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData data);
       static int getLefViaRules(lefrCallbackType_e type, lefiViaRule* via, lefiUserData data);
-      
-      static int getLef58CornerSpacing(void *data, const std::string &sIn);
+      static int getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* spacing, lefiUserData data);
+      static int getLef58CornerSpacing(void *data, frLayer* tmpLayer, const std::string &sIn);
       static int getLef58SpacingTable(void *data, frLayer* tmpLayer, const std::string &sIn);
       static int getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpLayer, const std::string &sIn);
       static int getLef58Spacing(void *data, frLayer* tmpLayer, const std::string &sIn);
@@ -131,6 +132,9 @@ namespace fr {
       static int getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, const std::string &sIn, 
                                                   const std::shared_ptr<frLef58CutSpacingTableConstraint> &con,
                                                   bool hasSecondLayer, frLayerNum secondLayerNum);
+      static int getLef58RightWayOnGridOnly(void *data, frLayer* tmpLayer, const std::string &sIn);
+      static int getLef58RectOnly(void *data, frLayer* tmpLayer, const std::string &sIn);
+      static int getLef58MinStep(void *data, frLayer* tmpLayer, const std::string &sIn);
 
       // postProcess functions
       void buildCMap();
@@ -141,12 +145,17 @@ namespace fr {
       void initDefaultVias();
       void getViaRawPriority(frViaDef* viaDef, viaRawPriorityTuple &priority);
       void initDefaultVias_N16(const std::string &in);
+      void initDefaultVias_GF14(const std::string &in);
+      void initCutLayerWidth();
+      void initConstraintLayerIdx();
+      void writeRefDef();
 
       // instance analysis
       void instAnalysis();
 
       // postProcessGuide functions
       void genGuides(frNet* net, std::vector<frRect> &rects);
+      void genGuides_addCoverGuide(frNet* net, std::vector<frRect> &rects);
       void genGuides_merge(std::vector<frRect> &rects, std::vector<std::map<frCoord, boost::icl::interval_set<frCoord> > > &intvs);
       void genGuides_split(std::vector<frRect> &rects, std::vector<std::map<frCoord, boost::icl::interval_set<frCoord> > > &intvs,
                            std::map<std::pair<frPoint, frLayerNum>, std::set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap,
@@ -157,6 +166,12 @@ namespace fr {
       void genGuides_gCell2TermMap(std::map<std::pair<frPoint, frLayerNum>, std::set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap, 
                                    std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap,
                                    frTerm* term, frBlockObject* origTerm);
+      bool genGuides_gCell2APInstTermMap(std::map<std::pair<frPoint, frLayerNum>, std::set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap, 
+                                         std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap,
+                                         frInstTerm* instTerm);
+      bool genGuides_gCell2APTermMap(std::map<std::pair<frPoint, frLayerNum>, std::set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap, 
+                                     std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap,
+                                     frTerm* instTerm);
       void genGuides_initPin2GCellMap(frNet* net, std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap);
       void genGuides_buildNodeMap(std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap, int &gCnt, int &nCnt,
                                   std::vector<frRect> &rects, std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap);
@@ -168,6 +183,9 @@ namespace fr {
 
       // write guide
       void writeGuideFile();
+
+      // misc
+      void addFakeNets();
     };
     class Writer {
     public:
@@ -185,12 +203,13 @@ namespace fr {
       void writeFromTA();
       void writeFromDR(const std::string &str = "");
       std::map< frString, std::list<std::shared_ptr<frConnFig> > > connFigs; // all connFigs ready to def
+      std::vector<frViaDef*> viaDefs;
     protected:
       frTechObject*                                  tech;
       frDesign*                                      design;
       //std::list< // temp for merge and split
       
-
+      void fillViaDefs();
       void fillConnFigs(bool isTA);
       void fillConnFigs_net(frNet* net, bool isTA);
       void mergeSplitConnFigs(std::list<std::shared_ptr<frConnFig> > &connFigs);

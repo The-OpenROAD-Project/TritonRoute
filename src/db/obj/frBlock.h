@@ -298,6 +298,13 @@ namespace fr {
     int getNumMarkers() const {
       return markers.size();
     }
+    frNet* getFakeVSSNet() {
+      return fakeSNets[0].get();
+    }
+    frNet* getFakeVDDNet() {
+      return fakeSNets[1].get();
+    }
+
     // setters
     void setDBUPerUU(frUInt4 uIn) {
       dbUnit = uIn;
@@ -335,6 +342,9 @@ namespace fr {
         blockages.push_back(std::move(blk));
       }
     }
+    void addBlockage(std::unique_ptr<frBlockage> &in) {
+      blockages.push_back(std::move(in));
+    }
     void setCMap(const frCMap &cIn) {
       cMap = cIn;
     }
@@ -351,6 +361,9 @@ namespace fr {
     }
     void removeMarker(frMarker* in) {
       markers.erase(in->getIter());
+    }
+    void addFakeSNet(std::unique_ptr<frNet> &in) {
+      fakeSNets.push_back(std::move(in));
     }
     // others
     frBlockObjectEnum typeId() const override {
@@ -385,6 +398,8 @@ namespace fr {
     std::vector<frGCellPattern>                                   gCellPatterns;
 
     frList<std::unique_ptr<frMarker> >                            markers;
+
+    std::vector<std::unique_ptr<frNet> >                          fakeSNets; // 0 is floating VSS, 1 is floating VDD
   };
 }
 

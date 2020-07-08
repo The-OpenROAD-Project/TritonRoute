@@ -94,6 +94,7 @@ void FlexTAWorker::initTracks() {
   }
 }
 
+// use prefAp, otherwise return false
 bool FlexTAWorker::initIroute_helper_pin(frGuide* guide, frCoord &maxBegin, frCoord &minEnd, 
                                          set<frCoord> &downViaCoordSet, set<frCoord> &upViaCoordSet,
                                          int &wlen, frCoord &wlen2) {
@@ -115,7 +116,7 @@ bool FlexTAWorker::initIroute_helper_pin(frGuide* guide, frCoord &maxBegin, frCo
   frBox box;
   box.set(bp, bp);
   nbrGuides.clear();
-  if (layerNum - 2 >= 0) {
+  if (layerNum - 2 >= BOTTOM_ROUTING_LAYER) {
     rq->queryGuide(box, layerNum - 2, nbrGuides);
     for (auto &nbrGuide: nbrGuides) {
       if (nbrGuide->getNet() == net) {
@@ -143,13 +144,13 @@ bool FlexTAWorker::initIroute_helper_pin(frGuide* guide, frCoord &maxBegin, frCo
   frTerm* trueTerm = nullptr;
   //string  name;
   for (auto &term: result) {
-    bool hasInst = false;
+    //bool hasInst = false;
     frInst* inst = nullptr;
     if (term->typeId() == frcInstTerm) {
       if (static_cast<frInstTerm*>(term)->getNet() != net) {
         continue;
       }
-      hasInst = true;
+      //hasInst = true;
       inst = static_cast<frInstTerm*>(term)->getInst();
       inst->getTransform(shiftXform);
       shiftXform.set(frOrient(frcR0));
@@ -162,33 +163,44 @@ bool FlexTAWorker::initIroute_helper_pin(frGuide* guide, frCoord &maxBegin, frCo
       trueTerm = static_cast<frTerm*>(term);
     }
     if (trueTerm) {
+      int pinIdx = 0;
+      int pinAccessIdx = (inst) ? inst->getPinAccessIdx() : -1;
       for (auto &pin: trueTerm->getPins()) {
-        for (auto &ap: pin->getAccessPatterns(instXform.orient())) {
-          if (hasInst && !(ap->hasInst(inst))) {
-            continue;
-          }
-          frPoint apBp, apEp;
-          ap->getPoints(apBp, apEp);
-          if (enableOutput) {
-            cout <<" (" <<apBp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
-                        <<apBp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") origin";
-          }
-          auto bNum = ap->getBeginLayerNum();
-          apBp.transform(shiftXform);
-          if (layerNum == bNum && getRouteBox().contains(apBp)) {
-            wlen2 = isH ? apBp.y() : apBp.x();
-            maxBegin = isH ? apBp.x() : apBp.y();
-            minEnd   = isH ? apBp.x() : apBp.y();
-            wlen = 0;
-            if (hasDown) {
-              downViaCoordSet.insert(maxBegin);
-            }
-            if (hasUp) {
-              upViaCoordSet.insert(maxBegin);
-            }
-            return true;
-          }
+        frAccessPoint* ap = nullptr;
+        if (inst) {
+          ap = (static_cast<frInstTerm*>(term)->getAccessPoints())[pinIdx];
         }
+        if (!pin->hasPinAccess()) {
+          continue;
+        }
+        if (pinAccessIdx == -1) {
+          continue;
+        }
+        if (ap == nullptr) {
+          continue;
+        }
+        frPoint apBp;
+        ap->getPoint(apBp);
+        if (enableOutput) {
+          cout <<" (" <<apBp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
+                      <<apBp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") origin";
+        }
+        auto bNum = ap->getLayerNum();
+        apBp.transform(shiftXform);
+        if (layerNum == bNum && getRouteBox().contains(apBp)) {
+          wlen2 = isH ? apBp.y() : apBp.x();
+          maxBegin = isH ? apBp.x() : apBp.y();
+          minEnd   = isH ? apBp.x() : apBp.y();
+          wlen = 0;
+          if (hasDown) {
+            downViaCoordSet.insert(maxBegin);
+          }
+          if (hasUp) {
+            upViaCoordSet.insert(maxBegin);
+          }
+          return true;
+        }
+        pinIdx++;
       }
     }
   }
@@ -228,13 +240,13 @@ void FlexTAWorker::initIroute_helper_generic_helper(frGuide* guide, frCoord &wle
   frTerm* trueTerm = nullptr;
   //string  name;
   for (auto &term: result) {
-    bool hasInst = false;
+    //bool hasInst = false;
     frInst* inst = nullptr;
     if (term->typeId() == frcInstTerm) {
       if (static_cast<frInstTerm*>(term)->getNet() != net) {
         continue;
       }
-      hasInst = true;
+      //hasInst = true;
       inst = static_cast<frInstTerm*>(term)->getInst();
       inst->getTransform(shiftXform);
       shiftXform.set(frOrient(frcR0));
@@ -247,25 +259,38 @@ void FlexTAWorker::initIroute_helper_generic_helper(frGuide* guide, frCoord &wle
       trueTerm = static_cast<frTerm*>(term);
     }
     if (trueTerm) {
+      int pinIdx = 0;
+      int pinAccessIdx = (inst) ? inst->getPinAccessIdx() : -1;
       for (auto &pin: trueTerm->getPins()) {
-        for (auto &ap: pin->getAccessPatterns(instXform.orient())) {
-          if (hasInst && !(ap->hasInst(inst))) {
-            continue;
-          }
-          frPoint apBp, apEp;
-          ap->getPoints(apBp, apEp);
-          if (enableOutput) {
-            cout <<" (" <<apBp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
-                        <<apBp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") origin";
-          }
-          apBp.transform(shiftXform);
-          if (getRouteBox().contains(apBp)) {
-            wlen2 = isH ? apBp.y() : apBp.x();
-            return;
-          }
+        frAccessPoint* ap = nullptr;
+        if (inst) {
+          ap = (static_cast<frInstTerm*>(term)->getAccessPoints())[pinIdx];
         }
+        if (!pin->hasPinAccess()) {
+          continue;
+        }
+        if (pinAccessIdx == -1) {
+          continue;
+        }
+        if (ap == nullptr) {
+          continue;
+        }
+        frPoint apBp;
+        ap->getPoint(apBp);
+        if (enableOutput) {
+          cout <<" (" <<apBp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
+                      <<apBp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") origin";
+        }
+        apBp.transform(shiftXform);
+        if (getRouteBox().contains(apBp)) {
+          wlen2 = isH ? apBp.y() : apBp.x();
+          return;
+        }
+        pinIdx++;
       }
     }
+    ; // to do @@@@@
+    wlen2 = 0;
   }
 }
 
@@ -304,7 +329,7 @@ void FlexTAWorker::initIroute_helper_generic(frGuide* guide, frCoord &minBegin, 
       box.set(ep, ep);
       cp = ep;
     }
-    if (layerNum - 2 >= 0) {
+    if (layerNum - 2 >= BOTTOM_ROUTING_LAYER) {
       rq->queryGuide(box, layerNum - 2, nbrGuides);
     } 
     if (layerNum + 2 < (int)design->getTech()->getLayers().size()) {
@@ -746,8 +771,8 @@ void FlexTAWorker::initFixedObjs() {
         initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
       // snet
       } else if (obj->typeId() == frcPathSeg || obj->typeId() == frcVia) {
+        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, boostb);
         box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
-        bloatDist = TASHAPEBLOATWIDTH * width;
         frNet* netPtr = nullptr;
         if (obj->typeId() == frcPathSeg) {
           netPtr = static_cast<frPathSeg*>(obj)->getNet();
@@ -755,15 +780,84 @@ void FlexTAWorker::initFixedObjs() {
           netPtr = static_cast<frVia*>(obj)->getNet();
         }
         initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
+        if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB" && getTech()->getLayer(layerNum)->getType() == frLayerTypeEnum::ROUTING) {
+          // down-via
+          if (layerNum - 2 >= getDesign()->getTech()->getBottomLayerNum() && 
+              getTech()->getLayer(layerNum - 2)->getType() == frLayerTypeEnum::ROUTING) {
+            auto cutLayer = getTech()->getLayer(layerNum - 1);
+            frBox viaBox;
+            auto via = make_unique<frVia>(cutLayer->getDefaultViaDef());
+            via->getLayer2BBox(viaBox);
+            frCoord viaWidth = viaBox.width();
+            // only add for fat via
+            if (viaWidth > width) {
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb, false);
+              initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
+            }
+          }
+          // up-via
+          if (layerNum + 2 < (int)design->getTech()->getLayers().size() && 
+              getTech()->getLayer(layerNum + 2)->getType() == frLayerTypeEnum::ROUTING) {
+            auto cutLayer = getTech()->getLayer(layerNum + 1);
+            frBox viaBox;
+            auto via = make_unique<frVia>(cutLayer->getDefaultViaDef());
+            via->getLayer1BBox(viaBox);
+            frCoord viaWidth = viaBox.width();
+            // only add for fat via
+            if (viaWidth > width) {
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb, false);
+              initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
+            }
+          }
+        }
       } else if (obj->typeId() == frcBlockage || obj->typeId() == frcInstBlockage) {
-        if (USEMINSPACING_OBS) {
-          box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
-          bloatDist = TASHAPEBLOATWIDTH * width;
-          initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
-        } else {
-          box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
-          bloatDist = TASHAPEBLOATWIDTH * width;
-          initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
+        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, boostb);
+        box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
+        initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
+        // if (USEMINSPACING_OBS) {
+        //   box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
+        //   bloatDist = TASHAPEBLOATWIDTH * width;
+        //   initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
+        // } else {
+        //   box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
+        //   bloatDist = TASHAPEBLOATWIDTH * width;
+        //   initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
+        // }
+
+        if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+          // block track for up-via and down-via for fat MACRO OBS          
+          bool isMacro = false;
+          if (obj->typeId() == frcBlockage) {
+            isMacro = true;
+          } else {
+            auto inst = (static_cast<frInstBlockage*>(obj))->getInst();
+            if (inst->getRefBlock()->getMacroClass() == MacroClassEnum::BLOCK ||
+                inst->getRefBlock()->getMacroClass() == MacroClassEnum::PAD ||
+                inst->getRefBlock()->getMacroClass() == MacroClassEnum::PAD_POWER ||
+                inst->getRefBlock()->getMacroClass() == MacroClassEnum::RING) {
+              isMacro = true;
+            }
+          }
+          bool isFatOBS = true;
+          if (min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y()) <= 2 * width) {
+            isFatOBS = false;
+          } 
+          if (isMacro && isFatOBS) {
+            // down-via
+            if (layerNum - 2 >= getDesign()->getTech()->getBottomLayerNum() && 
+                getTech()->getLayer(layerNum - 2)->getType() == frLayerTypeEnum::ROUTING) {
+              auto cutLayer = getTech()->getLayer(layerNum - 1);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb);
+              initFixedObjs_helper(box, bloatDist, layerNum - 2, nullptr);
+            }
+            // up-via
+            if (layerNum + 2 < (int)design->getTech()->getLayers().size() && 
+                getTech()->getLayer(layerNum + 2)->getType() == frLayerTypeEnum::ROUTING) {
+              auto cutLayer = getTech()->getLayer(layerNum + 1);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb);
+              initFixedObjs_helper(box, bloatDist, layerNum + 2, nullptr);
+            }
+          }
         }
       } else {
         cout <<"Warning: unsupported type in initFixedObjs" <<endl;
@@ -772,6 +866,71 @@ void FlexTAWorker::initFixedObjs() {
   }
 }
 
+frCoord FlexTAWorker::initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const box_t &boostb, bool isOBS) {
+  auto layer = getTech()->getLayer(lNum);
+  frBox viaBox;
+  auto via = make_unique<frVia>(viaDef);
+  if (viaDef->getLayer1Num() == lNum) {
+    via->getLayer1BBox(viaBox);
+  } else {
+    via->getLayer2BBox(viaBox);
+  }
+  frCoord viaWidth = viaBox.width();
+  frCoord viaLength = viaBox.length();
+
+  frCoord obsWidth = min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y());
+  if (USEMINSPACING_OBS && isOBS) {
+    obsWidth = layer->getWidth();
+  }
+
+  frCoord bloatDist = 0;
+  auto con = getTech()->getLayer(lNum)->getMinSpacing();
+  if (con) {
+    if (con->typeId() == frConstraintTypeEnum::frcSpacingConstraint) {
+      bloatDist = static_cast<frSpacingConstraint*>(con)->getMinSpacing();
+    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTablePrlConstraint) {
+      bloatDist = static_cast<frSpacingTablePrlConstraint*>(con)->find(obsWidth, viaWidth/*prl*/);
+    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTableTwConstraint) {
+      bloatDist = static_cast<frSpacingTableTwConstraint*>(con)->find(obsWidth, viaWidth, viaWidth/*prl*/);
+    }
+  }
+  // at least via enclosure should not short with obs (OBS has issue with wrongway and PG has issue with prefDir)
+  // TODO: generalize the following
+  if (isOBS) {
+    bloatDist += viaLength / 2;
+  } else {
+    bloatDist += viaWidth / 2;
+  }
+  return bloatDist;
+}
+
+frCoord FlexTAWorker::initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const box_t &boostb) {
+  auto layer = getTech()->getLayer(lNum);
+  frCoord width = layer->getWidth();
+  // use width if minSpc does not exist
+  frCoord bloatDist = width;
+  frCoord objWidth = min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y());
+  frCoord prl = (layer->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir) ? (boostb.max_corner().x() - boostb.min_corner().x()) :
+                                                                                   (boostb.max_corner().y() - boostb.min_corner().y());
+  if (obj->typeId() == frcBlockage || obj->typeId() == frcInstBlockage) {
+    if (USEMINSPACING_OBS) {
+      objWidth = width;
+    }
+  }
+  auto con = getTech()->getLayer(lNum)->getMinSpacing();
+  if (con) {
+    if (con->typeId() == frConstraintTypeEnum::frcSpacingConstraint) {
+      bloatDist = static_cast<frSpacingConstraint*>(con)->getMinSpacing();
+    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTablePrlConstraint) {
+      bloatDist = static_cast<frSpacingTablePrlConstraint*>(con)->find(objWidth, prl);
+    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTableTwConstraint) {
+      bloatDist = static_cast<frSpacingTableTwConstraint*>(con)->find(objWidth, width, prl);
+    }
+  }
+  // assuming the wire width is width
+  bloatDist += width / 2;
+  return bloatDist;
+}
 
 void FlexTAWorker::init() {
   rq.init();

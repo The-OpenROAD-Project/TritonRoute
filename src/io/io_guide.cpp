@@ -191,8 +191,8 @@ void io::Parser::genGuides_split(vector<frRect> &rects, vector<map<frCoord, boos
         set<frCoord> lineIdx;
         auto beginIdx = it->lower();
         auto endIdx   = it->upper();
-        // hardcode layerNum == 0 not used for GR
-        if (!retry && layerNum == 0) {
+        // hardcode layerNum <= VIA_ACCESS_LAYERNUM not used for GR
+        if (!retry && layerNum <= VIA_ACCESS_LAYERNUM) {
           // split by pin
           if (pin_helper[layerNum].find(trackIdx) != pin_helper[layerNum].end()) {
             auto &pin_helper_map = pin_helper[layerNum][trackIdx];
@@ -249,7 +249,7 @@ void io::Parser::genGuides_split(vector<frRect> &rects, vector<map<frCoord, boos
             for (auto it2 = pin_helper_map.lower_bound(beginIdx); 
                  it2 != pin_helper_map.end() && it2->first <= endIdx; it2++) {
               lineIdx.insert(it2->first);
-              //add pin2GCellmap
+              //add pin2GCellMap
               for (auto obj: it2->second) {
                 if (dir == frcHorzPrefRoutingDir) {
                   pin2GCellMap[obj].insert(make_pair(frPoint(it2->first, trackIdx), layerNum));
@@ -262,7 +262,7 @@ void io::Parser::genGuides_split(vector<frRect> &rects, vector<map<frCoord, boos
           }
           // add rect
           if (lineIdx.empty()) {
-            cout <<"Error: genGuides_split lineIdx is empty" <<endl;
+            cout <<"Error: genGuides_split lineIdx is empty on " << design->getTech()->getLayer(layerNum)->getName() <<endl;
             exit(1);
           } else if (lineIdx.size() == 1) {
             auto x = *(lineIdx.begin());
@@ -318,6 +318,7 @@ void io::Parser::genGuides_gCell2TermMap(map<pair<frPoint, frLayerNum>, set<frBl
       if (fig->typeId() == frcRect) {
         auto shape = static_cast<frRect*>(fig);
         auto lNum  = shape->getLayerNum();
+        auto layer = design->getTech()->getLayer(lNum);
         frBox box;
         shape->getBBox(box);
         if (enableOutput) {
@@ -346,48 +347,22 @@ void io::Parser::genGuides_gCell2TermMap(map<pair<frPoint, frLayerNum>, set<frBl
         if (box.lowerLeft() == gcellBox.lowerLeft()) {
           condition2 = true;
         }
-        //if ((box.lowerLeft().x() == (x1 + 1) * (int)GCELLGRIDX + (int)GCELLOFFSETX) &&
-        //    (box.lowerLeft().y() == (y1 + 1) * (int)GCELLGRIDY + (int)GCELLOFFSETY)) {
-        //  condition2 = true;
-        //}
-        //if (x1 < 0) {
-        //  cout <<"Warning: genGuides x1 < 0, automatically set to 0" <<endl;
-        //  //exit(1);
-        //  x1 = 0;
-        //}
-        //if (y1 < 0) {
-        //  cout <<"Warning: genGuides y1 < 0, automatically set to 0" <<endl;
-        //  //exit(1);
-        //  y1 = 0;
-        //}
-        //if (x1 > x2 || y1 > y2) {
-        //  cout <<"Error: genGuides_gCell2TermMap start > end" <<endl;
-        //  cout <<"  x1/x2, y1/y2 = " <<x1 <<" " <<x2 <<" " <<y1 <<" " <<y2 <<endl;
-        //  exit(1);
-        //}
-        //if (x1 >= (int)GCELLCNTX) {
-        //  x1 = GCELLCNTX - 1;
-        //}
-        //if (x2 >= (int)GCELLCNTX) {
-        //  //cout <<"Warning: genGuides x2 >= GCELLCNTX, automatically set to GCELLCNTX" <<endl;
-        //  //cout <<"  bbox " <<box <<" " <<lNum <<endl;
-        //  //exit(1);
-        //  x2 = GCELLCNTX - 1;
-        //}
-        //if (y1 >= (int)GCELLCNTY) {
-        //  y1 = GCELLCNTY - 1;
-        //}
-        //if (y2 >= (int)GCELLCNTY) {
-        //  //cout <<"Warning: genGuides y2 >= GCELLCNTY, automatically set to GCELLCNTY" <<endl;
-        //  //cout <<"  bbox " <<box <<" " <<lNum <<endl;
-        //  //exit(1);
-        //  y2 = GCELLCNTY - 1;
-        //}
+
+        bool condition3 = false; // GR implies wrongway connection but technology does not allow
+        if ((layer->getDir() == frcVertPrefRoutingDir && (!USENONPREFTRACKS /*|| layer->getLef58RectOnlyConstraint()*/) && box.left() == gcellBox.left()) ||
+            (layer->getDir() == frcHorzPrefRoutingDir && (!USENONPREFTRACKS /*|| layer->getLef58RectOnlyConstraint()*/) && box.bottom() == gcellBox.bottom())) {
+          condition3 = true;
+        }
         for (int x = x1; x <= x2; x++) {
           for (int y = y1; y <= y2; y++) {
             if (condition2 && x == tmpIdx.x() - 1 && y == tmpIdx.y() - 1) {
               if (VERBOSE > 0) {
                 cout <<"Warning: genGuides_gCell2TermMap avoid condition2, may result in guide open" <<endl;
+              }
+            } else if (condition3 && ((x == tmpIdx.x() -1 && layer->getDir() == frcVertPrefRoutingDir) || 
+                                      (y == tmpIdx.y() -1 && layer->getDir() == frcHorzPrefRoutingDir) )) {
+              if (VERBOSE > 0) {
+                cout <<"Warning: genGuides_gCell2TermMap avoid condition3, may result in guide open" <<endl;
               }
             } else {
               gCell2PinMap[make_pair(frPoint(x, y), lNum)].insert(origTerm);
@@ -425,7 +400,13 @@ void io::Parser::genGuides_gCell2PinMap(frNet* net, map<pair<frPoint, frLayerNum
     auto origTerm = instTerm->getTerm();
     auto uTerm = make_unique<frTerm>(*origTerm, xform);
     auto term = uTerm.get();
-    genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, instTerm);
+    if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+      if (!genGuides_gCell2APInstTermMap(gCell2PinMap, pin2GCellMap, instTerm)) {
+        genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, instTerm);
+      }
+    } else {
+      genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, instTerm);
+    }
     //if (pin2GCellMap.find(origTerm) == pin2GCellMap.end() || pin2GCellMap[origTerm].empty()) {
     //  cout <<"Error: gcell not cover " <<instTerm->getInst()->getName() <<"/" <<origTerm->getName() <<endl;
     //  exit(1);
@@ -435,12 +416,141 @@ void io::Parser::genGuides_gCell2PinMap(frNet* net, map<pair<frPoint, frLayerNum
     if (enableOutput) {
       cout <<"    term PIN/" <<term->getName() <<endl;
     }
-    genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, term);
+    if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+      if (!genGuides_gCell2APTermMap(gCell2PinMap, pin2GCellMap, term)) {
+        genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, term);
+      }
+    } else {
+      genGuides_gCell2TermMap(gCell2PinMap, pin2GCellMap, term, term);
+    }
     //if (pin2GCellMap.find(term) == pin2GCellMap.end() || pin2GCellMap[term].empty()) {
     //  cout <<"Error: gcell not cover PIN/" <<term->getName() <<endl;
     //  exit(1);
     //}
   }
+}
+
+bool io::Parser::genGuides_gCell2APInstTermMap(map<pair<frPoint, frLayerNum>, set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap, 
+                                               map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap, 
+                                               frInstTerm* instTerm) {
+  // bool enableOutput = false;
+  bool isSuccess = false;
+  //bool enableOutput = true;
+
+  if (!instTerm) {
+    return isSuccess;
+  }
+
+  // ap
+  // frTransform instXform; // (0,0), frcR0
+  frTransform shiftXform;
+  frTransform xform;
+  instTerm->getInst()->getUpdatedXform(xform);
+  frTerm* trueTerm = instTerm->getTerm();
+  // frTerm* origTerm = instTerm->getTerm();
+  // auto uTerm = make_unique<frTerm>(*origTerm, xform);
+  // auto uTerm = make_unique<frTerm>(*origTerm, xform);
+  // auto trueTerm = uTerm.get();
+  string  name;
+  frInst* inst = instTerm->getInst();
+  inst->getTransform(shiftXform);
+  shiftXform.set(frOrient(frcR0));
+  // inst->getUpdatedXform(instXform);
+
+  int pinIdx = 0;
+  int pinAccessIdx = (inst) ? inst->getPinAccessIdx() : -1;
+  int succesPinCnt = 0;
+  for (auto &pin: trueTerm->getPins()) {
+    frAccessPoint* prefAp = nullptr;
+    if (inst) {
+      prefAp = (instTerm->getAccessPoints())[pinIdx];
+    }
+    if (!pin->hasPinAccess()) {
+      continue;
+    }
+    if (pinAccessIdx == -1) {
+      continue;
+    }
+
+    if (!prefAp) {
+      for (auto &ap: pin->getPinAccess(pinAccessIdx)->getAccessPoints()) {
+        prefAp = ap.get();
+        break;
+      }
+    }
+
+    if (prefAp) {
+      frPoint bp;
+      prefAp->getPoint(bp);
+      auto bNum = prefAp->getLayerNum();
+      bp.transform(shiftXform);
+
+      frPoint idx;
+      design->getTopBlock()->getGCellIdx(bp, idx);
+      gCell2PinMap[make_pair(idx, bNum)].insert(static_cast<frBlockObject*>(instTerm));
+      succesPinCnt++;
+      if (succesPinCnt == int(trueTerm->getPins().size())) {
+        isSuccess = true;
+      }
+    }
+    pinIdx++;
+  }
+  return isSuccess;
+}
+
+bool io::Parser::genGuides_gCell2APTermMap(map<pair<frPoint, frLayerNum>, set<frBlockObject*, frBlockObjectComp> > &gCell2PinMap, 
+                                           map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap, 
+                                           frTerm* term) {
+  // bool enableOutput = false;
+  bool isSuccess = false;
+  //bool enableOutput = true;
+
+  if (!term) {
+    return isSuccess;
+  }
+
+  // ap
+  frTerm* trueTerm = term;
+
+  int pinIdx = 0;
+  // int pinAccessIdx = (inst) ? inst->getPinAccessIdx() : -1;
+  int pinAccessIdx = 0;
+  int succesPinCnt = 0;
+  for (auto &pin: trueTerm->getPins()) {
+    frAccessPoint* prefAp = nullptr;
+    // if (inst) {
+    //   prefAp = (instTerm->getAccessPoints())[pinIdx];
+    // }
+    if (!pin->hasPinAccess()) {
+      continue;
+    }
+    if (pinAccessIdx == -1) {
+      continue;
+    }
+
+    if (!prefAp) {
+      for (auto &ap: pin->getPinAccess(pinAccessIdx)->getAccessPoints()) {
+        prefAp = ap.get();
+        break;
+      }
+    }
+
+    if (prefAp) {
+      frPoint bp;
+      prefAp->getPoint(bp);
+      auto bNum = prefAp->getLayerNum();
+
+      frPoint idx;
+      design->getTopBlock()->getGCellIdx(bp, idx);
+      gCell2PinMap[make_pair(idx, bNum)].insert(static_cast<frBlockObject*>(term));
+      succesPinCnt++;
+      if (succesPinCnt == int(trueTerm->getPins().size())) {
+        isSuccess = true;
+      }
+    }
+    pinIdx++;
+  }
+  return isSuccess;
 }
 
 void io::Parser::genGuides_initPin2GCellMap(frNet* net, std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2GCellMap) {
@@ -452,11 +562,120 @@ void io::Parser::genGuides_initPin2GCellMap(frNet* net, std::map<frBlockObject*,
   }
 }
 
+void io::Parser::genGuides_addCoverGuide(frNet *net, vector<frRect> &rects) {
+  bool enableOutput = false;
+  vector<frBlockObject*> terms;
+  for (auto &instTerm: net->getInstTerms()) {
+    terms.push_back(instTerm);
+  }
+  for (auto &term: net->getTerms()) {
+    terms.push_back(term);
+  }
+
+  // auto &gp = design->getTopBlock()->getGCellPatterns();
+  // auto &xgp = gp[0];
+  // auto &ygp = gp[1];
+  // frCoord GCELLGRIDX   = xgp.getSpacing();
+  // frCoord GCELLGRIDY   = ygp.getSpacing();
+
+  for (auto term: terms) {
+    // ap
+    frTransform instXform; // (0,0), frcR0
+    frTransform shiftXform;
+    frTerm* trueTerm = nullptr;
+    string  name;
+    frInst* inst = nullptr;
+    if (term->typeId() == frcInstTerm) {
+      inst = static_cast<frInstTerm*>(term)->getInst();
+      inst->getTransform(shiftXform);
+      shiftXform.set(frOrient(frcR0));
+      inst->getUpdatedXform(instXform);
+      trueTerm = static_cast<frInstTerm*>(term)->getTerm();
+      name = inst->getName() + string("/") + trueTerm->getName();
+    } else if (term->typeId() == frcTerm) {
+      trueTerm = static_cast<frTerm*>(term);
+      name = string("PIN/") + trueTerm->getName();
+    }
+    if (enableOutput) {
+      cout <<"pin " <<name;
+    }
+    int pinIdx = 0;
+    int pinAccessIdx = (inst) ? inst->getPinAccessIdx() : -1;
+    for (auto &pin: trueTerm->getPins()) {
+      frAccessPoint* prefAp = nullptr;
+      if (inst) {
+        prefAp = (static_cast<frInstTerm*>(term)->getAccessPoints())[pinIdx];
+      }
+      if (!pin->hasPinAccess()) {
+        continue;
+      }
+      if (pinAccessIdx == -1) {
+        continue;
+      }
+
+      if (!prefAp) {
+        for (auto &ap: pin->getPinAccess(pinAccessIdx)->getAccessPoints()) {
+          prefAp = ap.get();
+          break;
+        }
+      }
+
+      if (prefAp) {
+        frPoint bp;
+        prefAp->getPoint(bp);
+        auto bNum = prefAp->getLayerNum();
+        bp.transform(shiftXform);
+
+        frPoint idx;
+        frBox llBox, urBox;
+        design->getTopBlock()->getGCellIdx(bp, idx);
+        // if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+          design->getTopBlock()->getGCellBox(frPoint(idx.x() - 1, idx.y() - 1), llBox);
+          design->getTopBlock()->getGCellBox(frPoint(idx.x() + 1, idx.y() + 1), urBox);
+        // } else {
+          // design->getTopBlock()->getGCellBox(frPoint(idx.x(), idx.y()), llBox);
+          // design->getTopBlock()->getGCellBox(frPoint(idx.x(), idx.y()), urBox);
+        // }
+        frBox coverBox(llBox.left(), llBox.bottom(), urBox.right(), urBox.top());
+        frLayerNum beginLayerNum, endLayerNum;
+        beginLayerNum = bNum;
+        endLayerNum = min(bNum + 4, design->getTech()->getTopLayerNum());
+
+        for (auto lNum = beginLayerNum; lNum <= endLayerNum; lNum += 2) {
+          for (int xIdx = -1; xIdx <= 1; xIdx++) {
+            for (int yIdx = -1; yIdx <= 1; yIdx++) {
+              frRect coverGuideRect;
+              coverGuideRect.setBBox(coverBox);
+              coverGuideRect.setLayerNum(lNum);
+              rects.push_back(coverGuideRect);
+            }
+          }
+        }
+      }
+      pinIdx++;
+    }
+
+
+
+    // if (dPin->getAccessPatterns().empty()) {
+    //   // initNet_termGenAp_new(dPin.get());
+    //   if (dPin->getAccessPatterns().empty()) {
+    //     cout <<endl <<"Error: pin " <<name <<" still does not have temp ap" <<endl;
+    //     exit(1);
+    //   } 
+    // }
+  }
+ 
+}
+
 void io::Parser::genGuides(frNet *net, vector<frRect> &rects) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  //cout <<"net " <<net->getName() <<endl <<flush;
+  // cout <<"net " <<net->getName() <<endl <<flush;
   vector<map<frCoord, boost::icl::interval_set<frCoord> > > intvs(tech->getLayers().size());
+  if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+    genGuides_addCoverGuide(net, rects);
+  }
   genGuides_merge(rects, intvs); // merge and add touching guide
   //cout <<"merge done" <<endl <<flush;
   
@@ -796,7 +1015,8 @@ bool io::Parser::genGuides_astar(frNet* net, vector<bool> &adjVisited, vector<in
         // two gcells, has edge
         } else if (idx1 < gCnt && idx2 < gCnt) {
           // no M1 cross-gcell routing allowed
-          if (lNum != 0) {
+          // BX200307: in general VIA_ACCESS_LAYER should not be used (instead of 0)
+          if (lNum != VIA_ACCESS_LAYERNUM) {
             adjVec[idx1].push_back(idx2);
             adjVec[idx2].push_back(idx1);
           }

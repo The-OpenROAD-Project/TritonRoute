@@ -69,6 +69,7 @@ namespace fr {
     void queryGuide(const frBox &box, std::vector<frGuide*> &result);
     void queryOrigGuide(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frNet> > &result);
     void queryGRPin(const frBox &box, std::vector<frBlockObject*> &result);
+    void queryDRObj(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frBlockObject> > &result);
     void queryDRObj(const frBox &box, frLayerNum layerNum, std::vector<frBlockObject*> &result);
     void queryDRObj(const frBox &box, std::vector<frBlockObject*> &result);
     void queryMarker(const frBox &box, frLayerNum layerNum, std::vector<frMarker*> &result);

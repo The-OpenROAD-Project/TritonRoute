@@ -72,6 +72,12 @@ namespace fr {
       endStyle.set(style);
       endExt = ext;
     }
+    void setBeginExt(const frUInt4 &in) {
+      beginExt = in;
+    }
+    void setEndExt(const frUInt4 &in) {
+      endExt = in;
+    }
     // getters
     frUInt4 getWidth() const {
       return width;

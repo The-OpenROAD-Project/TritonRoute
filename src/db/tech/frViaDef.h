@@ -40,10 +40,10 @@ namespace fr{
     // constructors
     frLef58CutClass(): name(""), viaWidth(0), viaLength(0), numCut(1) {}
     // getters
-    void getName(frString &in) const {
+    void getName(std::string &in) const {
       in = name;
     }
-    frString getName() const {
+    std::string getName() const {
       return name;
     }
     frCoord getViaWidth() const {
@@ -76,7 +76,7 @@ namespace fr{
       numCut = in;
     }
   protected:
-    frString name;
+    std::string name;
     frCoord  viaWidth;
     //bool     hViaLength;
     frCoord  viaLength;
@@ -87,15 +87,15 @@ namespace fr{
   class frViaDef {
   public:
     // constructors
-    frViaDef(): name(), isDefault(false), layer1Figs(), layer2Figs(), cutFigs(), cutClass() {}
+    frViaDef(): name(), isDefault(false), layer1Figs(), layer2Figs(), cutFigs(), cutClass(nullptr), cutClassIdx(-1), addedByRouter(false) {}
     //frViaDef(const frViaDef &in): name(defIn.name), isDefault(defIn.isDefault), cutClass(defIn.cutClass) {}
-    frViaDef(const frString &nameIn): name(nameIn), isDefault(false), layer1Figs(),
-                                     layer2Figs(), cutFigs(), cutClass() {}
+    frViaDef(const std::string &nameIn): name(nameIn), isDefault(false), layer1Figs(),
+                                     layer2Figs(), cutFigs(), cutClass(nullptr), cutClassIdx(-1), addedByRouter(false) {}
     // getters
-    void getName(frString &nameIn) const {
+    void getName(std::string &nameIn) const {
       nameIn = name;
     }
-    frString getName() const {
+    std::string getName() const {
       return name;
     }
     frLayerNum getLayer1Num() const {
@@ -143,11 +143,20 @@ namespace fr{
     bool getDefault() const {
       return isDefault;
     }
-    bool hasCutClass() const {
-      return (cutClass.lock()) ? true : false;
+    int getNumCut() const {
+      return cutFigs.size();
     }
-    std::shared_ptr<frLef58CutClass> getCutClass() const {
-      return cutClass.lock();
+    bool hasCutClass() const {
+      return (cutClass != nullptr);
+    }
+    frLef58CutClass* getCutClass() const {
+      return cutClass;
+    }
+    int getCutClassIdx() const {
+      return cutClassIdx;
+    }
+    bool isAddedByRouter() const {
+      return addedByRouter;
     }
     bool isMultiCut() const {
       return (cutFigs.size() > 1) ? true : false;
@@ -168,16 +177,24 @@ namespace fr{
     void setDefault(bool isDefaultIn) {
       isDefault = isDefaultIn;
     }
-    void setCutClass(const std::shared_ptr<frLef58CutClass> &in) {
+    void setCutClass(frLef58CutClass *in) {
       cutClass = in;
     }
+    void setCutClassIdx(int in) {
+      cutClassIdx = in;
+    }
+    void setAddedByRouter(bool in) {
+      addedByRouter = in;
+    }
   protected:
-    frString                                 name;
+    std::string                                 name;
     bool                                     isDefault;
     std::vector< std::unique_ptr<frShape> >  layer1Figs;
     std::vector< std::unique_ptr<frShape> >  layer2Figs;
     std::vector< std::unique_ptr<frShape> >  cutFigs;
-    std::weak_ptr<frLef58CutClass>           cutClass;
+    frLef58CutClass*                         cutClass;
+    int                                      cutClassIdx;
+    bool                                     addedByRouter;
   };
 }
 #endif

@@ -26,46 +26,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FR_APG_H_
-#define _FR_APG_H_
+#include <iostream>
+#include <sstream>
+#include "FlexRP.h"
+#include "db/infra/frTime.h"
+#include "gc/FlexGC.h"
 
-#include "frBaseTypes.h"
-#include "frDesign.h"
-#include "db/tech/frConstraint.h"
-#include "drc/frDRC.h"
+using namespace std;
+using namespace fr;
 
-namespace fr {
-  class APGWorker {
-  public:
-    APGWorker() {}
-    APGWorker(frDesign* designIn, frInst* instIn): design(designIn), inst(instIn) {
-
-    }
-
-    void init();
-    void setup();
-    void main();
-    void end();
-
-
-
-  protected:
-    frDesign* design;
-    frInst* inst;
-    // frVector<frAccessPattern*> aps;
-    std::set<frPin*> unConnectedPins;
-    frVector<frPin*> pinOrder;
-    std::set<FlexAccessPattern*> validAPs;
-    frVector<FlexAccessPattern*> bestAPComb;
-    std::map<frPin*, std::vector<FlexAccessPattern*> > pin2APs;
-    std::map<frLayerNum, bgi::rtree<std::pair<point_t, FlexAccessPattern*>, bgi::quadratic<16> > > layer2APRTree;
-    Rectangle apBBoxRect;
-
-    // functions
-    void updateAPStatus();
-  };
+void FlexRP::main() {
+  init();
+  prep();
+  // end();
 }
 
-
-
-#endif

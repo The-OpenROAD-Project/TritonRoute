@@ -25,6 +25,7 @@ TritonRoute is tested in 64-bit CentOS 6/7 environments with the following
 prerequisites:
 * A compatible C++ compiler supporting C++17 (GCC 7 and above)
 * Boost >= 1.68.0
+* OpenMP >= 4.5
 * Bison >= 3.0.4
 * zlib >= 1.2.7
 * CMake >= 3.1
@@ -46,11 +47,10 @@ $ ./TritonRoute -lef <LEF_FILE> -def <DEF_FILE> -guide <GUIDE_FILE> -output <OUT
 
 ## Supported Technologies ##
 * CLN65LP (with limited selection of standard cells, macros and floorplans)
-* (TritonRoute is under a major improvement plan for a more robust and stable 
-flow, with support of more standard cells, macros and floorplans in CLN65LP 
-and other technology nodes. The next version is expected to deliver support 
-of publicly accessible ISPD-2018 and ISPD-2019 testcases.)
+* ISPD-2018 Initial Detailed Routing Contest 
 
+## Acknowledgment ##
+Special thanks to the anonymous contributors of the new DRC engine and pin access analysis engine.
 
 ## License ##
 * [BSD 3-clause License](LICENSE) 

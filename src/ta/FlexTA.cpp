@@ -33,7 +33,7 @@
 #include "FlexTA.h"
 #include "db/infra/frTime.h"
 #include <algorithm>
-//#include <omp.h>
+#include <omp.h>
 
 using namespace std;
 using namespace fr;
@@ -86,6 +86,53 @@ int FlexTAWorker::main() {
   return 0;
 }
 
+int FlexTAWorker::main_mt() {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t0 = high_resolution_clock::now();
+  if (VERBOSE > 1) {
+    stringstream ss;
+    //cout <<endl <<"start TA worker (BOX/LAYER) " <<routeBox <<" " <<layerNum <<endl;
+    ss <<endl <<"start TA worker (BOX) ("
+       <<routeBox.left()   * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
+       <<routeBox.bottom() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") ("
+       <<routeBox.right()  * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
+       <<routeBox.top()    * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") ";
+    if (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir) {
+      ss <<"H";
+    } else {
+      ss <<"V";
+    }
+    ss <<endl;
+    cout <<ss.str();
+  }
+
+
+  //assignIroutes();
+  //reassignIroutes();
+  //saveToGuides();
+  //reportCosts();
+  init();
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  assign();
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  //end();
+  high_resolution_clock::time_point t3 = high_resolution_clock::now();
+
+  duration<double> time_span0 = duration_cast<duration<double>>(t1 - t0);
+  duration<double> time_span1 = duration_cast<duration<double>>(t2 - t1);
+  duration<double> time_span2 = duration_cast<duration<double>>(t3 - t2);
+
+  if (VERBOSE > 1) {
+    stringstream ss;
+    ss   <<"time (INIT/ASSIGN/POST) " <<time_span0.count() <<" " 
+                                      <<time_span1.count() <<" "
+                                      <<time_span2.count() <<" "
+                                      <<endl;
+    cout <<ss.str() <<flush;
+  }
+  return 0;
+}
+
 int FlexTA::initTA_helper(int iter, int size, int offset, bool isH, int &numPanels) {
   //frBox dieBox;
   //getDesign()->getTopBlock()->getBoundaryBBox(dieBox);
@@ -95,49 +142,120 @@ int FlexTA::initTA_helper(int iter, int size, int offset, bool isH, int &numPane
   auto &ygp = gCellPatterns.at(1);
   int sol = 0;
   numPanels = 0;
-  if (isH) {
-    for (int i = offset; i < (int)ygp.getCount(); i += size) {
-      FlexTAWorker worker(getDesign());
-      frBox beginBox, endBox;
-      getDesign()->getTopBlock()->getGCellBox(frPoint(0, i), beginBox);
-      getDesign()->getTopBlock()->getGCellBox(frPoint((int)xgp.getCount() - 1, 
-                                                      min(i + size - 1, (int)ygp.getCount() - 1)), endBox);
-      frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
-      frBox extBox;
-      routeBox.bloat(ygp.getSpacing() / 2, extBox);
-      worker.setRouteBox(routeBox);
-      worker.setExtBox(extBox);
-      worker.setDir(frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-      worker.setTAIter(iter);
-      worker.main();
-      //int numAssigned = worker.getNumAssigned();
-      sol += worker.getNumAssigned();
-      numPanels++;
-      //if (VERBOSE > 0) {
-      //  cout <<"Done with " <<numAssigned <<"horizontal wires";
-      //}
-    }
+  if (MAX_THREADS == 1) {
+    if (isH) {
+      for (int i = offset; i < (int)ygp.getCount(); i += size) {
+        FlexTAWorker worker(getDesign());
+        frBox beginBox, endBox;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(0, i), beginBox);
+        getDesign()->getTopBlock()->getGCellBox(frPoint((int)xgp.getCount() - 1, 
+                                                        min(i + size - 1, (int)ygp.getCount() - 1)), endBox);
+        frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
+        frBox extBox;
+        routeBox.bloat(ygp.getSpacing() / 2, extBox);
+        worker.setRouteBox(routeBox);
+        worker.setExtBox(extBox);
+        worker.setDir(frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
+        worker.setTAIter(iter);
+        worker.main();
+        //int numAssigned = worker.getNumAssigned();
+        sol += worker.getNumAssigned();
+        numPanels++;
+        //if (VERBOSE > 0) {
+        //  cout <<"Done with " <<numAssigned <<"horizontal wires";
+        //}
+      }
+    } else {
+      for (int i = offset; i < (int)xgp.getCount(); i += size) {
+        FlexTAWorker worker(getDesign());
+        frBox beginBox, endBox;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(i, 0),                       beginBox);
+        getDesign()->getTopBlock()->getGCellBox(frPoint(min(i + size - 1, (int)xgp.getCount() - 1),
+                                                        (int)ygp.getCount() - 1), endBox);
+        frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
+        frBox extBox;
+        routeBox.bloat(xgp.getSpacing() / 2, extBox);
+        worker.setRouteBox(routeBox);
+        worker.setExtBox(extBox);
+        worker.setDir(frPrefRoutingDirEnum::frcVertPrefRoutingDir);
+        worker.setTAIter(iter);
+        worker.main();
+        //int numAssigned = worker.getNumAssigned();
+        sol += worker.getNumAssigned();
+        numPanels++;
+        //if (VERBOSE > 0) {
+        //  cout <<"Done with " <<numAssigned <<"vertical wires";
+        //}
+      }
+    } 
   } else {
-    for (int i = offset; i < (int)xgp.getCount(); i += size) {
-      FlexTAWorker worker(getDesign());
-      frBox beginBox, endBox;
-      getDesign()->getTopBlock()->getGCellBox(frPoint(i, 0),                       beginBox);
-      getDesign()->getTopBlock()->getGCellBox(frPoint(min(i + size - 1, (int)xgp.getCount() - 1),
-                                                      (int)ygp.getCount() - 1), endBox);
-      frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
-      frBox extBox;
-      routeBox.bloat(xgp.getSpacing() / 2, extBox);
-      worker.setRouteBox(routeBox);
-      worker.setExtBox(extBox);
-      worker.setDir(frPrefRoutingDirEnum::frcVertPrefRoutingDir);
-      worker.setTAIter(iter);
-      worker.main();
-      //int numAssigned = worker.getNumAssigned();
-      sol += worker.getNumAssigned();
-      numPanels++;
-      //if (VERBOSE > 0) {
-      //  cout <<"Done with " <<numAssigned <<"vertical wires";
-      //}
+    vector<vector<unique_ptr<FlexTAWorker> > > workers;
+    if (isH) {
+      for (int i = offset; i < (int)ygp.getCount(); i += size) {
+        auto uworker = make_unique<FlexTAWorker>(getDesign());
+        auto &worker = *(uworker.get());
+        frBox beginBox, endBox;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(0, i), beginBox);
+        getDesign()->getTopBlock()->getGCellBox(frPoint((int)xgp.getCount() - 1, 
+                                                        min(i + size - 1, (int)ygp.getCount() - 1)), endBox);
+        frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
+        frBox extBox;
+        routeBox.bloat(ygp.getSpacing() / 2, extBox);
+        worker.setRouteBox(routeBox);
+        worker.setExtBox(extBox);
+        worker.setDir(frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
+        worker.setTAIter(iter);
+        //worker.main();
+        //sol += worker.getNumAssigned();
+        //numPanels++;
+        if (workers.empty() || (int)workers.back().size() >= BATCHSIZETA) {
+          workers.push_back(vector<unique_ptr<FlexTAWorker> >());
+        }
+        workers.back().push_back(std::move(uworker));
+      }
+    } else {
+      for (int i = offset; i < (int)xgp.getCount(); i += size) {
+        auto uworker = make_unique<FlexTAWorker>(getDesign());
+        auto &worker = *(uworker.get());
+        frBox beginBox, endBox;
+        getDesign()->getTopBlock()->getGCellBox(frPoint(i, 0),                       beginBox);
+        getDesign()->getTopBlock()->getGCellBox(frPoint(min(i + size - 1, (int)xgp.getCount() - 1),
+                                                        (int)ygp.getCount() - 1), endBox);
+        frBox routeBox(beginBox.left(), beginBox.bottom(), endBox.right(), endBox.top());
+        frBox extBox;
+        routeBox.bloat(xgp.getSpacing() / 2, extBox);
+        worker.setRouteBox(routeBox);
+        worker.setExtBox(extBox);
+        worker.setDir(frPrefRoutingDirEnum::frcVertPrefRoutingDir);
+        worker.setTAIter(iter);
+        //worker.main();
+        //sol += worker.getNumAssigned();
+        //numPanels++;
+        if (workers.empty() || (int)workers.back().size() >= BATCHSIZETA) {
+          workers.push_back(vector<unique_ptr<FlexTAWorker> >());
+        }
+        workers.back().push_back(std::move(uworker));
+      }
+    } 
+
+
+    omp_set_num_threads(min(8, MAX_THREADS));
+    // parallel execution
+    // multi thread
+    for (auto &workerBatch: workers) {
+      #pragma omp parallel for schedule(dynamic)
+      for (int i = 0; i < (int)workerBatch.size(); i++) {
+        workerBatch[i]->main_mt();
+        #pragma omp critical 
+        {
+          sol += workerBatch[i]->getNumAssigned();
+          numPanels++;
+        }
+      }
+      for (int i = 0; i < (int)workerBatch.size(); i++) {
+        workerBatch[i]->end();
+      }
+      workerBatch.clear();
     }
   }
   return sol;
@@ -167,17 +285,17 @@ void FlexTA::initTA(int size) {
     if (VERBOSE > 0) {
       cout <<"Done with " <<numAssigned <<" horizontal wires in " <<numPanels <<" frboxes and ";
     }
-    initTA_helper(0, size, 0, false, numPanels);
+    numAssigned = initTA_helper(0, size, 0, false, numPanels);
     if (VERBOSE > 0) {
       cout <<numAssigned <<" vertical wires in " <<numPanels <<" frboxes." <<endl;
     }
   // V first
   } else {
-    initTA_helper(0, size, 0, false, numPanels);
+    numAssigned = initTA_helper(0, size, 0, false, numPanels);
     if (VERBOSE > 0) {
       cout <<"Done with " <<numAssigned <<" vertical wires in " <<numPanels <<" frboxes and ";
     }
-    initTA_helper(0, size, 0, true, numPanels);
+    numAssigned = initTA_helper(0, size, 0, true, numPanels);
     if (VERBOSE > 0) {
       cout <<numAssigned <<" horizontal wires in " <<numPanels <<" frboxes." <<endl;
     }
