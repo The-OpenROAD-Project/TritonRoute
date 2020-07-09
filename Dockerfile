@@ -42,7 +42,7 @@ RUN make -j$(nproc)
 
 FROM centos:centos7 AS runner
 RUN yum update -y && yum install -y tcl-devel
-COPY --from=builder /TritonRoute/build/TritonRoute /build/TritonRoute14
+COPY --from=builder /TritonRoute/build/TritonRoute /build/TritonRoute
 
 RUN useradd -ms /bin/bash openroad
 USER openroad
