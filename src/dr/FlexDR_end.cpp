@@ -56,7 +56,15 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
   // vertical seg
   if (begin.x() == end.x()) {
     // if cross routeBBox
-    bool condition1 = isInitDR() ? (begin.x() < routeBox.right()) : (begin.x() <= routeBox.right());
+    // initDR must merge on top and right boundaries
+    // -------------------
+    // |    routebox     |
+    // |                 |---------------wire------------
+    // |                 |
+    // |                 |
+    // -------------------
+    bool condition1 = isInitDR() ? (begin.x() < routeBox.right()) : (begin.x() <= routeBox.right()); // parallel to wire
+    bool condition2 = /*isInitDR() ? (begin.y() < routeBox.top()):*/(begin.y() <= routeBox.top()); // orthogonal to wire
     if (routeBox.left() <= begin.x() && condition1 &&
         //!(begin.y() >= routeBox.top() || end.y() <= routeBox.bottom())) {
         !(begin.y() > routeBox.top() || end.y() < routeBox.bottom())) {
@@ -83,7 +91,7 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
         //cutSegs[make_pair(boundPt, lNum)].insert(sptr);
         
         // only insert true boundary point
-        if (end.y() > routeBox.bottom()) {
+        if (end.y() >= routeBox.bottom()) {
           boundPts.insert(make_pair(boundPt, lNum));
         }
         if (enableOutput) {
@@ -113,7 +121,7 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
         //cutSegs[make_pair(boundPt, lNum)].insert(sptr);
 
         // only insert true boundary piont
-        if (begin.y() < routeBox.top()) {
+        if (condition2) {
           boundPts.insert(make_pair(boundPt, lNum));
         }
         if (enableOutput) {
@@ -128,7 +136,8 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
   // horizontal seg
   } else if (begin.y() == end.y()) {
     // if cross routeBBox
-    bool condition1 = isInitDR() ? (begin.y() < routeBox.top()) : (begin.y() <= routeBox.top());
+    bool condition1 = isInitDR() ? (begin.y() < routeBox.top()) : (begin.y() <= routeBox.top()); // parallel to wire
+    bool condition2 = /*isInitDR() ? (begin.x() < routeBox.right()):*/(begin.x() <= routeBox.right()); // orthogonal to wire
     if (routeBox.bottom() <= begin.y() && condition1 &&
         //!(begin.x() >= routeBox.right() || end.x() <= routeBox.left())) {
         !(begin.x() > routeBox.right() || end.x() < routeBox.left())) {
@@ -155,7 +164,7 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
         //cutSegs[make_pair(boundPt, lNum)].insert(sptr);
 
         // only insert true boundary point
-        if (end.x() > routeBox.left()) {
+        if (end.x() >= routeBox.left()) {
           boundPts.insert(make_pair(boundPt, lNum));
         }
         if (enableOutput) {
@@ -185,7 +194,7 @@ void FlexDRWorker::endRemoveNets_pathSeg(frPathSeg* pathSeg,
         //cutSegs[make_pair(boundPt, lNum)].insert(sptr);
 
         // only insert true boundary point
-        if (begin.x() < routeBox.right()) {
+        if (condition2) {
           boundPts.insert(make_pair(boundPt, lNum));
         }
         if (enableOutput) {
@@ -476,6 +485,12 @@ void FlexDRWorker::endAddNets_merge(frNet* net, set<pair<frPoint, frLayerNum> > 
         }
       }
     }
+    // always merge offGrid boundary points
+    frCoord manuGrid = getDesign()->getTech()->getManufacturingGrid();
+    if (pt.x() % manuGrid || pt.y() % manuGrid) {
+      skip = false;
+    }
+
     if (skip) {
       continue;
     }
