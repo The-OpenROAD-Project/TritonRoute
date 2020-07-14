@@ -4,5 +4,6 @@ build
 build/*.*
 Makefile
 *.log
+!**/golden/*.log
 
 module/def/5.8-p029/def.output
