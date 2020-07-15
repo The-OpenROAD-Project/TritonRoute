@@ -596,8 +596,6 @@ void FlexRP::prep_via2viaForbiddenLen_minimumCut(const frLayerNum &lNum,
     return;
   }
 
-  frCoord minReqDist = INT_MIN;
-
   bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
 
   bool isVia1Above = false;
@@ -629,6 +627,7 @@ void FlexRP::prep_via2viaForbiddenLen_minimumCut(const frLayerNum &lNum,
   auto length2   = viaBox2.length();
 
   for (auto &con: getDesign()->getTech()->getLayer(lNum)->getMinimumcutConstraints()) {
+    frCoord minReqDist = INT_MIN;
     // check via2cut to via1metal
     // no length OR metal1 shape satisfies --> check via2
     if ((!con->hasLength() || (con->hasLength() && length1 > con->getLength())) && 
