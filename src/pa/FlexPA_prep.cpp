@@ -419,7 +419,8 @@ void FlexPA::prepPoint_pin_genPoints_layerShapes(vector<unique_ptr<frAccessPoint
   if (instTerm) {
     if (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE ||
         instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIEHIGH ||
-        instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW) {
+        instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW ||
+        instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_ANTENNACELL) {
       if ((layerNum >= VIAINPIN_BOTTOMLAYERNUM && layerNum <= VIAINPIN_TOPLAYERNUM) || 
           layerNum <= VIA_ACCESS_LAYERNUM) {
         // if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
@@ -654,7 +655,8 @@ void FlexPA::prepPoint_pin_checkPoint_planar(frAccessPoint* ap,
   }
   bool isStdCellPin = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE ||
                                     instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIEHIGH ||
-                                    instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW));
+                                    instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW ||
+                                    instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_ANTENNACELL));
   // if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
      
   // } else {
@@ -1114,7 +1116,8 @@ void FlexPA::prepPoint_pin_checkPoints(vector<unique_ptr<frAccessPoint> > &aps,
 void FlexPA::prepPoint_pin_updateStat(const vector<unique_ptr<frAccessPoint> > &tmpAps, frPin* pin, frInstTerm* instTerm) {
   bool isStdCellPin   = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIEHIGH ||
-                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW));
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW ||
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_ANTENNACELL));
   bool isMacroCellPin = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::BLOCK ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD_POWER ||
@@ -1154,7 +1157,8 @@ bool FlexPA::prepPoint_pin_helper(vector<unique_ptr<frAccessPoint> > &aps,
                                   frPin* pin, frInstTerm* instTerm, int lowerType, int upperType) {
   bool isStdCellPin   = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIEHIGH ||
-                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW));
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW || 
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_ANTENNACELL));
   bool isMacroCellPin = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::BLOCK ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD_POWER ||
@@ -1249,7 +1253,8 @@ void FlexPA::prepPoint_pin(frPin* pin, frInstTerm* instTerm) {
   set<pair<frPoint, frLayerNum> > apset;
   bool isStdCellPin   = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIEHIGH ||
-                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW));
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_TIELOW ||
+                                      instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::CORE_ANTENNACELL));
   bool isMacroCellPin = (instTerm && (instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::BLOCK ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD ||
                                       instTerm->getInst()->getRefBlock()->getMacroClass() == MacroClassEnum::PAD_POWER ||
@@ -1379,6 +1384,7 @@ void FlexPA::prepPoint() {
     if (inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE && 
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIEHIGH && 
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIELOW && 
+        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_ANTENNACELL && 
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::BLOCK &&
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::PAD &&
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::PAD_POWER &&
@@ -1476,7 +1482,8 @@ void FlexPA::prepPattern() {
     // only do for core and block cells
     if (inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE && 
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIEHIGH && 
-        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIELOW) {
+        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIELOW &&
+        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_ANTENNACELL) {
       // currUniqueInstIdx++;
       continue;
     }
@@ -1951,7 +1958,8 @@ void FlexPA::getInsts(std::vector<frInst*> &insts) {
   for (auto &inst: design->getTopBlock()->getInsts()) {
     if (inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE && 
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIEHIGH && 
-        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIELOW) {
+        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_TIELOW &&
+        inst->getRefBlock()->getMacroClass() != MacroClassEnum::CORE_ANTENNACELL) {
       continue;
     }
     bool isSkip = true;
