@@ -2263,8 +2263,8 @@ bool FlexPA::genPatterns_gc(frBlockObject* targetObj, vector<pair<frConnFig*, fr
 void FlexPA::genPatterns_perform(std::vector<FlexDPNode> &nodes,
                                  const std::vector<std::pair<frPin*, frInstTerm*> > &pins,
                                  std::vector<int> &vioEdges,
-                                 std::set<std::pair<int, int> > &usedAccessPoints,
-                                 std::set<std::pair<int, int> > &violAccessPoints,
+                                 const std::set<std::pair<int, int> > &usedAccessPoints,
+                                 const std::set<std::pair<int, int> > &violAccessPoints,
                                  int currUniqueInstIdx,
                                  int maxAccessPointSize) {
   bool enableOutput = false;
@@ -2302,8 +2302,8 @@ int FlexPA::getEdgeCost(int prevNodeIdx,
                         const std::vector<FlexDPNode> &nodes,
                         const std::vector<std::pair<frPin*, frInstTerm*> > &pins,
                         std::vector<int> &vioEdges,
-                        std::set<std::pair<int, int> > &usedAccessPoints,
-                        std::set<std::pair<int, int> > &violAccessPoints,
+                        const std::set<std::pair<int, int> > &usedAccessPoints,
+                        const std::set<std::pair<int, int> > &violAccessPoints,
                         int currUniqueInstIdx,
                         int maxAccessPointSize) {
   int edgeCost = 0;
