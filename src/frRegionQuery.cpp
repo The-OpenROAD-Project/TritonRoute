@@ -401,19 +401,16 @@ void frRegionQuery::addOrigGuide(frNet* net, const frRect &rect, ObjectsByLayer<
 void frRegionQuery::query(const frBox &box, frLayerNum layerNum, Objects<frBlockObject> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   shapes.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
-  //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGuide(const frBox &box, frLayerNum layerNum, Objects<frGuide> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   guides.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
-  //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGuide(const frBox &box, frLayerNum layerNum, vector<frGuide*> &result) {
   Objects<frGuide> temp;
-  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
-  guides.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
+  queryGuide(box, layerNum, temp);
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
@@ -429,7 +426,6 @@ void frRegionQuery::queryGuide(const frBox &box, vector<frGuide*> &result) {
 void frRegionQuery::queryOrigGuide(const frBox &box, frLayerNum layerNum, Objects<frNet> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   origGuides.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
-  //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGRPin(const frBox &box, vector<frBlockObject*> &result) {
@@ -475,14 +471,6 @@ void frRegionQuery::queryMarker(const frBox &box, vector<frMarker*> &result) {
   }
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
-
-//void frRegionQuery::query(const frBox &box, Objects<frBlockObject> &result) {
-//  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
-//  for (auto &m: shapes) {
-//    m.query(bgi::intersects(boostb), back_inserter(result));
-//  }
-//  //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
-//}
 
 void frRegionQuery::init(frLayerNum numLayers) {
   shapes.clear();
@@ -619,10 +607,6 @@ void frRegionQuery::initOrigGuide(frLayerNum numLayers, map<frNet*, vector<frRec
 }
 
 void frRegionQuery::initGuide(frLayerNum numLayers) {
-  // guides
-  //if (VERBOSE > 0) {
-  //  ;
-  //}
   guides.clear();
   guides.resize(numLayers);
   ObjectsByLayer<frGuide> allGuides(numLayers);
