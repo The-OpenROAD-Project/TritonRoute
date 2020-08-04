@@ -48,7 +48,6 @@ namespace fr {
     void add(frBlockage* in);
     void add(frInstBlockage* in);
     void addGuide(frGuide* in);
-    //void addGRPin(frBlockObject* in);
     void addDRObj(frShape* in);
     void addDRObj(frVia* in);
     void addMarker(frMarker* in);
@@ -62,7 +61,7 @@ namespace fr {
     void addOrigGuide(frNet* net, const frRect &rect, std::vector<std::vector<rq_rptr_value_t<frNet> > > &allShapes);
     void addDRObj(frShape* in, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
     void addDRObj(frVia* in,   std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    //void addGRPin(frBlockObject* in, const frPoint &pt, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
+
     void query(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frBlockObject> > &result);
     void queryGuide(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frGuide> > &result);
     void queryGuide(const frBox &box, frLayerNum layerNum, std::vector<frGuide*> &result);
@@ -75,8 +74,6 @@ namespace fr {
     void queryMarker(const frBox &box, frLayerNum layerNum, std::vector<frMarker*> &result);
     void queryMarker(const frBox &box, std::vector<frMarker*> &result);
 
-    //void query(const frBox &box, std::vector<rq_rptr_value_t<frBlockObject> > &result);
-    
     void clearGuides();
     void removeDRObj(frShape* in);
     void removeDRObj(frVia*   in);
