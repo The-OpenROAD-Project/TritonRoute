@@ -344,7 +344,7 @@ void FlexDRWorker::initNetObjs(set<frNet*, frBlockObjectComp> &nets,
   }
   
   if (isFollowGuide()) {
-    vector<rq_rptr_value_t<frNet> > origGuides;
+    frRegionQuery::Objects<frNet> origGuides;
     frRect rect;
     frBox  box;
     for (auto lNum = getDesign()->getTech()->getBottomLayerNum(); 
@@ -443,7 +443,7 @@ void FlexDRWorker::initNets_searchRepair_pin2epMap_helper(frNet *net, const frPo
   bool enableOutput = false;
   //bool enableOutput = true;
   auto regionQuery = getRegionQuery();
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   //result.clear();
   regionQuery->query(frBox(bp, bp), lNum, result);
   for (auto &[bx, rqObj]: result) {
@@ -4853,7 +4853,7 @@ void FlexDRWorker::initMazeCost_pin_helper(const frBox &box, frCoord bloatDist, 
 
 // init maze cost for snet objs and blockages
 void FlexDRWorker::initMazeCost_fixedObj() {
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   frBox box;
   //frCoord width = 0;
   // frCoord bloatDist = 0;
@@ -5236,7 +5236,7 @@ void FlexDRWorker::initMazeCost_terms(const set<frBlockObject*> &objs, bool isAd
 }
 
 void FlexDRWorker::initMazeCost_planarTerm() {
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   frBox box;
   // frCoord width = 0;
   frMIdx  zIdx = 0;
@@ -5720,7 +5720,7 @@ void FlexDRWorker::initFixedObjs() {
   for (auto layerNum = getDesign()->getTech()->getBottomLayerNum(); 
        layerNum <= design->getTech()->getTopLayerNum(); ++layerNum) {
     auto regionQuery = getDesign()->getRegionQuery();
-    vector<rq_rptr_value_t<frBlockObject> > queryResult;
+    frRegionQuery::Objects<frBlockObject> queryResult;
     regionQuery->query(queryBox, layerNum, queryResult);
     for (auto &objPair: queryResult) {
       cnt ++;

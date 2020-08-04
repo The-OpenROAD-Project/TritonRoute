@@ -459,7 +459,7 @@ void FlexDRWorker::endAddNets_patchWire(drPatchWire* pwire) {
 }
 
 void FlexDRWorker::endAddNets_merge(frNet* net, set<pair<frPoint, frLayerNum> > &boundPts) {
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   vector<frBlockObject*> drObjs;
   vector<frPathSeg*> horzPathSegs;
   vector<frPathSeg*> vertPathSegs;

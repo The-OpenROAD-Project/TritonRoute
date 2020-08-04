@@ -45,7 +45,7 @@ void frRegionQuery::add(frShape* shape) {
   }
 }
 
-inline void frRegionQuery::add(frShape* shape, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frShape* shape, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
   if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
@@ -77,7 +77,7 @@ void frRegionQuery::addMarker(frMarker* in) {
   markers.at(in->getLayerNum()).insert(make_pair(boostb, in));
 }
 
-inline void frRegionQuery::addDRObj(frShape* shape, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::addDRObj(frShape* shape, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
   if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect || shape->typeId() == frcPatchWire) {
@@ -151,7 +151,7 @@ void frRegionQuery::add(frVia* via) {
   }
 }
 
-inline void frRegionQuery::add(frVia* via, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frVia* via, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   frTransform xform;
   frPoint origin;
@@ -200,7 +200,7 @@ void frRegionQuery::addDRObj(frVia* via) {
   drObjs.at(via->getViaDef()->getCutLayerNum()).insert(make_pair(boostb, via));
 }
 
-inline void frRegionQuery::addDRObj(frVia* via, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::addDRObj(frVia* via, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   via->getBBox(frb);
   box_t boostb(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
@@ -245,7 +245,7 @@ void frRegionQuery::add(frInstTerm* instTerm) {
   }
 }
 
-inline void frRegionQuery::add(frInstTerm* instTerm, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frInstTerm* instTerm, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
 
@@ -289,7 +289,7 @@ void frRegionQuery::add(frTerm* term) {
   }
 }
 
-inline void frRegionQuery::add(frTerm* term, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frTerm* term, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
   for (auto &pin: term->getPins()) {
@@ -327,7 +327,7 @@ void frRegionQuery::add(frInstBlockage* instBlk) {
   }
 }
 
-inline void frRegionQuery::add(frInstBlockage* instBlk, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frInstBlockage* instBlk, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
 
@@ -364,7 +364,7 @@ void frRegionQuery::add(frBlockage* blk) {
   }
 }
 
-inline void frRegionQuery::add(frBlockage* blk, vector<vector<rq_rptr_value_t<frBlockObject> > > &allShapes) {
+inline void frRegionQuery::add(frBlockage* blk, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
   auto pin = blk->getPin();
@@ -390,7 +390,7 @@ void frRegionQuery::addGuide(frGuide* guide) {
   }
 }
 
-inline void frRegionQuery::addGuide(frGuide* guide, vector<vector<rq_rptr_value_t<frGuide> > > &allShapes) {
+inline void frRegionQuery::addGuide(frGuide* guide, ObjectsByLayer<frGuide> &allShapes) {
   frBox frb;
   box_t boostb;
   guide->getBBox(frb);
@@ -400,7 +400,7 @@ inline void frRegionQuery::addGuide(frGuide* guide, vector<vector<rq_rptr_value_
   }
 }
 
-inline void frRegionQuery::addOrigGuide(frNet* net, const frRect &rect, vector<vector<rq_rptr_value_t<frNet> > > &allShapes) {
+inline void frRegionQuery::addOrigGuide(frNet* net, const frRect &rect, ObjectsByLayer<frNet> &allShapes) {
   frBox frb;
   rect.getBBox(frb);
   box_t boostb;
@@ -408,27 +408,27 @@ inline void frRegionQuery::addOrigGuide(frNet* net, const frRect &rect, vector<v
   allShapes.at(rect.getLayerNum()).push_back(make_pair(boostb, net));
 }
 
-void frRegionQuery::query(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frBlockObject> > &result) {
+void frRegionQuery::query(const frBox &box, frLayerNum layerNum, Objects<frBlockObject> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   shapes.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
   //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
-void frRegionQuery::queryGuide(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frGuide> > &result) {
+void frRegionQuery::queryGuide(const frBox &box, frLayerNum layerNum, Objects<frGuide> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   guides.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
   //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGuide(const frBox &box, frLayerNum layerNum, vector<frGuide*> &result) {
-  vector<rq_rptr_value_t<frGuide> > temp;
+  Objects<frGuide> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   guides.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGuide(const frBox &box, vector<frGuide*> &result) {
-  vector<rq_rptr_value_t<frGuide> > temp;
+  Objects<frGuide> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   for (auto &m: guides) {
     m.query(bgi::intersects(boostb), back_inserter(temp));
@@ -436,33 +436,33 @@ void frRegionQuery::queryGuide(const frBox &box, vector<frGuide*> &result) {
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
-void frRegionQuery::queryOrigGuide(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frNet> > &result) {
+void frRegionQuery::queryOrigGuide(const frBox &box, frLayerNum layerNum, Objects<frNet> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   origGuides.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
   //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryGRPin(const frBox &box, vector<frBlockObject*> &result) {
-  vector<rq_rptr_value_t<frBlockObject> > temp;
+  Objects<frBlockObject> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   grPins.query(bgi::intersects(boostb), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
-void frRegionQuery::queryDRObj(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frBlockObject> > &result) {
+void frRegionQuery::queryDRObj(const frBox &box, frLayerNum layerNum, Objects<frBlockObject> &result) {
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   drObjs.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
 }
 
 void frRegionQuery::queryDRObj(const frBox &box, frLayerNum layerNum, vector<frBlockObject*> &result) {
-  vector<rq_rptr_value_t<frBlockObject> > temp;
+  Objects<frBlockObject> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   drObjs.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryDRObj(const frBox &box, vector<frBlockObject*> &result) {
-  vector<rq_rptr_value_t<frBlockObject> > temp;
+  Objects<frBlockObject> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   for (auto &m: drObjs) {
     m.query(bgi::intersects(boostb), back_inserter(temp));
@@ -471,14 +471,14 @@ void frRegionQuery::queryDRObj(const frBox &box, vector<frBlockObject*> &result)
 }
 
 void frRegionQuery::queryMarker(const frBox &box, frLayerNum layerNum, vector<frMarker*> &result) {
-  vector<rq_rptr_value_t<frMarker> > temp;
+  Objects<frMarker> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   markers.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void frRegionQuery::queryMarker(const frBox &box, vector<frMarker*> &result) {
-  vector<rq_rptr_value_t<frMarker> > temp;
+  Objects<frMarker> temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   for (auto &m: markers) {
     m.query(bgi::intersects(boostb), back_inserter(temp));
@@ -486,7 +486,7 @@ void frRegionQuery::queryMarker(const frBox &box, vector<frMarker*> &result) {
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
-//void frRegionQuery::query(const frBox &box, vector<rq_rptr_value_t<frBlockObject> > &result) {
+//void frRegionQuery::query(const frBox &box, Objects<frBlockObject> &result) {
 //  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
 //  for (auto &m: shapes) {
 //    m.query(bgi::intersects(boostb), back_inserter(result));
@@ -501,7 +501,7 @@ void frRegionQuery::init(frLayerNum numLayers) {
   markers.clear();
   markers.resize(numLayers);
 
-  vector<vector<rq_rptr_value_t<frBlockObject> > > allShapes(numLayers);
+  ObjectsByLayer<frBlockObject> allShapes(numLayers);
 
   int cnt = 0;
   for (auto &inst: design->getTopBlock()->getInsts()) {
@@ -598,7 +598,7 @@ void frRegionQuery::init(frLayerNum numLayers) {
 void frRegionQuery::initOrigGuide(frLayerNum numLayers, map<frNet*, vector<frRect>, frBlockObjectComp> &tmpGuides) {
   origGuides.clear();
   origGuides.resize(numLayers);
-  vector<vector<rq_rptr_value_t<frNet> > > allShapes(numLayers);
+  ObjectsByLayer<frNet> allShapes(numLayers);
 
   int cnt = 0;
   for (auto &[net, rects]: tmpGuides) {
@@ -635,7 +635,7 @@ void frRegionQuery::initGuide(frLayerNum numLayers) {
   //}
   guides.clear();
   guides.resize(numLayers);
-  vector<vector<rq_rptr_value_t<frGuide> > > allGuides(numLayers);
+  ObjectsByLayer<frGuide> allGuides(numLayers);
 
   int cnt = 0;
   for (auto &net: design->getTopBlock()->getNets()) {
@@ -667,7 +667,7 @@ void frRegionQuery::initGuide(frLayerNum numLayers) {
 
 void frRegionQuery::initGRPin(vector<pair<frBlockObject*, frPoint> > &in) {
   grPins.clear();
-  vector<rq_rptr_value_t<frBlockObject> > allGRPins;
+  Objects<frBlockObject> allGRPins;
   box_t boostb;
   for (auto &[obj, pt]: in) {
     boostb = box_t(point_t(pt.x(), pt.y()), point_t(pt.x(), pt.y()));
@@ -682,7 +682,7 @@ void frRegionQuery::initDRObj(frLayerNum numLayers) {
   drObjs.clear();
   drObjs.resize(numLayers);
 
-  vector<vector<rq_rptr_value_t<frBlockObject> > > allShapes(numLayers);
+  ObjectsByLayer<frBlockObject> allShapes(numLayers);
 
   int cnt = 0;
   for (auto &net: design->getTopBlock()->getNets()) {

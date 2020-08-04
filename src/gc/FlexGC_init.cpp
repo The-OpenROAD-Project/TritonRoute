@@ -155,7 +155,7 @@ void FlexGCWorker::initDesign() {
   }
   box_t queryBox(point_t(extBox.left(), extBox.bottom()), point_t(extBox.right(), extBox.top()));
   auto regionQuery = getDesign()->getRegionQuery();
-  vector<rq_rptr_value_t<frBlockObject> > queryResult;
+  frRegionQuery::Objects<frBlockObject> queryResult;
   frBox box;
   int cnt = 0;
   // init all non-dr objs from design

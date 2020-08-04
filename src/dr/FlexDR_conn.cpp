@@ -39,7 +39,7 @@ void FlexDR::checkConnectivity_pin2epMap_helper(frNet *net, const frPoint &bp, f
   bool enableOutput = false;
   //bool enableOutput = true;
   auto regionQuery = getRegionQuery();
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   //result.clear();
   regionQuery->query(frBox(bp, bp), lNum, result);
   for (auto &[bx, rqObj]: result) {

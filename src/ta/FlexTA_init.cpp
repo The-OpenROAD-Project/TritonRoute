@@ -490,7 +490,7 @@ void FlexTAWorker::initIroute(frGuide *guide) {
 void FlexTAWorker::initIroutes() {
   //bool enableOutput = true;
   bool enableOutput = false;
-  vector<rq_rptr_value_t<frGuide> > result;
+  frRegionQuery::Objects<frGuide> result;
   auto regionQuery = getRegionQuery();
   for (int lNum = 0; lNum < (int)getDesign()->getTech()->getLayers().size(); lNum++) {
     auto layer = getDesign()->getTech()->getLayer(lNum);
@@ -745,7 +745,7 @@ void FlexTAWorker::initFixedObjs() {
   //bool enableOutput = false;
   ////bool enableOutput = true;
   //double dbu = getTech()->getDBUPerUU();
-  vector<rq_rptr_value_t<frBlockObject> > result;
+  frRegionQuery::Objects<frBlockObject> result;
   frBox box;
   frCoord width = 0;
   frCoord bloatDist = 0;

@@ -35,6 +35,9 @@ namespace fr {
   class frDesign;
   class frRegionQuery {
   public:
+    template<typename T>
+    using Objects = std::vector<rq_rptr_value_t<T>>;
+
     frRegionQuery(frDesign* designIn): design(designIn) {}
     // getters
     frDesign* getDesign() const {
@@ -46,29 +49,18 @@ namespace fr {
     void add(frInstTerm* in);
     void add(frTerm* in);
     void add(frBlockage* in);
-    void add(frInstBlockage* in);
-    void addGuide(frGuide* in);
     void addDRObj(frShape* in);
     void addDRObj(frVia* in);
     void addMarker(frMarker* in);
-    void add(frShape* in,    std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void add(frVia* in,      std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void add(frInstTerm* in, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void add(frTerm* in,     std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void add(frBlockage* in, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void add(frInstBlockage* in, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void addGuide(frGuide* in, std::vector<std::vector<rq_rptr_value_t<frGuide> > > &allShapes);
-    void addOrigGuide(frNet* net, const frRect &rect, std::vector<std::vector<rq_rptr_value_t<frNet> > > &allShapes);
-    void addDRObj(frShape* in, std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
-    void addDRObj(frVia* in,   std::vector<std::vector<rq_rptr_value_t<frBlockObject> > > &allShapes);
 
-    void query(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frBlockObject> > &result);
-    void queryGuide(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frGuide> > &result);
+    // Queries
+    void query(const frBox &box, frLayerNum layerNum, Objects<frBlockObject> &result);
+    void queryGuide(const frBox &box, frLayerNum layerNum, Objects<frGuide> &result);
     void queryGuide(const frBox &box, frLayerNum layerNum, std::vector<frGuide*> &result);
     void queryGuide(const frBox &box, std::vector<frGuide*> &result);
-    void queryOrigGuide(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frNet> > &result);
+    void queryOrigGuide(const frBox &box, frLayerNum layerNum, Objects<frNet> &result);
     void queryGRPin(const frBox &box, std::vector<frBlockObject*> &result);
-    void queryDRObj(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<frBlockObject> > &result);
+    void queryDRObj(const frBox &box, frLayerNum layerNum, Objects<frBlockObject> &result);
     void queryDRObj(const frBox &box, frLayerNum layerNum, std::vector<frBlockObject*> &result);
     void queryDRObj(const frBox &box, std::vector<frBlockObject*> &result);
     void queryMarker(const frBox &box, frLayerNum layerNum, std::vector<frMarker*> &result);
@@ -95,6 +87,9 @@ namespace fr {
     template<typename T>
     using rtree = bgi::rtree<rq_rptr_value_t<T>, bgi::quadratic<16>>;
 
+    template<typename T>
+    using ObjectsByLayer = std::vector<Objects<T>>;
+
     frDesign*         design;
     std::vector<rtree<frBlockObject>> shapes; // only for pin shapes, obs and snet
     std::vector<rtree<frGuide>>       guides;
@@ -102,6 +97,19 @@ namespace fr {
     rtree<frBlockObject>              grPins;
     std::vector<rtree<frBlockObject>> drObjs; // only for dr objs, via only in via layer
     std::vector<rtree<frMarker>>      markers; // use init()
+
+    void add(frInstBlockage* in);
+    void add(frShape* in,    ObjectsByLayer<frBlockObject> &allShapes);
+    void add(frVia* in,      ObjectsByLayer<frBlockObject> &allShapes);
+    void add(frInstTerm* in, ObjectsByLayer<frBlockObject> &allShapes);
+    void add(frTerm* in,     ObjectsByLayer<frBlockObject> &allShapes);
+    void add(frBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
+    void add(frInstBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
+    void addGuide(frGuide* in, ObjectsByLayer<frGuide> &allShapes);
+    void addGuide(frGuide* in);
+    void addOrigGuide(frNet* net, const frRect &rect, ObjectsByLayer<frNet> &allShapes);
+    void addDRObj(frShape* in, ObjectsByLayer<frBlockObject> &allShapes);
+    void addDRObj(frVia* in,   ObjectsByLayer<frBlockObject> &allShapes);
   };
 }
 

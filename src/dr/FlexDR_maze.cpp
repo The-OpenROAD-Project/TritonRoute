@@ -1265,7 +1265,7 @@ void FlexDRWorker::modAdjCutSpacingCost_fixedObj(const frBox &origCutBox, frVia 
     frBox queryBox;
     viaBox.bloat(cutWithin, queryBox);
 
-    vector<rq_rptr_value_t<frBlockObject> > result;
+    frRegionQuery::Objects<frBlockObject> result;
     getRegionQuery()->query(queryBox, lNum, result);
 
     frBox box;
