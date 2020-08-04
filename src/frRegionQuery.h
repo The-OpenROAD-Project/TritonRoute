@@ -44,11 +44,6 @@ namespace fr {
       return design;
     }
     // setters
-    void add(frShape* in);
-    void add(frVia* in);
-    void add(frInstTerm* in);
-    void add(frTerm* in);
-    void add(frBlockage* in);
     void addDRObj(frShape* in);
     void addDRObj(frVia* in);
     void addMarker(frMarker* in);
@@ -98,6 +93,11 @@ namespace fr {
     std::vector<rtree<frBlockObject>> drObjs; // only for dr objs, via only in via layer
     std::vector<rtree<frMarker>>      markers; // use init()
 
+    void add(frShape* in);
+    void add(frVia* in);
+    void add(frInstTerm* in);
+    void add(frTerm* in);
+    void add(frBlockage* in);
     void add(frInstBlockage* in);
     void add(frShape* in,    ObjectsByLayer<frBlockObject> &allShapes);
     void add(frVia* in,      ObjectsByLayer<frBlockObject> &allShapes);
