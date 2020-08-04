@@ -33,18 +33,6 @@
 using namespace std;
 using namespace fr;
 
-void frRegionQuery::add(frShape* shape) {
-  frBox frb;
-  box_t boostb;
-  if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
-    shape->getBBox(frb);
-    boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-    shapes.at(shape->getLayerNum()).insert(make_pair(boostb, shape));
-  } else {
-    cout <<"Error: unsupported region query add" <<endl;
-  }
-}
-
 void frRegionQuery::add(frShape* shape, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
@@ -107,48 +95,6 @@ void frRegionQuery::removeMarker(frMarker* in) {
   in->getBBox(frb);
   boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
   markers.at(in->getLayerNum()).remove(make_pair(boostb, in));
-}
-
-void frRegionQuery::add(frVia* via) {
-  frBox frb;
-  frTransform xform;
-  frPoint origin;
-  via->getOrigin(origin);
-  xform.set(origin);
-  box_t boostb;
-  for (auto &uShape: via->getViaDef()->getLayer1Figs()) {
-    auto shape = uShape.get();
-    if (shape->typeId() == frcRect) {
-      shape->getBBox(frb);
-      frb.transform(xform);
-      boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(via->getViaDef()->getLayer1Num()).insert(make_pair(boostb, via));
-    } else {
-      cout <<"Error: unsupported region query add" <<endl;
-    }
-  }
-  for (auto &uShape: via->getViaDef()->getLayer2Figs()) {
-    auto shape = uShape.get();
-    if (shape->typeId() == frcRect) {
-      shape->getBBox(frb);
-      frb.transform(xform);
-      boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(via->getViaDef()->getLayer2Num()).insert(make_pair(boostb, via));
-    } else {
-      cout <<"Error: unsupported region query add" <<endl;
-    }
-  }
-  for (auto &uShape: via->getViaDef()->getCutFigs()) {
-    auto shape = uShape.get();
-    if (shape->typeId() == frcRect) {
-      shape->getBBox(frb);
-      frb.transform(xform);
-      boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(via->getViaDef()->getCutLayerNum()).insert(make_pair(boostb, via));
-    } else {
-      cout <<"Error: unsupported region query add" <<endl;
-    }
-  }
 }
 
 void frRegionQuery::add(frVia* via, ObjectsByLayer<frBlockObject> &allShapes) {
@@ -214,37 +160,6 @@ void frRegionQuery::removeDRObj(frVia* via) {
   drObjs.at(via->getViaDef()->getCutLayerNum()).remove(make_pair(boostb, via));
 }
 
-void frRegionQuery::add(frInstTerm* instTerm) {
-  frBox frb;
-  box_t boostb;
-
-  //frTransform xform;
-  //instTerm->getInst()->getTransform(xform);
-
-  //frBox mbox;
-  //instTerm->getInst()->getRefBlock()->getBoundaryBBox(mbox);
-  //// add origin
-  //xform.set(xform.xOffset() + mbox.left(), xform.yOffset() + mbox.bottom());
-  //frPoint size(mbox.right(), mbox.top());
-  //xform.updateXform(size);
-  frTransform xform;
-  instTerm->getInst()->getUpdatedXform(xform);
-
-  for (auto &pin: instTerm->getTerm()->getPins()) {
-    for (auto &uFig: pin->getFigs()) {
-      auto shape = uFig.get();
-      if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
-        shape->getBBox(frb);
-        frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, instTerm));
-      } else {
-        cout <<"Error: unsupported region query add" <<endl;
-      }
-    }
-  }
-}
-
 void frRegionQuery::add(frInstTerm* instTerm, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
@@ -272,23 +187,6 @@ void frRegionQuery::add(frInstTerm* instTerm, ObjectsByLayer<frBlockObject> &all
   }
 }
 
-void frRegionQuery::add(frTerm* term) {
-  frBox frb;
-  box_t boostb;
-  for (auto &pin: term->getPins()) {
-    for (auto &uFig: pin->getFigs()) {
-      auto shape = uFig.get();
-      if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
-        shape->getBBox(frb);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, term));
-      } else {
-        cout <<"Error: unsupported region query add" <<endl;
-      }
-    }
-  }
-}
-
 void frRegionQuery::add(frTerm* term, ObjectsByLayer<frBlockObject> &allShapes) {
   frBox frb;
   box_t boostb;
@@ -302,27 +200,6 @@ void frRegionQuery::add(frTerm* term, ObjectsByLayer<frBlockObject> &allShapes) 
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
-    }
-  }
-}
-
-void frRegionQuery::add(frInstBlockage* instBlk) {
-  frBox frb;
-  box_t boostb;
-
-  frTransform xform;
-  instBlk->getInst()->getUpdatedXform(xform);
-  auto blk = instBlk->getBlockage();
-  auto pin = blk->getPin();
-  for (auto &uFig: pin->getFigs()) {
-    auto shape = uFig.get();
-    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
-      shape->getBBox(frb);
-      frb.transform(xform);
-      boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, instBlk));
-    } else {
-      cout <<"Error: unsupported region query add" <<endl;
     }
   }
 }
@@ -342,22 +219,6 @@ void frRegionQuery::add(frInstBlockage* instBlk, ObjectsByLayer<frBlockObject> &
       frb.transform(xform);
       boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
       allShapes.at(static_cast<frShape*>(shape)->getLayerNum()).push_back(make_pair(boostb, instBlk));
-    } else {
-      cout <<"Error: unsupported region query add" <<endl;
-    }
-  }
-}
-
-void frRegionQuery::add(frBlockage* blk) {
-  frBox frb;
-  box_t boostb;
-  auto pin = blk->getPin();
-  for (auto &uFig: pin->getFigs()) {
-    auto shape = uFig.get();
-    if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
-      shape->getBBox(frb);
-      boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-      shapes.at(static_cast<frShape*>(shape)->getLayerNum()).insert(make_pair(boostb, blk));
     } else {
       cout <<"Error: unsupported region query add" <<endl;
     }
