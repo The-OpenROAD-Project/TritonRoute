@@ -380,16 +380,6 @@ inline void frRegionQuery::add(frBlockage* blk, ObjectsByLayer<frBlockObject> &a
   }
 }
 
-void frRegionQuery::addGuide(frGuide* guide) {
-  frBox frb;
-  box_t boostb;
-  guide->getBBox(frb);
-  boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-  for (int i = guide->getBeginLayerNum(); i <= guide->getEndLayerNum(); i++) {
-    shapes.at(i).insert(make_pair(boostb, guide));
-  }
-}
-
 inline void frRegionQuery::addGuide(frGuide* guide, ObjectsByLayer<frGuide> &allShapes) {
   frBox frb;
   box_t boostb;

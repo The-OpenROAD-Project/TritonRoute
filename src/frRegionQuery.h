@@ -106,7 +106,6 @@ namespace fr {
     void add(frBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
     void add(frInstBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
     void addGuide(frGuide* in, ObjectsByLayer<frGuide> &allShapes);
-    void addGuide(frGuide* in);
     void addOrigGuide(frNet* net, const frRect &rect, ObjectsByLayer<frNet> &allShapes);
     void addDRObj(frShape* in, ObjectsByLayer<frBlockObject> &allShapes);
     void addDRObj(frVia* in,   ObjectsByLayer<frBlockObject> &allShapes);
