@@ -186,17 +186,6 @@ include_directories(
 )
 
 ############################################################
-# Create a library 
-############################################################
-add_library( flexroutelib
-  ${FLEXROUTE_SRC}
-)
-
-set_target_properties( flexroutelib 
-  PROPERTIES OUTPUT_NAME "flexroute"
-)
-
-############################################################
 # Create an executable
 ############################################################
 add_executable( TritonRoute 
@@ -205,9 +194,6 @@ add_executable( TritonRoute
 
 add_dependencies( TritonRoute def )
 add_dependencies( TritonRoute lef )
-
-add_dependencies( flexroutelib def )
-add_dependencies( flexroutelib lef )
 
 target_link_libraries( TritonRoute 
   PUBLIC
