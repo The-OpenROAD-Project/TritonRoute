@@ -67,12 +67,6 @@ namespace fr {
       gtl::polygon_90_with_holes_data<frCoord> shape;
       std::vector<frCoord> coords = {gtl::xl(rect), gtl::yl(rect), gtl::xh(rect), gtl::yh(rect)};
       shape.set_compact(coords.begin(), coords.end());
-      //std::cout <<"rect (" <<gtl::xl(rect) <<", " <<gtl::yl(rect) <<") (" <<gtl::xh(rect) <<", " <<gtl::yh(rect) <<")" <<std::endl;
-      //std::cout <<"poly";
-      //for (auto it = shape.begin(); it != shape.end(); it++) {
-      //  std::cout <<" (" <<(*it).x() <<", " <<(*it).y() <<")";
-      //}
-      //std::cout <<std::endl;
       auto pin = std::make_unique<gcPin>(shape, layerNum, this);
       pin->setId(pins[layerNum].size());
       pins[layerNum].push_back(std::move(pin));
@@ -138,10 +132,6 @@ namespace fr {
     frBlockObjectEnum typeId() const override {
       return gccNet;
     }
-    //void init(int numLayers) {
-    //  fixedPolygons.clear();
-    //  routePolygons.clear();
-    //  pins.clear();
   protected:
     std::vector<gtl::polygon_90_set_data<frCoord> >          fixedPolygons; // only routing layer
     std::vector<gtl::polygon_90_set_data<frCoord> >          routePolygons; // only routing layer
@@ -149,12 +139,6 @@ namespace fr {
     std::vector<std::vector<gtl::rectangle_data<frCoord> > > routeRectangles; // only cut layer
     std::vector<std::vector<std::unique_ptr<gcPin> > >       pins;
     frBlockObject*                                           owner;
-    //bool                                               dirty;
-    // assisting structures
-    //std::vector<frBlockObject*>                        fixedObjs;
-    //std::vector<frBlockObject*>                        routeObjs;
-    //gtl::polygon_90_set_data<frCoord>                  fixedPs;
-    //gtl::polygon_90_set_data<frCoord>                  mergedPs;
 
     void init();
   };

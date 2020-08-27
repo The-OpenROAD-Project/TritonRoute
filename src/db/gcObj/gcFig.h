@@ -41,8 +41,6 @@ namespace fr {
     gcFig(): gcBlockObject() {}
     gcFig(const gcFig& in): gcBlockObject(in) {}
     // getters
-    //virtual void getBBox(frBox &box) const = 0;
-    //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
   };

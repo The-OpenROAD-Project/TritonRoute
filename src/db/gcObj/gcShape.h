@@ -41,8 +41,6 @@ namespace fr {
   class gcPolygon;
 }
 
-// template <>
-// struct gtl::geometry_concept<fr::gcCorner> { typedef point_concept type; };
 template <>
 struct gtl::geometry_concept<fr::gcSegment> { typedef segment_concept type; };
 template <>
@@ -62,15 +60,13 @@ namespace fr {
     // getters
     virtual frLayerNum getLayerNum() const = 0;
     // others
-    //drBlockObjectEnum typeId() const override = 0;
-  protected:
   };
 
   class gcCorner: public gtl::point_data<frCoord> {
   public:
     // constructors
-    gcCorner(): /*gtl::point_data<frCoord>(),*/ prevCorner(nullptr), nextCorner(nullptr), cornerType(frCornerTypeEnum::UNKNOWN) {}
-    gcCorner(const gcCorner &in): /*gtl::point_data<frCoord>(in),*/ prevCorner(in.prevCorner), nextCorner(in.nextCorner), cornerType(in.cornerType),
+    gcCorner(): prevCorner(nullptr), nextCorner(nullptr), cornerType(frCornerTypeEnum::UNKNOWN) {}
+    gcCorner(const gcCorner &in): prevCorner(in.prevCorner), nextCorner(in.nextCorner), cornerType(in.cornerType),
                                   cornerDir(frCornerDirEnum::UNKNOWN), fixed(false) {}
 
     // getters
@@ -132,16 +128,12 @@ namespace fr {
   class gcSegment: public gtl::segment_data<frCoord>, public gcShape {
   public:
     // constructors
-    gcSegment(): gtl::segment_data<frCoord>(), gcShape(), layer(-1), pin(nullptr), net(nullptr)/*, bp(), ep()*/, prev_edge(nullptr), 
+    gcSegment(): gtl::segment_data<frCoord>(), gcShape(), layer(-1), pin(nullptr), net(nullptr), prev_edge(nullptr),
                                                next_edge(nullptr), lowCorner(nullptr), highCorner(nullptr), fixed(false) {}
-    gcSegment(const gcSegment &in): gtl::segment_data<frCoord>(in), gcShape(in), layer(in.layer), pin(in.pin), net(in.net), 
-                              /*bp(in.bp), ep(in.ep),*/ prev_edge(in.prev_edge), next_edge(in.next_edge), 
+    gcSegment(const gcSegment &in): gtl::segment_data<frCoord>(in), gcShape(in), layer(in.layer), pin(in.pin), net(in.net),
+                              prev_edge(in.prev_edge), next_edge(in.next_edge),
                               lowCorner(in.lowCorner), highCorner(in.highCorner), fixed(in.fixed) {}
     // getters
-    //void getPoints(frPoint &bpIn, frPoint &epIn) const {
-    //  bpIn.set(bp);
-    //  epIn.set(ep);
-    //}
     gcSegment* getPrevEdge() const {
       return prev_edge;
     }
@@ -185,10 +177,6 @@ namespace fr {
       gtl::segment_data<frCoord>::low(bp);
       gtl::segment_data<frCoord>::high(ep);
     }
-    //void setPoints(const frPoint &bpIn, const frPoint &epIn) {
-    //  bp.set(bpIn);
-    //  ep.set(epIn);
-    //}
     void setPrevEdge(gcSegment* in) {
       prev_edge = in;
     }
@@ -391,12 +379,10 @@ namespace fr {
     gcPolygon(const gcPolygon& in): gtl::polygon_90_with_holes_data<frCoord>(in), gcShape(in), layer(in.layer), pin(in.pin), net(in.net) {}
     gcPolygon(const gtl::polygon_90_with_holes_data<frCoord> &shapeIn, frLayerNum layerIn, gcPin* pinIn, gcNet* netIn):
               gtl::polygon_90_with_holes_data<frCoord>(shapeIn), layer(layerIn), pin(pinIn), net(netIn) {
-      //update();
     }
     // setters
     void setPolygon(const gtl::polygon_90_with_holes_data<frCoord> &in) {
       gtl::polygon_90_with_holes_data<frCoord>::operator =(in);
-      //update();
     }
     // ensure gtl assumption: counterclockwise for outer and clockwise for holes
     void setPolygon(const std::vector<frPoint> &in) {
@@ -416,16 +402,6 @@ namespace fr {
       ps.get(polys);
       setPolygon(polys[0]);
     }
-    //void update() {
-    //  fixed.clear();
-    //  fixed.resize(size_holes() + 1);
-    //  fixed[0].resize(size(), false);
-    //  int i = 1;
-    //  for (auto it = begin_holes(); it != end_holes(); it++) {
-    //    fixed[i].resize((*it).size(), false);
-    //    i++;
-    //  }
-    //}
     // getters
     frBlockObjectEnum typeId() const override {
       return gccPolygon;
@@ -490,7 +466,6 @@ namespace fr {
     frLayerNum layer;
     gcPin*     pin;
     gcNet*     net;
-    //std::vector<std::vector<std::unique_ptr<gcEdge> >  edges; //[0] outer; [1-n] holes
   };
 
 }

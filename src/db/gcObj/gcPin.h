@@ -40,18 +40,8 @@ namespace fr {
     gcPin(const gtl::polygon_90_with_holes_data<frCoord> &shapeIn, frLayerNum layerNumIn, gcNet* netIn): 
           gcBlockObject(), polygon(std::make_unique<gcPolygon>(shapeIn, layerNumIn, this, netIn)), net(netIn)/*, dirty(true)*/, 
           polygon_edges(), polygon_corners(), max_rectangles() {
-      //std::vector<gtl::rectangle_data<frCoord> > rects;
-      //gtl::get_max_rectangles(rects, shapeIn);
-      //for (auto &rect: rects) {
-      //  max_rectangles.push_back(gcRect(rect, layerNumIn, this, netIn));
-      //}
     }
     // setters
-    //void setPolygon(const gcPolygon &in) {
-    //  polygon = in;
-    //  polygon.addToPin(this);
-    //  polygon.addToNet(net);
-    //}
     void setNet(gcNet* in) {
       net = in;
     }
@@ -79,13 +69,6 @@ namespace fr {
       return max_rectangles;
     }
 
-    //int numMaxRectangles() const {
-    //  return max_rectangles.size();
-    //}
-    //const gcRect& getMaxRectangle(int i) const {
-    //  return max_rectangles[i];
-    //}
-
     gcNet* getNet() {
       return net;
     }
@@ -96,7 +79,6 @@ namespace fr {
   protected:
     std::unique_ptr<gcPolygon>            polygon;
     gcNet*                                net;
-    //bool                                  dirty;
     // assisting structures
     std::vector<std::vector<std::unique_ptr<gcSegment> > > polygon_edges;
     std::vector<std::vector<std::unique_ptr<gcCorner> > > polygon_corners;
