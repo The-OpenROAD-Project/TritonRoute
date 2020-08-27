@@ -157,7 +157,6 @@ set (FLEXROUTE_HEADER
   ${FLEXROUTE_HOME}/src/frDesign.h
   ${FLEXROUTE_HOME}/src/frRegionQuery.h
   ${FLEXROUTE_HOME}/src/global.h
-  ${FLEXROUTE_HOME}/src/FlexAccessPattern.h
   ${FLEXROUTE_HOME}/src/io/io.h
   ${FLEXROUTE_HOME}/src/io/frShapeUtil.h
   ${FLEXROUTE_HOME}/src/pa/FlexPA.h
