@@ -49,14 +49,6 @@ void frDesign::printAllMacros() {
   }
 }
 
-////void FlexRoute::printAllNets() {
-////  cout <<endl;
-////  cout <<"print all nets: " <<endl;
-////  for (auto &m: nets) {
-////    cout <<endl <<*(m.second) <<endl;
-////  }
-////}
-
 void frDesign::printAllTerms() {
   cout <<endl <<"print all terminals: ";
   for (auto &m: topBlock->getTerms()) {

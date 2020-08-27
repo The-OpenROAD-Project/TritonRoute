@@ -131,9 +131,4 @@ extern std::ostream& operator<< (std::ostream& os, const fr::frNet &net);
 extern std::ostream& operator<< (std::ostream& os, const fr::frPoint &pIn);
 extern std::ostream& operator<< (std::ostream& os, const fr::frBox &box);
 
-//extern size_t getPeakRSS();
-//extern size_t getCurrentRSS();
-
-//extern void printAllMacros(const std::shared_ptr<fr::frDesign> &design);
-
 #endif

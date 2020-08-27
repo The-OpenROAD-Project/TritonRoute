@@ -46,7 +46,6 @@ string DRC_RPT_FILE;
 int OR_SEED = -1;
 double OR_K = 0;
 
-//string DBPROCESSNODE = "N16_11m_2xa1xd3xe2y2r_utrdl";
 string DBPROCESSNODE = "";
 int    MAX_THREADS   = 1;
 int    BATCHSIZE     = 1024;
@@ -65,17 +64,10 @@ bool   ENABLE_VIA_GEN = true;
 
 frLayerNum VIAINPIN_BOTTOMLAYERNUM             = std::numeric_limits<frLayerNum>::max();
 frLayerNum VIAINPIN_TOPLAYERNUM                = std::numeric_limits<frLayerNum>::max();
-// frLayerNum VIAINPIN_BOTTOMLAYERNUM             = 2;
-// frLayerNum VIAINPIN_TOPLAYERNUM                = 2;
 frLayerNum VIAONLY_MACROCELLPIN_BOTTOMLAYERNUM = std::numeric_limits<frLayerNum>::max();
 frLayerNum VIAONLY_MACROCELLPIN_TOPLAYERNUM    = std::numeric_limits<frLayerNum>::max();
-//frLayerNum VIAONLY_STDCELLPIN_BOTTOMLAYERNUM   = std::numeric_limits<frLayerNum>::max();
-//frLayerNum VIAONLY_STDCELLPIN_TOPLAYERNUM      = std::numeric_limits<frLayerNum>::max();
-// frLayerNum VIAONLY_STDCELLPIN_BOTTOMLAYERNUM   = 2;
-// frLayerNum VIAONLY_STDCELLPIN_TOPLAYERNUM      = 2;
 int        MINNUMACCESSPOINT_MACROCELLPIN      = 3;
 int        MINNUMACCESSPOINT_STDCELLPIN        = 3;
-// int        MINNUMACCESSPOINT_STDCELLPIN        = 5;
 int        ACCESS_PATTERN_END_ITERATION_NUM    = 5;
 
 frLayerNum ONGRIDONLY_WIRE_PREF_BOTTOMLAYERNUM    = std::numeric_limits<frLayerNum>::max();
@@ -215,14 +207,6 @@ ostream& operator<< (ostream& os, const frViaDef &viaDefIn) {
   return os;
 }
 
-//ostream& operator<< (ostream& os, const frLayerBlockage &blkIn) {
-//  os <<"BLK (LAYER) " <<blkIn.getLayerNum();
-//  for (auto &point: blkIn.getPoints()) {
-//    os <<endl <<"  " <<point.x() <<" " <<point.y();
-//  }
-//  return os;
-//}
-
 ostream& operator<< (ostream& os, const frBlock &blockIn) {
   frBox box;
   blockIn.getBBox(box);
@@ -232,13 +216,6 @@ ostream& operator<< (ostream& os, const frBlock &blockIn) {
   for (auto &m: blockIn.getTerms()) {
     os <<endl <<*m;
   }
-  //for (auto &m: blockIn.getBlockages()) {
-  //  if (m->typeId() == frcLayerBlockage) {
-  //    os <<endl <<*(static_cast<frLayerBlockage*>(m.get()));
-  //  } else {
-  //    os <<endl <<"Unsupported macro blockage!";
-  //  }
-  //}
   return os;
 }
 

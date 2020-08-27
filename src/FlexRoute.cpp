@@ -33,7 +33,6 @@
 #include "pa/FlexPA.h"
 #include "ta/FlexTA.h"
 #include "dr/FlexDR.h"
-//#include "io/frPinPrep.h"
 #include "gc/FlexGC.h"
 #include "rp/FlexRP.h"
 
@@ -41,26 +40,13 @@ using namespace std;
 using namespace fr;
 
 void FlexRoute::init() {
-  //FlexGCWorker gcWorker;
-  //gcWorker.main();
-  //exit(1);
   io::Parser parser(getDesign());
   parser.readLefDef();
   parser.readGuide();
   parser.postProcess();
   FlexPA pa(getDesign());
   pa.main();
-  // exit(1);
-  // get access pattern for post process
-  //FlexPinPrep pp(getDesign()->getTech(), getDesign(), parser.getPrefTrackPatterns(), parser.getTrackOffsetMap());
-  //pp.init();
-  //pp.main();
-  //std::cout << "finished pinPrep\n" << std::flush;
-  //exit(1);
   parser.postProcessGuide();
-  //parser.buildRtree4Routes();
-  //parser.buildRtree4Insts();
-  //exit(0);
 }
 
 void FlexRoute::prep() {
@@ -92,32 +78,6 @@ int FlexRoute::main() {
   dr();
   endFR();
 
-
-  /*
-  // rtree test
-  vector<rtree_frConnFig_value_t> result1;
-  design->getTopBlock()->queryRtree4Routes(frBox(585000, 1098000, 590000, 1101000), 6, result1);
-  cout <<endl <<"query1:" <<endl;
-  for (auto &it: result1) {
-    if (it.second->typeId() == frcPathSeg) {
-      frPoint pt1, pt2;
-      dynamic_pointer_cast<frPathSeg>(it.second)->getPoints(pt1, pt2);
-      cout <<"found pathseg " <<pt1.x() <<" " <<pt1.y() <<" " << pt2.x() <<" " <<pt2.y() 
-           <<" " <<dynamic_pointer_cast<frPathSeg>(it.second)->getNet()->getName() <<endl;
-    } else if (it.second->typeId() == frcGuide) {
-      frPoint pt1, pt2;
-      dynamic_pointer_cast<frGuide>(it.second)->getPoints(pt1, pt2);
-      cout <<"found guide   " <<pt1.x() <<" " <<pt1.y() <<" " << pt2.x() <<" " <<pt2.y()
-           <<" " <<dynamic_pointer_cast<frGuide>(it.second)->getNet()->getName();
-      if (dynamic_pointer_cast<frGuide>(it.second)->getBeginLayerNum() !=
-          dynamic_pointer_cast<frGuide>(it.second)->getEndLayerNum()) {
-        cout <<" via guide";
-      }
-      cout <<endl;
-    }
-  }
-  exit(0);
-  */
   return 0;
 }
 

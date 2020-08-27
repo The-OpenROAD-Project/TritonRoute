@@ -164,11 +164,6 @@ void frRegionQuery::add(frInstTerm* instTerm, ObjectsByLayer<frBlockObject> &all
   frBox frb;
   box_t boostb;
 
-  //frTransform xform;
-  //instTerm->getInst()->getTransform(xform);
-
-  //instTerm->getInst()->getRefBlock()->getBoundaryBBox(frb);
-  //xform.updateXform(frb.upperRight());
   frTransform xform;
   instTerm->getInst()->getUpdatedXform(xform);
 
@@ -519,7 +514,6 @@ void frRegionQuery::initDRObj(frLayerNum numLayers) {
 
   ObjectsByLayer<frBlockObject> allShapes(numLayers);
 
-  int cnt = 0;
   for (auto &net: design->getTopBlock()->getNets()) {
     for (auto &shape: net->getShapes()) {
       addDRObj(shape.get(), allShapes);
@@ -527,33 +521,15 @@ void frRegionQuery::initDRObj(frLayerNum numLayers) {
     for (auto &via: net->getVias()) {
       addDRObj(via.get(), allShapes);
     }
-    cnt++;
-    //if (VERBOSE > 0) {
-    //  if (cnt < 100000) {
-    //    if (cnt % 10000 == 0) {
-    //      cout <<"  complete " <<cnt <<" nets" <<endl;
-    //    }
-    //  } else {
-    //    if (cnt % 100000 == 0) {
-    //      cout <<"  complete " <<cnt <<" nets" <<endl;
-    //    }
-    //  }
-    //}
   }
 
   for (auto i = 0; i < numLayers; i++) {
     drObjs.at(i) = boost::move(rtree<frBlockObject>(allShapes.at(i)));
     allShapes.at(i).clear();
     allShapes.at(i).shrink_to_fit();
-    //if (VERBOSE > 0) {
-    //  cout <<"  complete " <<design->getTech()->getLayer(i)->getName() <<endl;
-    //}
   }
 
 }
-
-
-
 
 void frRegionQuery::print() {
   cout <<endl;

@@ -45,7 +45,6 @@ namespace fr {
     std::unique_ptr<frDesign> design;
   
     void init();
-    //void pinPrep();
     void prep();
     void ta();
     void dr();

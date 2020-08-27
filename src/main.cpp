@@ -84,42 +84,8 @@ int readParams(const string &fileName) {
 }
 
 int main(int argc, char** argv) {
-
-  //cout <<CPX_MIN <<endl;
-  //return 0;
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //double startTime = omp_get_wtime();
-
-  //std::ios::sync_with_stdio(false);
-  //cout <<"TritonRoute Version 0.0.6.0" <<endl;
-  //cout <<"Developed by Lutong Wang and Bangqi Xu\n"
-  //     <<"\n"
-  //     <<"Copyright (c) 2019, The Regents of the University of California\n"
-  //     <<"All rights reserved.\n"
-  //     <<"\n"
-  //     <<"Redistribution and use in source and binary forms, with or without\n"
-  //     <<"modification, are permitted provided that the following conditions are met:\n"
-  //     <<"    * Redistributions of source code must retain the above copyright\n"
-  //     <<"      notice, this list of conditions and the following disclaimer.\n"
-  //     <<"    * Redistributions in binary form must reproduce the above copyright\n"
-  //     <<"      notice, this list of conditions and the following disclaimer in the\n"
-  //     <<"      documentation and/or other materials provided with the distribution.\n"
-  //     <<"    * Neither the name of the University nor the\n"
-  //     <<"      names of its contributors may be used to endorse or promote products\n"
-  //     <<"      derived from this software without specific prior written permission.\n"
-  //     <<"\n"
-  //     <<"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n"
-  //     <<"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
-  //     <<"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n"
-  //     <<"DISCLAIMED. IN NO EVENT SHALL THE REGENTS BE LIABLE FOR ANY\n"
-  //     <<"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
-  //     <<"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
-  //     <<"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
-  //     <<"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
-  //     <<"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n"
-  //     <<"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
-  //     <<"\n";
   if (argc == 1) {
     cout <<"Error: usage ./TritonRoute -lef <LEF_FILE> -def <DEF_FILE> -guide <GUIDE_FILE> -output <OUTPUT_DEF>" <<endl;
     return 2;
@@ -139,33 +105,27 @@ int main(int argc, char** argv) {
         argv++;
         argc--;
         LEF_FILE = *argv;
-        //cout <<"lef: " <<LEF_FILE <<endl;
       } else if (strcmp(*argv, "-def") == 0) {
         argv++;
         argc--;
         DEF_FILE = *argv;
         REF_OUT_FILE = DEF_FILE; 
-        //cout <<"def: " <<DEF_FILE <<endl;
       } else if (strcmp(*argv, "-guide") == 0) {
         argv++;
         argc--;
         GUIDE_FILE = *argv;
-        //cout <<"guide: " <<GUIDE_FILE <<endl;
       } else if (strcmp(*argv, "-threads") == 0) {
         argv++;
         argc--;
         sscanf(*argv, "%d", &MAX_THREADS);
-        //cout <<"thread: " <<MAX_THREADS <<endl;
       } else if (strcmp(*argv, "-output") == 0) {
         argv++;
         argc--;
         OUT_FILE = *argv;
-        //cout <<"output: " <<OUT_FILE <<endl;
       } else if (strcmp(*argv, "-verbose") == 0) {
         argv++;
         argc--;
         VERBOSE = atoi(*argv);
-        //cout <<"output: " <<OUT_FILE <<endl;
       } else {
         cout <<"ERROR: Illegal command line option: " <<*argv <<endl;
         return 2;
