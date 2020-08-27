@@ -198,9 +198,6 @@ namespace fr {
                                         origin(in.origin), layer(in.layer), owner(in.owner) {}
     frPatchWire(const drPatchWire &in);
     // setters
-    // void setBBox (const frBox &boxIn) {
-    //   box.set(boxIn);
-    // }
     void setOffsetBox (const frBox &in) {
       offsetBox.set(in);
     }
@@ -281,14 +278,10 @@ namespace fr {
     void getOffsetBox (frBox &boxIn) const {
       boxIn.set(offsetBox);
     }
-    // frPoint getOrigin() const {
-    //   return origin;
-    // }
     void getOrigin(frPoint &in) const {
       in.set(origin);
     }
     void move(const frTransform &xform) override {
-      // offsetBox.transform(xform);
     }
     bool overlaps(const frBox &box) const override {
       frBox rectBox;

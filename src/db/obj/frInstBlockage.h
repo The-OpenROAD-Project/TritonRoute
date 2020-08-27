@@ -40,8 +40,6 @@ namespace fr {
   public:
     // constructors
     frInstBlockage(): frBlockObject(), inst(nullptr), blockage(nullptr) {}
-    //frInstTerm(const frInstTerm &in): frBlockObject(), inst(in.inst), term(in.term), 
-    //                                  net(in.net) {}
     // getters
     frInst* getInst() const {
       return inst;

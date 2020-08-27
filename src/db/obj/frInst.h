@@ -42,14 +42,6 @@ namespace fr {
   public:
     // constructors
     frInst(): frRef(), name(), refBlock(nullptr), instTerms(), instBlockages(), xform(), pinAccessIdx(0) {}
-    //frInst(const frInst &instIn): frRef(), name(instIn.name), cellName(instIn.cellName),
-    //                              instTerms(), xform(instIn.xform) {
-    //  instTerms.clear();
-    //  instTerms.shrink_to_fit();
-    //  for (auto &m: instIn.instTerms) {
-    //    copyInstTerm(m);
-    //  }
-    //}
     // getters
     const frString& getName() const {
       return name;
@@ -168,7 +160,6 @@ namespace fr {
      * overlaps
      */
 
-    // BX 181204 implemented
     void getBBox (frBox &boxIn) const override;
     
     void move(const frTransform &xform) override {

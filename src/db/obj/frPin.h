@@ -34,7 +34,6 @@
 #include "db/obj/frBlockObject.h"
 #include "db/obj/frShape.h"
 #include "db/obj/frAccess.h"
-//#include "FlexAccessPattern.h"
 
 
 namespace fr {
@@ -43,8 +42,8 @@ namespace fr {
   class frPin: public frBlockObject {
   public:
     // constructors
-    frPin(): frBlockObject(), term(nullptr), pinFigs()/*, accessPatterns()*/, aps() {}
-    frPin(const frPin &in): frBlockObject(), term(in.term)/*, accessPatterns(in.accessPatterns)*/ {
+    frPin(): frBlockObject(), term(nullptr), pinFigs(), aps() {}
+    frPin(const frPin &in): frBlockObject(), term(in.term) {
       for (auto &uPinFig: in.getFigs()) {
         auto pinFig = uPinFig.get();
         if (pinFig->typeId() == frcRect) {
@@ -59,7 +58,7 @@ namespace fr {
         }
       }
     }
-    frPin(const frPin &in, const frTransform &xform): frBlockObject(), term(in.term)/*, accessPatterns(in.accessPatterns)*/ {
+    frPin(const frPin &in, const frTransform &xform): frBlockObject(), term(in.term) {
       for (auto &uPinFig: in.getFigs()) {
         auto pinFig = uPinFig.get();
         if (pinFig->typeId() == frcRect) {
@@ -87,16 +86,7 @@ namespace fr {
     std::vector< std::unique_ptr<frPinFig> >& getFigs() {
       return pinFigs;
     }
-    //frList<FlexAccessPattern>& getAccessPatterns() {
-    //  return accessPatterns;
-    //}
-    //frVector<std::unique_ptr<FlexAccessPattern> >& getAccessPatterns() {
-    //  return accessPatterns;
-    //}
 
-    //frVector<std::unique_ptr<FlexAccessPattern> >& getAccessPatterns(const frOrient &oriIn) {
-    //  return orient2APs[oriIn];
-    //}
     int getNumPinAccess() const {
       return aps.size();
     }
@@ -127,18 +117,6 @@ namespace fr {
     std::map< frLayerNum, PolygonSet >& getLayer2PolySet() {
       return layer2PolySet;
     }
-    //frListIter<FlexAccessPattern> addAccessPattern(const FlexAccessPattern &apIn) {
-    //  accessPatterns.push_back(apIn);
-    //  return (--accessPatterns.end());
-    //}
-    //void addAccessPattern(const FlexAccessPattern &apIn) {
-    //  auto uptr = std::make_unique<FlexAccessPattern>(apIn);
-    //  accessPatterns.push_back(std::move(uptr));
-    //}
-    //void addAccessPattern(const frOrient &oriIn, const FlexAccessPattern &apIn) {
-    //  auto uptr = std::make_unique<FlexAccessPattern>(apIn);
-    //  orient2APs[oriIn].push_back(std::move(uptr));
-    //}
     void addPinAccess(std::unique_ptr<frPinAccess> &in) {
       in->setId(aps.size());
       aps.push_back(std::move(in));
@@ -151,8 +129,6 @@ namespace fr {
     frTerm* term;
     std::vector< std::unique_ptr<frPinFig> > pinFigs; // optional, set later
     std::map< frLayerNum, PolygonSet> layer2PolySet;
-    //frVector<std::unique_ptr<FlexAccessPattern> > accessPatterns;
-    //std::map< frOrient, frVector<std::unique_ptr<FlexAccessPattern> > > orient2APs;
     std::vector<std::unique_ptr<frPinAccess> > aps; // not copied in copy constructor
   };
 }

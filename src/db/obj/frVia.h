@@ -269,7 +269,6 @@ namespace fr {
       boxIn.set(xl,yl,xh,yh);
       frTransform xform;
       xform.set(origin);
-      //cout <<"origin " <<origin.x() <<" " <<origin.y() <<endl;
       boxIn.transform(xform);
     }
     void move(const frTransform &xform) override {
@@ -286,7 +285,6 @@ namespace fr {
       return iter;
     }
 
-    //friend void copyRefresh(std::shared_ptr<frInst> &instIn);
   protected:
     frPoint        origin;
     frViaDef*      viaDef;

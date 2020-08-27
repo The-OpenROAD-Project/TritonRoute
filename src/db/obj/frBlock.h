@@ -53,9 +53,6 @@ namespace fr {
     frUInt4 getDBUPerUU() const {
       return dbUnit;
     }
-    //frUInt4 getManufacturingGrid() const {
-    //  return manufacturingGrid;
-    //}
     void getBBox(frBox &boxIn) const {
       if (boundaries.size()) {
         boundaries.begin()->getBBox(boxIn);
@@ -72,7 +69,6 @@ namespace fr {
         urx = urx > tmpBox.right()  ? urx : tmpBox.right();
         ury = ury > tmpBox.top()    ? ury : tmpBox.top();
       }
-      //std::cout <<"dieBox after bound " <<llx <<" " <<lly <<" " <<urx <<" " <<ury <<std::endl;
       for (auto &inst: getInsts()) {
         inst->getBBox(tmpBox);
         llx = llx < tmpBox.left()   ? llx : tmpBox.left();
@@ -80,7 +76,6 @@ namespace fr {
         urx = urx > tmpBox.right()  ? urx : tmpBox.right();
         ury = ury > tmpBox.top()    ? ury : tmpBox.top();
       }
-      //std::cout <<"dieBox after inst " <<llx <<" " <<lly <<" " <<urx <<" " <<ury <<std::endl;
       for (auto &term: getTerms()) {
         for (auto &pin: term->getPins()) {
           for (auto &fig: pin->getFigs()) {
@@ -92,7 +87,6 @@ namespace fr {
           }
         }
       }
-      //std::cout <<"dieBox after term " <<llx <<" " <<lly <<" " <<urx <<" " <<ury <<std::endl;
       boxIn.set(llx, lly, urx, ury);
     }
     void getBoundaryBBox(frBox &boxIn) const {
@@ -201,9 +195,6 @@ namespace fr {
       frPoint idx(idx1);
       frBox dieBox;
       getBoundaryBBox(dieBox);
-      //double dbu = getDBUPerUU();
-      //std::cout <<"diebox (" <<dieBox.left() / dbu <<", " <<dieBox.bottom() / dbu <<") ("
-      //                       <<dieBox.right()/ dbu <<", " <<dieBox.top()    / dbu <<")" <<std::endl;
       auto &gp = getGCellPatterns();
       auto &xgp = gp[0];
       auto &ygp = gp[1];
@@ -225,21 +216,16 @@ namespace fr {
       frCoord yh = (frCoord)ygp.getSpacing() * (idx.y() + 1) + ygp.getStartCoord();
       if (idx.x() <= 0) {
         xl = dieBox.left();
-        //std::cout <<"xl reset to dieBox" <<std::endl;
       }
       if (idx.y() <= 0) {
         yl = dieBox.bottom();
-        //std::cout <<"yl reset to dieBox" <<std::endl;
       }
       if (idx.x() >= (int)xgp.getCount() - 1) {
         xh = dieBox.right();
-        //std::cout <<"xh reset to dieBox" <<std::endl;
       }
       if (idx.y() >= (int)ygp.getCount() - 1) {
         yh = dieBox.top();
-        //std::cout <<"yh reset to dieBox" <<std::endl;
       }
-      //std::cout <<"xl/yl/xh/yh@" <<xl <<"/" <<yl <<"/" <<xh <<"/" <<yh <<std::endl;
       box.set(xl, yl, xh, yh);
     }
     void getGCellCenter(const frPoint &idx, frPoint &pt) const {
@@ -309,9 +295,6 @@ namespace fr {
     void setDBUPerUU(frUInt4 uIn) {
       dbUnit = uIn;
     }
-    //void setManufacturingGrid(frUInt4 in) {
-    //  manufacturingGrid = in;
-    //}
     void setName(const frString &nameIn) {
       name = nameIn;
     }
@@ -321,17 +304,14 @@ namespace fr {
     }
     void addInst(std::unique_ptr<frInst> &in) {
       name2inst[in->getName()] = in.get();
-      //in->setId(insts.size());
       insts.push_back(std::move(in));
     }
     void addNet(std::unique_ptr<frNet> &in) {
       name2net[in->getName()] = in.get();
-      //in->setId(snets.size() + nets.size());
       nets.push_back(std::move(in));
     }
     void addSNet(std::unique_ptr<frNet> &in) {
       name2snet[in->getName()] = in.get();
-      //in->setId(snets.size() + nets.size());
       snets.push_back(std::move(in));
     }
     void setBoundaries(const std::vector<frBoundary> &in) {
@@ -374,7 +354,6 @@ namespace fr {
   protected:
     frString                                                      name;
     frUInt4                                                       dbUnit;
-    //frUInt4                                                       manufacturingGrid;
 
     MacroClassEnum                                                macroClass;
 

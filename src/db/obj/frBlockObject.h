@@ -35,7 +35,6 @@ namespace fr {
   class frBlockObject {
   public:
     // constructors
-    //frBlockObject() {}
     frBlockObject(): id(-1) {}
     frBlockObject(const frBlockObject &in): id(in.id) {}
     virtual ~frBlockObject() {}

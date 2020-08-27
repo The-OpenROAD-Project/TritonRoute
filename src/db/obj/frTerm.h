@@ -41,7 +41,6 @@ namespace fr {
   class frTerm: public frBlockObject {
   public:
     // constructors
-    //frTerm(): frBlockObject(), name(), net(), pins() {}
     frTerm(const frString &in): frBlockObject(), name(in), net(nullptr), pins(), type(frTermEnum::frcNormalTerm) {}
     frTerm(const frTerm &in): frBlockObject(), name(in.name), net(in.net), type(in.type) {
       for (auto &uPin: in.getPins()) {
@@ -77,9 +76,6 @@ namespace fr {
     void addToNet(frNet* in) {
       net = in;
     }
-    //void removeFromNet() {
-    //  net.reset();
-    //}
     void addPin(std::unique_ptr<frPin> &in) {
       in->setTerm(this);
       pins.push_back(std::move(in));

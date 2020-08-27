@@ -62,17 +62,7 @@ namespace fr {
       vioIsH = in;
     }
 
-    // void addNet(frNet* netIn) {
-    //   srcs.push_back(netIn);
-    // }
-    // void addInstTerm(frInstTerm* instTermIn) {
-    //   srcs.push_back(instTermIn);
-    // }
-    // void addTerm(frTerm* termIn) {
-    //   srcs.push_back(termIn);
-    // }
     void addSrc(frBlockObject *srcIn) {
-      // srcs.push_back(srcIn);
       srcs.insert(srcIn);
     }
     void addAggressor(frBlockObject *obj, const std::tuple<frLayerNum, frBox, bool> &tupleIn) {
@@ -81,9 +71,6 @@ namespace fr {
     void addVictim(frBlockObject *obj, const std::tuple<frLayerNum, frBox, bool> &tupleIn) {
       victims.push_back(std::make_pair(obj, tupleIn));
     }
-    // void addSrcId(int netId) {
-    //   srcIds.insert(netId);
-    // }
     // getters
 
     /* from frFig
@@ -100,17 +87,6 @@ namespace fr {
       return layerNum;
     }
 
-    // frVector<frNet*> getNets() const {
-    //   return nets;
-    // }
-
-    // const frVector<frBlockObject*>& getSrcs() const {
-    //   return srcs;
-    // }
-    // frVector<frBlockObject*>& getSrcs() {
-    //   return srcs;
-    // }
-
     const std::set<frBlockObject*>& getSrcs() const {
       return srcs;
     }
@@ -118,13 +94,6 @@ namespace fr {
       return srcs;
     }
     
-    // const std::set<int>& getSrcIds() const {
-    //   return srcIds;
-    // }
-    // std::set<int>& getSrcIds() {
-    //   return srcIds;
-    // }
-
     const std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getAggressors() const {
       return aggressors;
     }
@@ -176,11 +145,9 @@ namespace fr {
     frConstraint* constraint;
     frBox bbox;
     frLayerNum layerNum;
-    // frVector<frBlockObject*> srcs; // either frNet or instTerm or term
     std::set<frBlockObject*> srcs;
     std::vector<std::pair<frBlockObject*,std::tuple<frLayerNum, frBox, bool> > > victims; // obj, isFixed
     std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > > aggressors; // obj, isFixed
-    // std::set<int> srcIds;
     frListIter<std::unique_ptr<frMarker> > iter;
     bool vioHasDir, vioIsH;
   };

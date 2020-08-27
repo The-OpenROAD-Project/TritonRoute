@@ -29,7 +29,6 @@
 #ifndef _FR_NET_H_
 #define _FR_NET_H_
 
-//#include <boost/graph/adjacency_list.hpp>
 #include "frBaseTypes.h"
 #include "db/obj/frBlockObject.h"
 #include "db/obj/frGuide.h"
@@ -43,7 +42,6 @@ namespace fr {
   class frNet: public frBlockObject {
   public:
     // constructors
-    //frNet(): frBlockObject() {}
     frNet(const frString &in): frBlockObject(), name(in), instTerms(), terms(), shapes(), vias(), pwires(), guides(), type(frNetEnum::frcNormalNet), modified(false), isFakeNet(false) {}
     // getters
     const frString& getName() const {
@@ -124,7 +122,6 @@ namespace fr {
       auto rptr = in.get();
       rptr->addToNet(this);
       guides.push_back(std::move(in));
-      //rptr->setIter(--vias.end());
     }
     void clearGuides() {
       guides.clear();
@@ -161,7 +158,6 @@ namespace fr {
     std::list<std::unique_ptr<frShape> >      shapes;
     std::list<std::unique_ptr<frVia> >        vias;
     std::list<std::unique_ptr<frShape> >      pwires;
-    //std::list<std::unique_ptr<frGuide> >    guides;
     std::vector<std::unique_ptr<frGuide> >    guides;
     frNetEnum                                 type;
     bool                                      modified;

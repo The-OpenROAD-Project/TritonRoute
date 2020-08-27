@@ -158,13 +158,6 @@ namespace fr {
       }
     }
     void addViaDef(frViaDef *in);
-    //void addViaDef(frViaDef *in) {
-    //  auto numCut = in->getNumCut();
-    //  if (numCut > (int)viaDefs.size()) {
-    //    viaDefs.resize(numCut, {});
-    //  }
-    //  viaDefs[numCut].push_back(in);
-    //}
     void addToPinAccess(frPinAccess* in) {
       aps = in;
     }
