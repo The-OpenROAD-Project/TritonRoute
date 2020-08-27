@@ -50,7 +50,5 @@ void FlexTAWorker::saveToGuides() {
 
 
 void FlexTAWorker::end() {
-  //if (getTAIter() <= 0) {
-    saveToGuides();
-  //}
+  saveToGuides();
 }

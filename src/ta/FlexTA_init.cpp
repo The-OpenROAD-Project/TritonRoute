@@ -34,8 +34,6 @@ using namespace fr;
 void FlexTAWorker::initTracks() {
   //bool enableOutput = true;
   bool enableOutput = false;
-  //tracks.clear();
-  //tracks.resize(getDesign()->getTech()->getLayers().size());
   trackLocs.clear();
   trackLocs.resize(getDesign()->getTech()->getLayers().size());
   vector<set<frCoord> > trackCoordSets(getDesign()->getTech()->getLayers().size());
@@ -83,9 +81,6 @@ void FlexTAWorker::initTracks() {
       if (enableOutput) {
         cout <<" " <<coord * 1.0 / getDesign()->getTopBlock()->getDBUPerUU();
       }
-      //taTrack t;
-      //t.setTrackLoc(coord);
-      //tracks[i].push_back(std::move(t));
       trackLocs[i].push_back(coord);
     }
     if (enableOutput) {
@@ -142,15 +137,12 @@ bool FlexTAWorker::initIroute_helper_pin(frGuide* guide, frCoord &maxBegin, frCo
   frTransform instXform; // (0,0), frcR0
   frTransform shiftXform;
   frTerm* trueTerm = nullptr;
-  //string  name;
   for (auto &term: result) {
-    //bool hasInst = false;
     frInst* inst = nullptr;
     if (term->typeId() == frcInstTerm) {
       if (static_cast<frInstTerm*>(term)->getNet() != net) {
         continue;
       }
-      //hasInst = true;
       inst = static_cast<frInstTerm*>(term)->getInst();
       inst->getTransform(shiftXform);
       shiftXform.set(frOrient(frcR0));
@@ -238,15 +230,12 @@ void FlexTAWorker::initIroute_helper_generic_helper(frGuide* guide, frCoord &wle
   frTransform instXform; // (0,0), frcR0
   frTransform shiftXform;
   frTerm* trueTerm = nullptr;
-  //string  name;
   for (auto &term: result) {
-    //bool hasInst = false;
     frInst* inst = nullptr;
     if (term->typeId() == frcInstTerm) {
       if (static_cast<frInstTerm*>(term)->getNet() != net) {
         continue;
       }
-      //hasInst = true;
       inst = static_cast<frInstTerm*>(term)->getInst();
       inst->getTransform(shiftXform);
       shiftXform.set(frOrient(frcR0));
@@ -359,9 +348,6 @@ void FlexTAWorker::initIroute_helper_generic(frGuide* guide, frCoord &minBegin, 
                 maxEnd = max(maxEnd, (isH ? nbrSegBegin.x() : nbrSegBegin.y()));
                 hasMaxEnd = true;
               }
-              //if (nbrBp == nbrEp) {
-              //  wlen2 = isH ? ((nbrSegBegin.y() + nbrSegEnd().y()) / 2) : ((nbrSegBegin.x() + nbrSegEnd().x()) / 2)
-              //}
               if (psLNum == layerNum - 2) {
                 downViaCoordSet.insert((isH ? nbrSegBegin.x() : nbrSegBegin.y()));
               } else {
@@ -434,11 +420,6 @@ void FlexTAWorker::initIroute(frGuide *guide) {
         auto obj = static_cast<frPathSeg*>(connFig.get());
         obj->getPoints(segBegin, segEnd);
         trackLoc = (isH ? segBegin.y() : segBegin.x());
-        //auto psLNum = obj->getLayerNum();
-        //int idx1 = 0;
-        //int idx2 = 0;
-        //getTrackIdx(trackLoc, psLNum, idx1, idx2);
-        //iroute.setTrackIdx(idx1);
       }
     }
   } else {
@@ -457,13 +438,6 @@ void FlexTAWorker::initIroute(frGuide *guide) {
   // owner set when add to taPin
   iroute->addPinFig(ps);
 
-  //iroute.setCoords(maxBegin, minEnd);
-  //for (auto coord: upViaCoordSet) {
-  //  iroute.addViaCoords(coord, true);
-  //}
-  //for (auto coord: downViaCoordSet) {
-  //  iroute.addViaCoords(coord, false);
-  //}
   for (auto coord: upViaCoordSet) {
     unique_ptr<taPinFig> via = make_unique<taVia>(getDesign()->getTech()->getLayer(layerNum + 1)->getDefaultViaDef());
     auto rViaPtr = static_cast<taVia*>(via.get());
@@ -481,8 +455,6 @@ void FlexTAWorker::initIroute(frGuide *guide) {
     iroute->setWlenHelper2(wlen2);
   }
   addIroute(iroute, isExt);
-  //iroute.setId(iroutes.size()); // set id
-  //iroutes.push_back(iroute);
 }
 
 
@@ -514,11 +486,9 @@ void FlexTAWorker::initIroutes() {
       //       <<pt2.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") " 
       //       <<guide->getNet()->getName() << "\n";
       //}
-      //guides.push_back(guide);
       //cout <<endl;
       initIroute(guide);
     }
-    //sort(guides.begin(), guides.end(), [](const frGuide *a, const frGuide *b) {return *a < *b;});
   }
 
   if (enableOutput) {
@@ -607,12 +577,9 @@ void FlexTAWorker::initCosts() {
         cout <<"Error: FlexTAWorker::initCosts does not find trackLoc" <<endl;
         exit(1);
       }
-      //auto tmpCost = assignIroute_getCost(iroute.get(), trackLoc, drcCost);
       assignIroute_getCost(iroute.get(), trackLoc, drcCost);
       iroute->setCost(drcCost);
       totCost += drcCost;
-      //iroute->setDrcCost(drcCost);
-      //totDrcCost += drcCost;
       if (enableOutput && !isInitTA()) {
         bool   isH = (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
         double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -702,15 +669,10 @@ void FlexTAWorker::initFixedObjs_helper(const frBox &box, frCoord bloatDist, frL
   //frCoord x1, x2;
   if (isH) {
     getTrackIdx(bloatBox.bottom(), bloatBox.top(),   lNum, idx1, idx2);
-    //x1 = bloatBox.bottom();
-    //x2 = bloatBox.top();
   } else {
     getTrackIdx(bloatBox.left(),   bloatBox.right(), lNum, idx1, idx2);
-    //x1 = bloatBox.left();
-    //x2 = bloatBox.right();
   }
   auto &trackLocs = getTrackLocs(lNum);
-  //auto &tracks = getTracks(lNum);
   auto &workerRegionQuery = getWorkerRegionQuery();
   for (int i = idx1; i <= idx2; i++) {
     // new
@@ -743,8 +705,7 @@ void FlexTAWorker::initFixedObjs_helper(const frBox &box, frCoord bloatDist, frL
 
 void FlexTAWorker::initFixedObjs() {
   //bool enableOutput = false;
-  ////bool enableOutput = true;
-  //double dbu = getTech()->getDBUPerUU();
+  //bool enableOutput = true;
   frRegionQuery::Objects<frBlockObject> result;
   frBox box;
   frCoord width = 0;
@@ -814,15 +775,6 @@ void FlexTAWorker::initFixedObjs() {
         bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, boostb);
         box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
         initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
-        // if (USEMINSPACING_OBS) {
-        //   box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
-        //   bloatDist = TASHAPEBLOATWIDTH * width;
-        //   initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
-        // } else {
-        //   box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
-        //   bloatDist = TASHAPEBLOATWIDTH * width;
-        //   initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
-        // }
 
         if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
           // block track for up-via and down-via for fat MACRO OBS          

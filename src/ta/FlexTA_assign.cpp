@@ -88,7 +88,6 @@ void FlexTAWorker::modMinSpacingCostPlanar(const frBox &box, frLayerNum lNum, ta
   auto &trackLocs = getTrackLocs(lNum);
   auto &workerRegionQuery = getWorkerRegionQuery();
   for (int i = idx1; i <= idx2; i++) {
-    //cout <<"@@@ " <<i <<endl <<flush;
     auto trackLoc = trackLocs[i];
     xform.set(frPoint(boxLeft, trackLoc));
     box2.transform(xform);
@@ -201,23 +200,6 @@ void FlexTAWorker::modMinSpacingCostVia(const frBox &box, frLayerNum lNum, taPin
     cout <<"Warning: no min spacing rule" <<endl;
     return;
   }
-  // other obj eol spc to curr obj
-  // no need to bloat eolWithin because eolWithin always < minSpacing
-  //frCoord bloatDistEolX = 0;
-  //frCoord bloatDistEolY = 0;
-  //for (auto con: getDesign()->getTech()->getLayer(lNum)->getEolSpacing()) {
-  //  auto eolSpace  = con->getMinSpacing();
-  //  auto eolWidth  = con->getEolWidth();
-  //  // eol up and down
-  //  if (viaBox.right() - viaBox.left() < eolWidth) {
-  //    bloatDistEolY = max(bloatDistEolY, eolSpace);
-  //  } 
-  //  // eol left and right
-  //  if (viaBox.top() - viaBox.bottom() < eolWidth) {
-  //    bloatDistEolX = max(bloatDistEolX, eolSpace);
-  //  }
-  //}
-  //frCoord bloatDistSquare = bloatDist * bloatDist;
 
   int idx1, idx2;
   if (isH) {
@@ -235,12 +217,10 @@ void FlexTAWorker::modMinSpacingCostVia(const frBox &box, frLayerNum lNum, taPin
   frBox tmpBx;
   frTransform xform;
   frCoord dx, dy, prl;
-  //frCoord distSquare;
   frCoord reqDist = 0;
   frCoord maxX, blockLeft, blockRight;
   frBox blockBox;
   for (int i = idx1; i <= idx2; i++) {
-    //cout <<"@@@ " <<i <<endl <<flush;
     auto trackLoc = trackLocs[i];
     if (isH) {
       xform.set(frPoint(box.left(), trackLoc));
@@ -249,7 +229,6 @@ void FlexTAWorker::modMinSpacingCostVia(const frBox &box, frLayerNum lNum, taPin
     }
     tmpBx.set(viaBox);
     tmpBx.transform(xform);
-    //distSquare = box2boxDistSquare(box, tmpBx, dx, dy);
     box2boxDistSquare(box, tmpBx, dx, dy);
     if (isH) { // track is horizontal
       if (dy > 0) { // via at the bottom of box
@@ -405,7 +384,6 @@ void FlexTAWorker::modCutSpacingCost(const frBox &box, frLayerNum lNum, taPinFig
   bool hasViol = false;
   for (int i = idx1; i <= idx2; i++) {
     auto trackLoc = trackLocs[i];
-    //cout <<"@@@" <<trackLoc <<endl;
     if (isH) {
       xform.set(frPoint(box.left(), trackLoc));
     } else {
@@ -413,7 +391,6 @@ void FlexTAWorker::modCutSpacingCost(const frBox &box, frLayerNum lNum, taPinFig
     }
     tmpBx.set(viaBox);
     tmpBx.transform(xform);
-    //distSquare = box2boxDistSquare(box, tmpBx, dx, dy);
     box2boxDistSquare(box, tmpBx, dx, dy);
 
     for (auto con: getDesign()->getTech()->getLayer(lNum)->getCutSpacing()) {
@@ -436,7 +413,6 @@ void FlexTAWorker::modCutSpacingCost(const frBox &box, frLayerNum lNum, taPinFig
             continue;
           }
         }
-        //cout <<"@@@@" <<trackLoc <<endl;
         if (isC2C) {
           maxX = (frCoord)(sqrt(1.0 * reqDist * reqDist - 1.0 * c2ctrackdist * c2ctrackdist));
         } else {
@@ -463,7 +439,6 @@ void FlexTAWorker::modCutSpacingCost(const frBox &box, frLayerNum lNum, taPinFig
             continue;
           }
         }
-        //cout <<"@@@@" <<trackLoc <<endl;
         if (isC2C) {
           maxX = (frCoord)(sqrt(1.0 * reqDist * reqDist - 1.0 * c2ctrackdist * c2ctrackdist));
         } else {
@@ -752,9 +727,6 @@ frUInt4 FlexTAWorker::assignIroute_getDRCCost(taPin* iroute, frCoord trackLoc) {
         ep.set(trackLoc, ep.y());
       }
       frUInt4 wireCost = assignIroute_getDRCCost_helper(iroute, frBox(bp, ep), obj->getLayerNum());
-      //if (!isInitTA()) {
-      //  cout <<"wireCost@" <<wireCost <<endl;
-      //}
       cost += wireCost;
     } else if (uPinFig->typeId() == tacVia) {
       auto obj = static_cast<taVia*>(uPinFig.get());
@@ -764,11 +736,7 @@ frUInt4 FlexTAWorker::assignIroute_getDRCCost(taPin* iroute, frCoord trackLoc) {
       } else {
         bp.set(trackLoc, bp.y());
       }
-      //cost += TAVIACOST * assignIroute_getDRCCost_helper(iroute, frBox(bp, bp), obj->getViaDef()->getCutLayerNum());
       frUInt4 viaCost = assignIroute_getDRCCost_helper(iroute, frBox(bp, bp), obj->getViaDef()->getCutLayerNum());
-      //if (!isInitTA()) {
-      //  cout <<"viaCost@" <<viaCost <<endl;
-      //}
       cost += viaCost;
     } else {
       cout <<"Error: assignIroute_updateIroute unsupported pinFig" <<endl;
@@ -824,7 +792,6 @@ frUInt4 FlexTAWorker::assignIroute_getCost(taPin* iroute, frCoord trackLoc, frUI
   int pinCost    = (tmpPinCost == 0) ? 0 : TAPINCOST * irouteLayerPitch + tmpPinCost;
   int tmpAlignCost = assignIroute_getAlignCost(iroute, trackLoc);
   int alignCost  = (tmpAlignCost == 0) ? 0 : TAALIGNCOST * irouteLayerPitch + tmpAlignCost;
-  // int misalignCost = assignIroute_getMisalignCost(iroute, trackLoc);
   if (enableOutput) {
     cout <<"    drc/wlen/pin/align cost = " <<drcCost <<"/" <<wlenCost <<"/" <<pinCost <<"/" <<alignCost <<endl;
   }
@@ -993,14 +960,10 @@ int FlexTAWorker::assignIroute_bestTrack(taPin* iroute, frLayerNum lNum, int idx
     exit(1);
   }
   if (enableOutput) {
-  //if (true) {
     cout <<"  select track@" <<bestTrackLoc / dbu <<", cost=" <<bestCost <<endl;
   }
-  //totCost    -= iroute->getCost();
-  //totDrcCost -= iroute->getDrcCost();
   totCost    += drcCost;
   iroute->setCost(drcCost);
-  //totDrcCost += drcCost;
   return bestTrackLoc;
 }
   
@@ -1053,7 +1016,6 @@ void FlexTAWorker::assignIroute_init(taPin* iroute, set<taPin*, frBlockObjectCom
       subCost(uPinFig.get(), pinS);
     }
     totCost    -= iroute->getCost();
-    //totDrcCost -= iroute->getDrcCost();
   }
 }
 
@@ -1086,14 +1048,8 @@ void FlexTAWorker::assignIroute_updateOthers(set<taPin*, frBlockObjectComp> &pin
       exit(1);
     }
     totCost    -= iroute->getCost();
-    //totDrcCost -= iroute->getDrcCost();
-    //auto tmpCost = assignIroute_getCost(iroute, trackLoc, drcCost);
     assignIroute_getCost(iroute, trackLoc, drcCost);
     iroute->setCost(drcCost);
-    //iroute->setCost(tmpCost);
-    //iroute->setDrcCost(drcCost);
-    //totCost    += iroute->getCost();
-    //totDrcCost += iroute->getDrcCost();
     totCost    += iroute->getCost();
     if (drcCost && iroute->getNumAssigned() < maxRetry) {
       addToReassignIroutes(iroute);
@@ -1151,34 +1107,32 @@ void FlexTAWorker::assign() {
   if (getTAIter() == -1) {
     return;
   }
-  //if (isInitTA()) {
-    int maxBufferSize = 20;
-    vector<taPin*> buffers(maxBufferSize, nullptr);
-    int currBufferIdx = 0;
-    auto iroute = popFromReassignIroutes();
-    while (iroute != nullptr) {
-      auto it = find(buffers.begin(), buffers.end(), iroute);
-      // in the buffer, skip
-      if (it != buffers.end() || iroute->getNumAssigned() >= maxRetry) {
-        ;
-      // not in the buffer, re-assign
-      } else {
-        assignIroute(iroute);
-        // re add last buffer item to reassigniroutes if drccost > 0
-        //if (buffers[currBufferIdx]) {
-        //  if (buffers[currBufferIdx]->getDrcCost()) {
-        //    addToReassignIroutes(buffers[currBufferIdx]);
-        //  }
-        //}
-        buffers[currBufferIdx] = iroute;
-        currBufferIdx = (currBufferIdx + 1) % maxBufferSize;
-        if (enableOutput && !isInitTA()) {
-          //cout <<"totCost@" <<totCost <<"/" <<totDrcCost <<endl;
-          cout <<"totCost@" <<totCost <<endl;
-        }
-        numAssigned++;
+  int maxBufferSize = 20;
+  vector<taPin*> buffers(maxBufferSize, nullptr);
+  int currBufferIdx = 0;
+  auto iroute = popFromReassignIroutes();
+  while (iroute != nullptr) {
+    auto it = find(buffers.begin(), buffers.end(), iroute);
+    // in the buffer, skip
+    if (it != buffers.end() || iroute->getNumAssigned() >= maxRetry) {
+      ;
+    // not in the buffer, re-assign
+    } else {
+      assignIroute(iroute);
+      // re add last buffer item to reassigniroutes if drccost > 0
+      //if (buffers[currBufferIdx]) {
+      //  if (buffers[currBufferIdx]->getDrcCost()) {
+      //    addToReassignIroutes(buffers[currBufferIdx]);
+      //  }
+      //}
+      buffers[currBufferIdx] = iroute;
+      currBufferIdx = (currBufferIdx + 1) % maxBufferSize;
+      if (enableOutput && !isInitTA()) {
+        //cout <<"totCost@" <<totCost <<"/" <<totDrcCost <<endl;
+        cout <<"totCost@" <<totCost <<endl;
       }
-      iroute = popFromReassignIroutes();
+      numAssigned++;
     }
-  //}
+    iroute = popFromReassignIroutes();
+  }
 }

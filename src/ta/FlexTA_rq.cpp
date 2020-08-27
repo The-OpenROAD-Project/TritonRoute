@@ -75,7 +75,6 @@ void FlexTAWorkerRegionQuery::query(const frBox &box, frLayerNum layerNum, set<t
   vector<rq_rptr_value_t<taPinFig> > temp;
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   shapes.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
-  //transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second->getPin();});
   for (auto &[boostb, rptr]: temp) {
     result.insert(rptr->getPin());
   }
@@ -87,25 +86,6 @@ void FlexTAWorkerRegionQuery::init() {
   shapes.resize(numLayers);
   costs.clear();
   costs.resize(numLayers);
-  //aps.clear();
-  //aps.resize(numLayers);
-  //vector<vector<rq_rptr_value_t<drConnFig> > > allShapes(numLayers);
-  //for (auto &net: getDRWorker()->getNets()) {
-  //  for (auto &connFig: net->getRouteConnFigs()) {
-  //    add(connFig.get(), allShapes);
-  //  }
-  //  for (auto &connFig: net->getExtConnFigs()) {
-  //    add(connFig.get(), allShapes);
-  //  }
-  //}
-  //for (auto i = 0; i < numLayers; i++) {
-  //  shapes.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<drConnFig>, bgi::quadratic<16> >(allShapes.at(i)));
-  //  allShapes.at(i).clear();
-  //  allShapes.at(i).shrink_to_fit();
-  //  //if (VERBOSE > 0) {
-  //  //  cout <<"  complete " <<design->getTech()->getLayer(i)->getName() <<endl;
-  //  //}
-  //}
 }
 
 void FlexTAWorkerRegionQuery::addCost(const frBox &box, frLayerNum layerNum, frBlockObject* obj, frConstraint* con) {
@@ -120,16 +100,3 @@ void FlexTAWorkerRegionQuery::queryCost(const frBox &box, frLayerNum layerNum, v
   box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
   costs.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
 }
-
-//void FlexTAWorkerRegionQuery::addAP(const frBox &box, frLayerNum layerNum, frBlockObject* obj, frConstraint* con) {
-//  aps.at(layerNum).insert(make_pair(box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top())), obj));
-//}
-//
-//void FlexTAWorkerRegionQuery::removeAP(const frBox &box, frLayerNum layerNum, frBlockObject* obj, frConstraint* con) {
-//  aps.at(layerNum).remove(make_pair(box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top())), obj));
-//}
-//
-//void FlexTAWorkerRegionQuery::queryAP(const frBox &box, frLayerNum layerNum, vector<rq_rptr_value_t<frBlockObject> > &result) {
-//  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
-//  aps.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
-//}
