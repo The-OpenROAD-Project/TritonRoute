@@ -74,8 +74,6 @@ void FlexRP::prep_viaForbiddenThrough_helper(const frLayerNum &lNum,
                                              const int &tableEntryIdx,
                                              frViaDef* viaDef,
                                              bool isCurrDirX) {
-  // bool isCurrDirY = !isCurrDirX;
-
   bool isThroughAllowed = true;
 
   if (prep_viaForbiddenThrough_minStep(lNum, viaDef, isCurrDirX)) {
@@ -123,8 +121,6 @@ void FlexRP::prep_lineForbiddenLen_helper(const frLayerNum &lNum,
                                           const int &tableEntryIdx,
                                           const bool isZShape,
                                           const bool isCurrDirX) {
-  // bool isCurrDirY = !isCurrDirX;
-
   vector<pair<frCoord, frCoord> > forbiddenRanges;
   prep_lineForbiddenLen_minSpc(lNum, isZShape, isCurrDirX, forbiddenRanges);
 
@@ -148,7 +144,6 @@ void FlexRP::prep_lineForbiddenLen_minSpc(const frLayerNum &lNum,
                                           const bool isZShape,
                                           const bool isCurrDirX,
                                           vector<pair<frCoord, frCoord> > &forbiddenRanges) {
-  // bool isCurrDirY = !isCurrDirX;
   frCoord defaultWidth = tech->getLayer(lNum)->getWidth();
 
   frCoord minNonOverlapDist = defaultWidth;
@@ -210,8 +205,6 @@ void FlexRP::prep_viaForbiddenPlanarLen_helper(const frLayerNum &lNum,
   if (!viaDef) {
     return;
   }
-
-  // bool isCurrDirY = !isCurrDirX;
 
   vector<pair<frCoord, frCoord> > forbiddenRanges;
   prep_viaForbiddenPlanarLen_minStep(lNum, viaDef, isCurrDirX, forbiddenRanges);
@@ -277,7 +270,6 @@ void FlexRP::prep_viaForbiddenTurnLen_helper(const frLayerNum &lNum,
   }
 
   auto tech = getDesign()->getTech();
-  // bool isCurrDirY = !isCurrDirX;
   
   vector<pair<frCoord, frCoord> > forbiddenRanges;
   prep_viaForbiddenTurnLen_minSpc(lNum, viaDef, isCurrDirX, forbiddenRanges);
@@ -306,7 +298,6 @@ void FlexRP::prep_viaForbiddenTurnLen_minSpc(const frLayerNum &lNum,
     return;
   }
 
-  // bool isCurrDirY = !isCurrDirX;
   frCoord defaultWidth = tech->getLayer(lNum)->getWidth();
 
   frVia via1(viaDef);
@@ -470,18 +461,15 @@ void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc(const frLayerNum &lNum,
   auto via1CutLNum = viaDef1->getCutLayerNum();
   if (!tech->getLayer(via1CutLNum)->getLef58CutSpacingConstraints(false).empty()) {
     for (auto con: tech->getLayer(via1CutLNum)->getLef58CutSpacingConstraints(false)) {
-      // cout << "@@@ here-1\n";
       if (con->getSecondLayerNum() != lNum) {
         continue;
       }
-      // cout << "@@@ here0\n";
       if (!con->isConcaveCorner()) {
         continue;
       }
       reqSpcVal = con->getCutSpacing();
       prep_via2viaForbiddenLen_lef58CutSpc_helper(enclosureBox1, enclosureBox2, cutBox1, reqSpcVal ,range);
       forbiddenRanges.push_back(range);
-      // cout << "@@@ forbidden range (" << range.first / 2000.0 << ", " << range.second << "\n";
     }
   } else {
     for (auto con: tech->getLayer(via1CutLNum)->getLef58CutSpacingConstraints(true)) {
@@ -494,7 +482,6 @@ void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc(const frLayerNum &lNum,
       reqSpcVal = con->getCutSpacing();
       prep_via2viaForbiddenLen_lef58CutSpc_helper(enclosureBox1, enclosureBox2, cutBox1, reqSpcVal ,range);
       forbiddenRanges.push_back(range);
-      // cout << "@@@ forbidden range (" << range.first / 2000.0 << ", " << range.second << "\n";
     }
   }
 
@@ -511,7 +498,6 @@ void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc(const frLayerNum &lNum,
       reqSpcVal = con->getCutSpacing();
       prep_via2viaForbiddenLen_lef58CutSpc_helper(enclosureBox1, enclosureBox2, cutBox2, reqSpcVal ,range);
       forbiddenRanges.push_back(range);
-      // cout << "@@@ forbidden range (" << range.first / 2000.0 << ", " << range.second << "\n";
     }
   } else {
     for (auto con: tech->getLayer(via2CutLNum)->getLef58CutSpacingConstraints(true)) {
@@ -524,10 +510,8 @@ void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc(const frLayerNum &lNum,
       reqSpcVal = con->getCutSpacing();
       prep_via2viaForbiddenLen_lef58CutSpc_helper(enclosureBox1, enclosureBox2, cutBox2, reqSpcVal ,range);
       forbiddenRanges.push_back(range);
-      // cout << "@@@ forbidden range (" << range.first / 2000.0 << ", " << range.second << "\n";
     }
   }
-  // cout << "@@@ here\n";
 }
 
 void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc_helper(const frBox &enclosureBox1,
@@ -703,10 +687,8 @@ void FlexRP::prep_via2viaForbiddenLen_cutSpc(const frLayerNum &lNum,
   frBox viaBox1, cutBox1;
   if (viaDef1->getLayer1Num() == lNum) {
     via1.getLayer1BBox(viaBox1);
-    //isVia1Above = true;
   } else {
     via1.getLayer2BBox(viaBox1);
-    //isVia1Above = false;
   }
   via1.getCutBBox(cutBox1);
 
@@ -714,10 +696,8 @@ void FlexRP::prep_via2viaForbiddenLen_cutSpc(const frLayerNum &lNum,
   frBox viaBox2, cutBox2;
   if (viaDef2->getLayer1Num() == lNum) {
     via2.getLayer1BBox(viaBox2);
-    //isVia2Above = true;
   } else {
     via2.getLayer2BBox(viaBox2);
-    //isVia2Above = false;
   }
   via2.getCutBBox(cutBox2);
 
