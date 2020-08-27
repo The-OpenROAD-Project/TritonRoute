@@ -32,7 +32,6 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
-//#include <boost/io/ios_state.hpp>
 
 extern size_t getPeakRSS();
 extern size_t getCurrentRSS();
@@ -41,12 +40,6 @@ namespace fr {
   class frTime {
   public:
     frTime(): t0(std::chrono::high_resolution_clock::now()), t(clock()) {}
-    //void begin() {
-    //  t0 = std::chrono::high_resolution_clock::now();
-    //}
-    //void end() {
-    //  t1 = std::chrono::high_resolution_clock::now();
-    //}
     std::chrono::high_resolution_clock::time_point getT0() const {
       return t0;
     }
@@ -59,7 +52,6 @@ namespace fr {
   protected:
     std::chrono::high_resolution_clock::time_point t0;
     clock_t t;
-    //std::chrono::high_resolution_clock::time_point t1;
   };
 }
 

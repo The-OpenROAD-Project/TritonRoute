@@ -33,11 +33,6 @@ using namespace std;
 using namespace fr;
 
 void frBox::transform(const frTransform &xform) {
-  //auto ll = bBox.lowerLeft.transform(xform);
-  //ll.transform(xform);
-  //auto ur = bBox.upperRight.transform(xform);
-  //ur.transform(xform);
-  //this->set(ll, ur);
   ll.transform(xform);
   ur.transform(xform);
   this->set(ll, ur);
