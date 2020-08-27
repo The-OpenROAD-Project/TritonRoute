@@ -62,11 +62,8 @@ namespace fr {
       std::vector<bgi::rtree<rq_rptr_value_t<gcRect>,          bgi::quadratic<16> > > max_rectangles; // merged
   };
 
-  // class FlexDRWorker;
   class drConnFig;
   class drNet;
-  // class drShape;
-  // class drPatchWire;
   class FlexGCWorker {
   public:
     // constructors
@@ -90,27 +87,7 @@ namespace fr {
       owner2nets[owner] = net;
       return net;
     }
-    bool addMarker(std::unique_ptr<frMarker> &in) {
-      frBox bbox;
-      in->getBBox(bbox);
-      auto layerNum = in->getLayerNum();
-      auto con = in->getConstraint();
-      std::vector<frBlockObject*> srcs(2, nullptr);
-      int i = 0;
-      for (auto &src: in->getSrcs()) {
-        srcs.at(i) = src;
-        i++;
-      }
-      if (mapMarkers.find(std::make_tuple(bbox, layerNum, con, srcs[0], srcs[1])) != mapMarkers.end()) {
-        return false;
-      }
-      if (mapMarkers.find(std::make_tuple(bbox, layerNum, con, srcs[1], srcs[0])) != mapMarkers.end()) {
-        return false;
-      }
-      mapMarkers[std::make_tuple(bbox, layerNum, con, srcs[0], srcs[1])] = in.get();
-      markers.push_back(std::move(in));
-      return true;
-    }
+    bool addMarker(std::unique_ptr<frMarker> &in);
     void clearMarkers() {
       mapMarkers.clear();
       markers.clear();
@@ -184,7 +161,6 @@ namespace fr {
     void init();
     int  main();
     void end();
-    int  test();
     // initialization from FlexPA, initPA0 --> addPAObj --> initPA1
     void initPA0();
     void initPA1();

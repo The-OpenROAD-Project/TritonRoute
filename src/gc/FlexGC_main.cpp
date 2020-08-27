@@ -67,25 +67,21 @@ bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const gtl::rectangle_data<f
   frCoord cornerY = corner->getNextEdge()->low().y();
   switch (corner->getDir()) {
     case frCornerDirEnum::NE:
-      // if (cornerX == box.max_corner().get<0>() && cornerY == box.max_corner().get<1>()) {
       if (cornerX == gtl::xh(rect) && cornerY == gtl::yh(rect)) {
         return true;
       }
       break;
     case frCornerDirEnum::SE:
-      // if (cornerX == box.max_corner().get<0>() && cornerY == box.min_corner().get<1>()) {
       if (cornerX == gtl::xh(rect) && cornerY == gtl::yl(rect)) {
         return true;
       }
       break;
     case frCornerDirEnum::SW:
-      // if (cornerX == box.min_corner().get<0>() && cornerY == box.min_corner().get<1>()) {
       if (cornerX == gtl::xl(rect) && cornerY == gtl::yl(rect)) {
         return true;
       }
       break;
     case frCornerDirEnum::NW:
-      // if (cornerX == box.min_corner().get<0>() && cornerY == box.max_corner().get<1>()) {
       if (cornerX == gtl::xl(rect) && cornerY == gtl::yh(rect)) {
         return true;
       }
@@ -192,9 +188,6 @@ frCoord FlexGCWorker::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* 
   frCoord reqSpcVal = 0;
   auto currLayer = getDesign()->getTech()->getLayer(layerNum);
   bool isObs  = false;
-  //bool hasOverrideSpacing = false;
-  //bool hasOverrideWidth = false;
-  //frCoord overrideSpacingVal = 0;
   auto width1 = rect1->width();
   auto width2 = rect2->width();
   // override width and spacing
@@ -204,20 +197,6 @@ frCoord FlexGCWorker::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* 
     if (USEMINSPACING_OBS) {
       width1 = currLayer->getWidth();
     }
-    //frBlockage* obs1 = nullptr;
-    //if (rect1->getNet()->getOwner()->typeId() == frcInstBlockage) {
-    //  obs1 = static_cast<frInstBlockage*>(rect1->getNet()->getOwner())->getBlockage();
-    //} else if (rect1->getNet()->getOwner()->typeId() == frcBlockage) {
-    //  obs1 = static_cast<frBlockage*>(rect1->getNet()->getOwner());
-    //}
-    //if (obs1->hasSpacing(rect1->getLayerNum())) {
-    //  hasOverrideSpacing = true;
-    //  overrideSpacingVal = std::max(overrideSpacingVal, obs1->getSpacing(rect1->getLayerNum()));
-    //}
-    //if (obs1->hasDesignRuleWidth(rect1->getLayerNum())) {
-    //  hasOverrideWidth = true;
-    //  width1 = obs1->getDesignRuleWidth(rect1->getLayerNum());
-    //}
   }
   if (rect2->getNet()->getOwner() && 
       (rect2->getNet()->getOwner()->typeId() == frcInstBlockage || rect2->getNet()->getOwner()->typeId() == frcBlockage)) {
@@ -225,37 +204,14 @@ frCoord FlexGCWorker::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* 
     if (USEMINSPACING_OBS) {
       width2 = currLayer->getWidth();
     }
-    //frBlockage* obs1 = nullptr;
-    //if (rect2->getNet()->getOwner()->typeId() == frcInstBlockage) {
-    //  obs1 = static_cast<frInstBlockage*>(rect2->getNet()->getOwner())->getBlockage();
-    //} else if (rect1->getNet()->getOwner()->typeId() == frcBlockage) {
-    //  obs1 = static_cast<frBlockage*>(rect2->getNet()->getOwner());
-    //}
-    //if (obs1->hasSpacing(rect2->getLayerNum())) {
-    //  hasOverrideSpacing = true;
-    //  overrideSpacingVal = std::max(overrideSpacingVal, obs1->getSpacing(rect2->getLayerNum()));
-    //}
-    //if (obs1->hasDesignRuleWidth(rect2->getLayerNum())) {
-    //  hasOverrideWidth = true;
-    //  width2 = obs1->getDesignRuleWidth(rect2->getLayerNum());
-    //}
   }
   // check if width is a result of route shape
   // if the width a shape is smaller if only using fixed shape, then it's route shape -- wrong...
   if (currLayer->hasMinSpacing()) {
     auto con = currLayer->getMinSpacing();
     switch (con->typeId()) {
-      //case frConstraintTypeEnum::frcSpacingConstraint:
-      //  reqSpcVal = static_cast<frSpacingConstraint*>(con)->getMinSpacing();
-      //  break;
       case frConstraintTypeEnum::frcSpacingTablePrlConstraint:
         reqSpcVal = static_cast<frSpacingTablePrlConstraint*>(con)->find(std::max(width1, width2), prl);
-        // obs override
-        //if (isObs) {
-        //  if (hasOverrideSpacing) {
-        //    reqSpcVal = overrideSpacingVal;
-        //  }
-        //}
         // same-net override
         if (!isObs && rect1->getNet() == rect2->getNet()) {
           if (currLayer->hasSpacingSamenet()) {
@@ -322,9 +278,9 @@ bool FlexGCWorker::checkMetalSpacing_prl_hasPolyEdge(gcRect* rect1, gcRect* rect
         flagB = true;
       } else if (objPtr->getDir() == frDirEnum::E && objPtr->low().y() == gtl::yh(markerRect)) {
         flagT = true;
-      } else if (objPtr->getDir() == frDirEnum::N && objPtr->low().x() == gtl::xl(markerRect)) { // mod 8/22/19
+      } else if (objPtr->getDir() == frDirEnum::N && objPtr->low().x() == gtl::xl(markerRect)) {
         flagL = true;
-      } else if (objPtr->getDir() == frDirEnum::S && objPtr->low().x() == gtl::xh(markerRect)) { // mod 8/22/19
+      } else if (objPtr->getDir() == frDirEnum::S && objPtr->low().x() == gtl::xh(markerRect)) {
         flagR = true;
       }
     }
@@ -370,36 +326,13 @@ void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl
   auto layerNum = rect1->getLayerNum();
   auto net1 = rect1->getNet();
   auto net2 = rect2->getNet();
-  //bool hasRoute = false;
   auto reqSpcVal = checkMetalSpacing_prl_getReqSpcVal(rect1, rect2, prl);
-  bool testflag = false;
-  //if (gtl::xl(markerRect) == frCoord(264.01  * 2000) &&
-  //    gtl::yl(markerRect) == frCoord(62.72   * 2000) &&
-  //    gtl::xh(markerRect) == frCoord(264.445 * 2000) &&
-  //    gtl::yh(markerRect) == frCoord(62.87   * 2000)) {
-  //  cout <<"@@@0" <<endl;
-  //  testflag = true;
-  //}
-  //if (layerNum == 0 &&
-  //    gtl::xl(markerRect) == frCoord(210.370 * 2000) &&
-  //    gtl::yl(markerRect) == frCoord( 96.455 * 2000) &&
-  //    gtl::xh(markerRect) == frCoord(210.405 * 2000) &&
-  //    gtl::yh(markerRect) == frCoord( 96.455 * 2000)) {
-  //  cout <<"@@@0" <<endl;
-  //  testflag = true;
-  //}
   // no violation if fixed shapes
   if (rect1->isFixed() && rect2->isFixed()) {
-    if (testflag) {
-      cout <<"@@@1" <<endl;
-    }
     return;
   }
   // no violation if spacing satisfied
   if (distX * distX + distY * distY >= reqSpcVal * reqSpcVal) {
-    if (testflag) {
-      cout <<"@@@2 " <<reqSpcVal <<endl;
-    }
     return;
   }
   // no violation if no two true polygon edges (prl > 0 requires non-zero true poly edge; prl <= 0 allows zero true poly edge)
@@ -414,44 +347,8 @@ void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl
     }
   }
   if (!checkMetalSpacing_prl_hasPolyEdge(rect1, rect2, markerRect, type, prl)) {
-    if (testflag) {
-      cout <<"@@@3" <<endl;
-    }
     return;
   }
-  // no violation if covered by shapes of the two nets 
-  // <--> (prl > 0) edge && markerRect should result in non-zero true edge length
-  //auto &workerRegionQuery = getWorkerRegionQuery();
-  //vector<rq_rptr_value_t<gcRect> > result;
-  //box_t queryBox(point_t(gtl::xl(markerRect), gtl::yl(markerRect)), 
-  //               point_t(gtl::xh(markerRect), gtl::yh(markerRect)));
-  //workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
-  //for (auto &[objBox, objPtr]: result) {
-  //  if ((objPtr->getNet() == net1 || objPtr->getNet() == net2) && bg::covered_by(queryBox, objBox)) {
-  //    if (testflag) {
-  //      cout <<"@@@4" <<endl;
-  //    }
-  //    return;
-  //  }
-  //}
-  // no violation if bloat width cannot find route shapes
-  //{
-  //  using namespace boost::polygon::operators;
-  //  auto width = std::max(rect1->width(), rect2->width());
-  //  auto width = std::max(rect1->width(), rect2->width());
-  //  gtl::rectangle_data<frCoord> enlargedMarkerRect(markerRect);
-  //  gtl::bloat(enlargedMarkerRect, width);
-  //  auto &polys1 = net1->getPolygons(layerNum, false);
-  //  auto intersection_polys1 = polys1 & enlargedMarkerRect;
-  //  auto &polys2 = net2->getPolygons(layerNum, false);
-  //  auto intersection_polys2 = polys2 & enlargedMarkerRect;
-  //  if (gtl::empty(intersection_polys1) && gtl::empty(intersection_polys2)) {
-  //    if (testflag) {
-  //      cout <<"@@@5" <<endl;
-  //    }
-  //    return;
-  //  }
-  //}
   // no violation if bloat width cannot find non-fixed route shapes
   bool hasRoute = false;
   if (!hasRoute) {
@@ -489,9 +386,6 @@ void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl
     }
   }
   if (!hasRoute) {
-    if (testflag) {
-      cout <<"@@@5" <<endl;
-    }
     return;
   }
 
@@ -604,30 +498,7 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
   auto layerNum = rect1->getLayerNum();
   auto net1 = rect1->getNet();
   auto net2 = rect2->getNet();
-  bool testflag = false;
-  //bool testflag = true;
-  //if (layerNum == 0 &&
-  //    gtl::xl(markerRect) == frCoord(335.955 * 2000) &&
-  //    gtl::yl(markerRect) == frCoord(134.500 * 2000) &&
-  //    gtl::xh(markerRect) == frCoord(336.005 * 2000) &&
-  //    gtl::yh(markerRect) == frCoord(134.545 * 2000)) {
-  //  testflag = true;
-  //  cout <<"@@@0" <<endl;
-  //}
-  //210.09, 88.89 ) ( 210.145, 88.945
-  //if (layerNum == 0 &&
-  //    gtl::xl(markerRect) == frCoord(210.090 * 2000) &&
-  //    gtl::yl(markerRect) == frCoord( 88.890 * 2000) &&
-  //    gtl::xh(markerRect) == frCoord(210.145 * 2000) &&
-  //    gtl::yh(markerRect) == frCoord( 88.945 * 2000)) {
-  //  testflag = true;
-  //  cout <<"@@@0" <<endl;
-  //}
-  /// skip fixed shape
   if (rect1->isFixed() && rect2->isFixed()) {
-    if (testflag) {
-      cout <<"@@@1" <<endl;
-    }
     return;
   }
   // skip obs overlaps with pin
@@ -651,9 +522,6 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
     auto &polys2 = net2->getPolygons(layerNum, false);
     auto intersection_polys2 = polys2 & bloatMarkerRect;
     if (gtl::empty(intersection_polys1) && gtl::empty(intersection_polys2)) {
-      if (testflag) {
-        cout <<"@@@2" <<endl;
-      }
       return;
     }
   }
@@ -664,17 +532,11 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
     auto xLen = gtl::delta(markerRect, gtl::HORIZONTAL);
     auto yLen = gtl::delta(markerRect, gtl::VERTICAL);
     if (xLen * xLen + yLen * yLen >= minWidth * minWidth) {
-      if (testflag) {
-        cout <<"@@@3" <<endl;
-      }
       return;
     }
     // skip if rect < minwidth
     if ((gtl::delta(*rect1, gtl::HORIZONTAL) < minWidth || gtl::delta(*rect1, gtl::VERTICAL) < minWidth) ||
         (gtl::delta(*rect2, gtl::HORIZONTAL) < minWidth || gtl::delta(*rect2, gtl::VERTICAL) < minWidth)) {
-      if (testflag) {
-        cout <<"@@@4" <<endl;
-      }
       return;
     }
     // query third object that can bridge rect1 and rect2 in bloated marker area
@@ -701,62 +563,16 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
       if (gtl::delta(*objPtr, gtl::HORIZONTAL) < minWidth || gtl::delta(*objPtr, gtl::VERTICAL) < minWidth) {
         continue;
       }
-      //cout <<"@@@x (" 
-      //     <<gtl::xl(*objPtr) / 2000.0 <<", "
-      //     <<gtl::yl(*objPtr) / 2000.0 <<") ("
-      //     <<gtl::xh(*objPtr) / 2000.0 <<", "
-      //     <<gtl::yh(*objPtr) / 2000.0 <<") ("
-      //     <<endl;
       // only check same net third object
       gtl::rectangle_data<frCoord> tmpRect1(*rect1);
       gtl::rectangle_data<frCoord> tmpRect2(*rect2);
       if (gtl::intersect(tmpRect1, *objPtr) && gtl::intersect(tmpRect2, *objPtr)) {
-        //if (gtl::intersect(tmpRect1, tmpRect2)) {
-        //  if (gtl::contains(tmpRect1, markerRect)) {
-        //    auto xLen1 = gtl::delta(tmpRect1, gtl::HORIZONTAL);
-        //    auto yLen1 = gtl::delta(tmpRect1, gtl::VERTICAL);
-        //    if (xLen1 * xLen1 + yLen1 * yLen1 >= minWidth * minWidth) {
-        //      if (testflag) {
-        //        cout <<"@@@5 (" 
-        //             <<gtl::xl(tmpRect1) / 2000.0 <<", "
-        //             <<gtl::yl(tmpRect1) / 2000.0 <<") ("
-        //             <<gtl::xh(tmpRect1) / 2000.0 <<", "
-        //             <<gtl::yh(tmpRect1) / 2000.0 <<") ("
-        //             <<endl;
-        //      }
-        //      return;
-        //    }
-        //  }
-        //}
         auto xLen1 = gtl::delta(tmpRect1, gtl::HORIZONTAL);
         auto yLen1 = gtl::delta(tmpRect1, gtl::VERTICAL);
         auto xLen2 = gtl::delta(tmpRect2, gtl::HORIZONTAL);
         auto yLen2 = gtl::delta(tmpRect2, gtl::VERTICAL);
-        //cout <<"@@@x5 (" 
-        //     <<gtl::xl(tmpRect1) / 2000.0 <<", "
-        //     <<gtl::yl(tmpRect1) / 2000.0 <<") ("
-        //     <<gtl::xh(tmpRect1) / 2000.0 <<", "
-        //     <<gtl::yh(tmpRect1) / 2000.0 <<") ("
-        //     <<gtl::xl(tmpRect2) / 2000.0 <<", "
-        //     <<gtl::yl(tmpRect2) / 2000.0 <<") ("
-        //     <<gtl::xh(tmpRect2) / 2000.0 <<", "
-        //     <<gtl::yh(tmpRect2) / 2000.0 <<")"
-        //     <<endl;
         if (xLen1 * xLen1 + yLen1 * yLen1 >= minWidth * minWidth &&
             xLen2 * xLen2 + yLen2 * yLen2 >= minWidth * minWidth) {
-          //cout <<"@@@x5 returned" <<endl;
-          if (testflag) {
-            cout <<"@@@5 (" 
-                 <<gtl::xl(tmpRect1) / 2000.0 <<", "
-                 <<gtl::yl(tmpRect1) / 2000.0 <<") ("
-                 <<gtl::xh(tmpRect1) / 2000.0 <<", "
-                 <<gtl::yh(tmpRect1) / 2000.0 <<") ("
-                 <<gtl::xl(tmpRect2) / 2000.0 <<", "
-                 <<gtl::yl(tmpRect2) / 2000.0 <<") ("
-                 <<gtl::xh(tmpRect2) / 2000.0 <<", "
-                 <<gtl::yh(tmpRect2) / 2000.0 <<")"
-                 <<endl;
-          }
           return;
         }
       }
@@ -784,12 +600,6 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
-      //cout <<"@@@("
-      //     <<gtl::xl(*rect1) / dbu <<", " <<gtl::yl(*rect1) / dbu <<") ("
-      //     <<gtl::xh(*rect1) / dbu <<", " <<gtl::yh(*rect1) / dbu <<") ("
-      //     <<gtl::xl(*rect2) / dbu <<", " <<gtl::yl(*rect2) / dbu <<") ("
-      //     <<gtl::xh(*rect2) / dbu <<", " <<gtl::yh(*rect2) / dbu <<") "
-      //     <<endl;
       if (net1 == net2) {
         cout <<"NSMetal@(";
       } else {
@@ -850,9 +660,6 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* ptr1, gcRect* ptr2) {
   if (ptr1 == ptr2) {
     return;
   }
-  //auto layerNum = ptr1->getLayerNum();
-  //auto net1 = ptr1->getNet();
-  //auto net2 = ptr2->getNet();
 
   gtl::rectangle_data<frCoord> markerRect(*ptr1);
   auto distX = gtl::euclidean_distance(markerRect, *ptr2, gtl::HORIZONTAL);
@@ -868,19 +675,6 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* ptr1, gcRect* ptr2) {
   if (distY) {
     prlY = -prlY;
   }
-  //// x spacing
-  //if (distX > 0 && distY == 0) {
-  //  checkMetalPrl_prl(ptr1, ptr2, markerRect, prlY, distX * distX);
-  //// y spacing
-  //} else if (distX == 0 && distY > 0) {
-  //  checkMetalPrl_prl(ptr1, ptr2, markerRect, prlX, distY * distY);
-  //// diag spacing
-  //} else if (distX > 0 && distY > 0) {
-  //  checkMetalPrl_prl(ptr1, ptr2, markerRect, std::max(prlX, prlY), distX * distX + distY * distY);
-  //// short, nsmetal
-  //} else {
-  //  ;
-  //}
   
   // short, nsmetal
   if (distX == 0 && distY == 0) {
@@ -941,7 +735,6 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* rect) {
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   // Short, metSpc, NSMetal here
   for (auto &[objBox, ptr]: result) {
-    //cout <<"from " <<rect <<" to " <<ptr <<endl;
     checkMetalSpacing_main(rect, ptr);
   }
 }
@@ -973,7 +766,6 @@ void FlexGCWorker::checkMetalSpacing() {
         for (auto &pin: net->getPins(i)) {
           for (auto &maxrect: pin->getMaxRectangles()) {
             // Short, NSMetal, metSpc
-            //cout <<"from " <<maxrect.get() <<endl;
             checkMetalSpacing_main(maxrect.get());
           }
         }
@@ -1225,34 +1017,9 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg
         continue;
       }
       // no violation if fixed
-      // if (corner->isFixed() && seg->isFixed() && objPtr->isFixed()) {
       if (seg->isFixed() && objPtr->isFixed()) {
-      // if (corner->isFixed() && seg->isFixed()) {
         continue;
       }
-      // no violation if width is not contributed by route obj
-      // bool hasRoute = false;
-      // if (!hasRoute) {
-      //   // marker enlarged by width
-      //   auto width = objPtr->width();
-      //   gtl::rectangle_data<frCoord> enlargedMarkerRect(markerRect);
-      //   gtl::bloat(enlargedMarkerRect, width);
-      //   // widthrect
-      //   gtl::polygon_90_set_data<frCoord> tmpPoly;
-      //   using namespace boost::polygon::operators;
-      //   tmpPoly += enlargedMarkerRect;
-      //   tmpPoly &= *objPtr; // tmpPoly now is widthrect
-      //   auto targetArea = gtl::area(tmpPoly);
-      //   // get fixed shapes
-      //   tmpPoly &= net->getPolygons(layerNum, true);
-      //   if (gtl::area(tmpPoly) < targetArea) {
-      //     hasRoute = true;
-      //   } 
-      // }
-
-      // if (!hasRoute) {
-      //   continue;
-      // }
 
       // real violation
       auto marker = make_unique<frMarker>();
@@ -1335,8 +1102,6 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner) {
   box_t queryBox = checkMetalCornerSpacing_getQueryBox(corner, maxSpcValX, maxSpcValY);
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  // vector<pair<segment_t, gcSegment*> > result;
-  // workerRegionQuery.queryPolygonEdge(queryBox, layerNum, result);
   vector<rq_rptr_value_t<gcRect> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   // LEF58CornerSpacing
@@ -1642,11 +1407,7 @@ void FlexGCWorker::checkMetalShape_lef58MinStep_noBetweenEol(gcPin* pin, frLef58
   auto layerNum = poly->getLayerNum();
   auto net = poly->getNet();
 
-  // gcSegment* be = nullptr;
-  // gcSegment* firste = nullptr; // first edge to check
   vector<gcSegment*> startEdges;
-  // int currLength = 0;
-  // bool hasRoute = false;
   frCoord llx = 0;
   frCoord lly = 0;
   frCoord urx = 0;
@@ -2163,23 +1924,6 @@ bool FlexGCWorker::checkMetalEndOfLine_eol_isEolEdge(gcSegment *edge, frSpacingE
   // skip if non convex edge
   auto prevEdge = edge->getPrevEdge();
   auto nextEdge = edge->getNextEdge();
-  // using gtl default generation of hole polygon from polyset, 1 means convex
-  //if (gtl::orientation(*prevEdge, *edge) == 1 && gtl::orientation(*edge, *nextEdge) == 1) {
-  //  double dbu = getDesign()->getTopBlock()->getDBUPerUU();
-  //  cout <<"both 1 (" <<prevEdge->low().x()  / dbu <<", " <<prevEdge->low().y()  / dbu <<") --> ("
-  //                    <<edge->low().x()      / dbu <<", " <<edge->low().y()      / dbu <<") --> ("
-  //                    <<nextEdge->low().x()  / dbu <<", " <<nextEdge->low().y()  / dbu <<") --> ("
-  //                    <<nextEdge->high().x() / dbu <<", " <<nextEdge->high().y() / dbu <<") "
-  //                    <<getDesign()->getTech()->getLayer(edge->getLayerNum())->getName() <<endl;
-  //}
-  //if (gtl::orientation(*prevEdge, *edge) == -1 && gtl::orientation(*edge, *nextEdge) == -1) {
-  //  double dbu = getDesign()->getTopBlock()->getDBUPerUU();
-  //  cout <<"both -1 (" <<prevEdge->low().x() / dbu <<", " <<prevEdge->low().y()  / dbu <<") --> ("
-  //                    <<edge->low().x()      / dbu <<", " <<edge->low().y()      / dbu <<") --> ("
-  //                    <<nextEdge->low().x()  / dbu <<", " <<nextEdge->low().y()  / dbu <<") --> ("
-  //                    <<nextEdge->high().x() / dbu <<", " <<nextEdge->high().y() / dbu <<") "
-  //                    <<getDesign()->getTech()->getLayer(edge->getLayerNum())->getName() <<endl;
-  //}
   if (!(gtl::orientation(*prevEdge, *edge) == 1 && gtl::orientation(*edge, *nextEdge) == 1)) {
     return false;
   }
@@ -2247,11 +1991,6 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getQueryBox(gc
   gtl::yl(queryRect, queryBox.min_corner().y());
   gtl::xh(queryRect, queryBox.max_corner().x());
   gtl::yh(queryRect, queryBox.max_corner().y());
-
-  //bg::set<bg::min_corner, 0>(queryBox, queryBox.min_corner().x() + 1);
-  //bg::set<bg::min_corner, 1>(queryBox, queryBox.min_corner().y() + 1);
-  //bg::set<bg::max_corner, 0>(queryBox, queryBox.max_corner().x() - 1);
-  //bg::set<bg::max_corner, 1>(queryBox, queryBox.max_corner().y() - 1);
 }
 
 void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getParallelEdgeRect(gcSegment *edge, gtl::rectangle_data<frCoord> &rect) {
@@ -2402,19 +2141,6 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSeg
       return;
     }
   }
-  //{
-  //  using namespace boost::polygon::operators;
-  //  gtl::polygon_90_set_data<frCoord> polys1, polys2;
-  //  polys1 += net1->getPolygons(layerNum, false);
-  //  polys1 += net1->getPolygons(layerNum, true);
-  //  auto intersection_polys1 = polys1 & markerRect;
-  //  polys2 += net2->getPolygons(layerNum, false);
-  //  polys2 += net2->getPolygons(layerNum, true);
-  //  auto intersection_polys2 = polys2 & markerRect;
-  //  if (!(gtl::empty(intersection_polys1) && gtl::empty(intersection_polys2))) {
-  //    return;
-  //  }
-  //}
 
   auto marker = make_unique<frMarker>();
   frBox box(gtl::xl(markerRect), gtl::yl(markerRect), gtl::xh(markerRect), gtl::yh(markerRect));
@@ -2880,7 +2606,6 @@ void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::
         }
       }
       cout <<endl;
-      // cout << "  reqSpcValSquare = " << reqSpcValSquare / dbu / dbu << ", distSquare = " << distSquare / dbu / dbu << endl;
     }
   }
 }
@@ -2911,34 +2636,6 @@ void FlexGCWorker::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2,
   gtl::center(center1, *rect1);
   gtl::center(center2, *rect2);
   frCoord distSquare = 0;
-
-  //if (con->hasStack() && con->hasSameNet() && net1 == net2) {
-  //  //auto xLen1 = gtl::delta(*rect1, gtl::HORIZONTAL);
-  //  //auto yLen1 = gtl::delta(*rect1, gtl::VERTICAL);
-  //  //auto xLen2 = gtl::delta(*rect2, gtl::HORIZONTAL);
-  //  //auto yLen2 = gtl::delta(*rect2, gtl::VERTICAL);
-  //  //if (xLen1 < xLen2 && yLen1 < yLen2) {
-  //  //  if (gtl::contains(*rect2, *rect1)) {
-  //  //    return;
-  //  //  }
-  //  //}
-  //  //if (xLen1 > xLen2 && yLen1 > yLen2) {
-  //  //  if (gtl::contains(*rect1, *rect2)) {
-  //  //    return;
-  //  //  }
-  //  //}
-  //  if (gtl::contains(*rect1, *rect2) || gtl::contains(*rect2, *rect1)) {
-  //    return;
-  //  }
-  //  //if (xLen1 == xLen2 && yLen1 == yLen2) {
-  //  //  if (center1 == center2) {
-  //  //    return;
-  //  //  }
-  //  //  if (reqSpcValSquare == 0) {
-  //  //    return;
-  //  //  }
-  //  //}
-  //}
 
   if (con->hasCenterToCenter()) {
     distSquare = gtl::distance_squared(center1, center2);
@@ -2973,7 +2670,6 @@ void FlexGCWorker::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2,
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
       cout <<"CutSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("
                         <<gtl::xh(markerRect) / dbu <<", " <<gtl::yh(markerRect) / dbu <<") "
-                        // << "reqSpcValSquare = " << reqSpcValSquare << ", distSquare = " << distSquare << " "
            <<getDesign()->getTech()->getLayer(layerNum)->getName() <<" ";
       auto owner = net1->getOwner();
       if (owner == nullptr) {
@@ -3059,14 +2755,6 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutS
   auto layerNum = rect->getLayerNum();
   auto layer = getDesign()->getTech()->getLayer(layerNum);
 
-  // // rect is obs larger than min. size cut, must check against cutWithin
-  // if (rect->getNet()->getOwner() && 
-  //     (rect->getNet()->getOwner()->typeId() == frcInstBlockage ||
-  //      rect->getNet()->getOwner()->typeId() == frcBlockage) &&
-  //     rect->width() > int(layer->getWidth())) {
-  //   return true;
-  // }
-
   auto conCutClassIdx = con->getCutClassIdx();
 
   auto cutWithinSquare = con->getCutWithin();
@@ -3092,15 +2780,6 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutS
     if (distSquare >= cutWithinSquare) {
       continue;
     }
-    // // if target is a cut blockage shape larger than min. size, assume it is a blockage from MACRO
-    // if (ptr->getNet()->getOwner() && 
-    //     (ptr->getNet()->getOwner()->typeId() == frcInstBlockage ||
-    //      ptr->getNet()->getOwner()->typeId() == frcBlockage) &&
-    //     ptr->width() > int(layer->getWidth())) {
-    //   cnt += reqNumCut;
-    // } else {
-    //   cnt++;
-    // }
 
     auto cutClassIdx = layer->getCutClassIdx(ptr->width(), ptr->length());
     if (cutClassIdx == conCutClassIdx) {
@@ -3129,14 +2808,6 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
   auto layerNum = rect->getLayerNum();
   auto layer = getDesign()->getTech()->getLayer(layerNum);
 
-  // // rect is obs larger than min. size cut, must check against cutWithin
-  // if (rect->getNet()->getOwner() && 
-  //     (rect->getNet()->getOwner()->typeId() == frcInstBlockage ||
-  //      rect->getNet()->getOwner()->typeId() == frcBlockage) &&
-  //     rect->width() > int(layer->getWidth())) {
-  //   return true;
-  // }
-
   auto conCutClassIdx = con->getCutClassIdx();
 
   auto cutWithinSquare = con->getCutWithin();
@@ -3162,31 +2833,14 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
     if (distSquare >= cutWithinSquare) {
       continue;
     }
-    // // if target is a cut blockage shape larger than min. size, assume it is a blockage from MACRO
-    // if (ptr->getNet()->getOwner() && 
-    //     (ptr->getNet()->getOwner()->typeId() == frcInstBlockage ||
-    //      ptr->getNet()->getOwner()->typeId() == frcBlockage) &&
-    //     ptr->width() > int(layer->getWidth())) {
-    //   cnt += reqNumCut;
-    // } else {
-    //   cnt++;
-    // }
 
     auto cutClassIdx = layer->getCutClassIdx(ptr->width(), ptr->length());
     if (cutClassIdx == conCutClassIdx) {
       cnt++;
     }
-    // if (center1.x() == 692782 && center1.y() == 618112) {
-    //   cout << "  @@@ debug: cutClassIdx = " << cutClassIdx << ", conCutClassIdx = " << conCutClassIdx << endl;
-    // }
   }
 
-  // if (center1.x() == 692782 && center1.y() == 618112) {
-  //   cout << "  @@@ debug: cnt = " << cnt << ", reqNumCut = " << reqNumCut << endl;
-  // }
-
   if (cnt >= reqNumCut) {
-    // cout << "meet twoCuts\n";
     return true;
   } else {
     return false;
@@ -3226,8 +2880,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1,
   auto layerNum = rect1->getLayerNum();
   auto net1 = rect1->getNet();
   auto net2 = rect2->getNet();
-  // auto reqSpcVal = con->getCutSpacing();
-  // auto reqSpcValSquare = reqSpcVal * reqSpcVal;
 
   bool isSkip = true;
   if (checkLef58CutSpacing_spc_hasAdjCuts(rect1, con)) {
@@ -3240,7 +2892,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1,
   if (isSkip) {
     return;
   }
-  // cout << "here\n";
 
   if (con->hasExactAligned()) {
     cout << "Warning: unsupported branch EXACTALIGNED in checkLef58CutSpacing_spc_adjCut\n";
@@ -3375,7 +3026,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1,
         }
       }
       cout <<endl;
-      // cout << "  reqSpcValSquare = " << reqSpcValSquare / dbu / dbu << ", distSquare = " << distSquare / dbu / dbu << endl;
     }
   }
 
@@ -3437,7 +3087,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
     auto conCutClassIdx = con->getCutClassIdx();
     auto cutClassIdx = getDesign()->getTech()->getLayer(layerNum)->getCutClassIdx(rect1->width(), rect1->length());
     if (cutClassIdx != conCutClassIdx) {
-      // cout << "cutClassIdx mismatch, conCutClassIdx = " << conCutClassIdx << ", cutClassIdx = " << cutClassIdx << "\n";
       return;
     }
 
@@ -3625,9 +3274,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
           edgeY = min(edgeY, int(gtl::length(*(corner->getPrevEdge()))));
         }
         // outside of keepout zone
-        // cout << "check keepout zone, dx = " << dx << ", dy = " << dy << ", edgeX = " << edgeX << ", edgeY = " << edgeY <<"\n";
-        // cout << "  corner (" << corner->x() << ", " << corner->y() << "), cutRect (" << gtl::xl(*rect1) << ", " << gtl::yl(*rect1) << ") - ("
-        //                                                                              << gtl::xh(*rect1) << ", " << gtl::yh(*rect1) << ")\n";
         if (edgeX * dy + edgeY * dx >= edgeX * edgeY) {
           continue;
         }
@@ -3651,7 +3297,6 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
                                                           frBox(corner->x(), corner->y(), corner->x(), corner->y()),
                                                           corner->isFixed()));
         if (addMarker(marker)) {
-          // cout << "NONEOLCONVEXCORNER violation\n";
           if (enableOutput) {
             double dbu = getDesign()->getTopBlock()->getDBUPerUU();
             cout <<"CutSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("
@@ -3734,12 +3379,6 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* ptr1, gcRect* ptr2, frCutSpacing
     }
   }
 
-  // original, only consider same layer skip
-  //if (!getDesign()->getTech()->getLayer(ptr1->getLayerNum())->getCutSpacing(true).empty() &&
-  //    !con->hasSameNet() &&
-  //    ptr1->getNet() == ptr2->getNet() && !(con->hasSecondLayer())) {
-  //  return;
-  //}
   gtl::rectangle_data<frCoord> markerRect(*ptr1);
   auto distX = gtl::euclidean_distance(markerRect, *ptr2, gtl::HORIZONTAL);
   auto distY = gtl::euclidean_distance(markerRect, *ptr2, gtl::VERTICAL);
@@ -3768,57 +3407,6 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* ptr1, gcRect* ptr2, frCutSpacing
     checkCutSpacing_spc_diff_layer(ptr1, ptr2, markerRect, con);
   }
 }
-
-// bool FlexGCWorker::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingConstraint* con) {
-//   // no adj cut rule, must proceed checking
-//   if (!con->isAdjacentCuts()) {
-//     return true;
-//   }
-//   // rect is obs, must proceed regardless of numCuts
-//   if (rect->getNet()->getOwner() && 
-//       (rect->getNet()->getOwner()->typeId() == frcInstBlockage ||
-//        rect->getNet()->getOwner()->typeId() == frcBlockage)) {
-//     return true;
-//   }
-
-//   auto layerNum = rect->getLayerNum();
-//   auto cutWithinSquare = con->getCutWithin();
-//   box_t queryBox;
-//   myBloat(*rect, cutWithinSquare, queryBox);
-//   cutWithinSquare *= cutWithinSquare;
-//   auto &workerRegionQuery = getWorkerRegionQuery();
-//   vector<rq_rptr_value_t<gcRect> > result;
-//   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
-//   int reqNumCut = con->getAdjacentCuts();
-//   int cnt = -1;
-//   gtl::point_data<frCoord> center1, center2;
-//   gtl::center(center1, *rect);
-//   // count adj cuts
-//   for (auto &[objBox, ptr]: result) {
-//     frCoord distSquare = 0;
-//     if (con->hasCenterToCenter()) {
-//       gtl::center(center2, *ptr);
-//       distSquare = gtl::distance_squared(center1, center2);
-//     } else {
-//       distSquare = gtl::square_euclidean_distance(*rect, *ptr);
-//     }
-//     if (distSquare >= cutWithinSquare) {
-//       continue;
-//     }
-//     if (ptr->getNet()->getOwner() && 
-//         (ptr->getNet()->getOwner()->typeId() == frcInstBlockage ||
-//          ptr->getNet()->getOwner()->typeId() == frcBlockage)) {
-//       cnt += reqNumCut;
-//     } else {
-//       cnt++;
-//     }
-//   }
-//   if (cnt >= reqNumCut) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
 
 bool FlexGCWorker::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingConstraint* con) {
   // no adj cut rule, must proceed checking
@@ -3902,10 +3490,6 @@ void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect, frLef58CutSpacingCons
 void FlexGCWorker::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* con) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  // if (con && con->isLayer()) {
-  //   cout <<"Error: secondLayerName not supported" <<endl;
-  //   exit(1);
-  // }
   auto layerNum = rect->getLayerNum();
   auto maxSpcVal = checkCutSpacing_getMaxSpcVal(con);
   box_t queryBox;
@@ -3953,16 +3537,12 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* co
   auto &workerRegionQuery = getWorkerRegionQuery();
   vector<rq_rptr_value_t<gcRect> > result;
   if (con->hasSecondLayer()) {
-    // cout << "secondLayerNum = " << con->getSecondLayerNum() << ", queryBox = (" 
-    //      << queryBox.min_corner().x() <<", " <<queryBox.min_corner().y() <<") -- (" 
-    //      << queryBox.max_corner().x() <<", " <<queryBox.max_corner().y() <<")\n";
     workerRegionQuery.queryMaxRectangle(queryBox, con->getSecondLayerNum(), result);
   } else {
     workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   }
   // Short, metSpc, NSMetal here
   for (auto &[objBox, ptr]: result) {
-    //cout <<"from " <<rect <<" to " <<ptr <<endl;
     if (con->hasSecondLayer()) {
       if (rect->getNet() != ptr->getNet() || con->getSameNetConstraint() == nullptr) {
         checkCutSpacing_main(rect, ptr, con);
@@ -3981,7 +3561,6 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect) {
   auto layerNum = rect->getLayerNum();
 
   // CShort
-  //checkCutSpacing_main(rect, nullptr);
   // diff net same layer
   for (auto con: getDesign()->getTech()->getLayer(layerNum)->getCutSpacing(false)) {
     checkCutSpacing_main(rect, con);
@@ -3993,9 +3572,6 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect) {
   // diff net diff layer
   for (auto con: getDesign()->getTech()->getLayer(layerNum)->getInterLayerCutSpacingConstraint(false)) {
     if (con) {
-      // if (layerNum == 3 && con->getSecondLayerNum() == 1) {
-      //   cout << "here0\n";
-      // }
       checkCutSpacing_main(rect, con);
     }
   }
@@ -4012,14 +3588,6 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect) {
   for (auto con: getDesign()->getTech()->getLayer(layerNum)->getLef58CutSpacingConstraints(false)) {
     checkLef58CutSpacing_main(rect, con, skipDiffNet);
   }
-
-
-  // // same net diff layer --> no longer needed, automatically swapped if samenet
-  // for (auto con: getDesign()->getTech()->getLayer(layerNum)->getInterLayerCutSpacingConstraint(true)) {
-  //   if (con) {
-  //     checkCutSpacing_main(rect, con);
-  //   }
-  // }  
 }
 
 void FlexGCWorker::checkCutSpacing() {

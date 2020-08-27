@@ -681,25 +681,14 @@ void FlexGCWorker::initNet_pins_maxRectangles_getFixedMaxRectangles(gcNet* net, 
   vector<gtl::rectangle_data<frCoord> > rects;
   frPoint bp, ep;
   for (int i = 0; i < numLayers; i++) {
-    //bool flag     = (getDesign()->getTech()->getLayer(i)->getType() == frLayerTypeEnum::ROUTING);
-    //auto minWidth = getDesign()->getTech()->getLayer(i)->getWidth();
     rects.clear();
     gtl::get_max_rectangles(rects, net->getPolygons(i, true));
     for (auto &rect: rects) {
-      // <minwidth max rectangle filtered to match tool and reduce NSMet
-      // processed at nsmetal
-      //if (flag && (gtl::delta(rect, gtl::HORIZONTAL) < minWidth || gtl::delta(rect, gtl::VERTICAL) < minWidth)) {
-      //  continue;
-      //}
       fixedMaxRectangles[i].insert(make_pair(frPoint(gtl::xl(rect), gtl::yl(rect)), 
                                              frPoint(gtl::xh(rect), gtl::yh(rect))));
     }
     // for rectangles input --> non-merge scenario
     for (auto &rect: net->getRectangles(i, true)) {
-      // processed at nsmetal
-      //if (flag && (gtl::delta(rect, gtl::HORIZONTAL) < minWidth || gtl::delta(rect, gtl::VERTICAL) < minWidth)) {
-      //  continue;
-      //}
       fixedMaxRectangles[i].insert(make_pair(frPoint(gtl::xl(rect), gtl::yl(rect)), 
                                              frPoint(gtl::xh(rect), gtl::yh(rect))));
     }
@@ -728,35 +717,22 @@ void FlexGCWorker::initNet_pins_maxRectangles_helper(gcNet* net, gcPin* pin, con
 }
 
 void FlexGCWorker::initNet_pins_maxRectangles(gcNet* net) {
-  //bool enableOutput = true;
-  //bool enableOutput = false;
   int numLayers = getDesign()->getTech()->getLayers().size();
   vector<set<pair<frPoint, frPoint> > > fixedMaxRectangles(numLayers);
   // get all fixed max rectangles
   initNet_pins_maxRectangles_getFixedMaxRectangles(net, fixedMaxRectangles);
   
   // gen all max rectangles
-  //int cntFixed = 0;
-  //int cntRoute = 0;
   vector<gtl::rectangle_data<frCoord> > rects;
   for (int i = 0; i < numLayers; i++) {
-    //bool flag     = (getDesign()->getTech()->getLayer(i)->getType() == frLayerTypeEnum::ROUTING);
-    //auto minWidth = getDesign()->getTech()->getLayer(i)->getWidth();
     for (auto &pin: net->getPins(i)) {
       rects.clear();
       gtl::get_max_rectangles(rects, *(pin->getPolygon()));
       for (auto &rect: rects) {
-        // <minwidth max rectangle filtered to match tool and reduce NSMet
-        //if (flag && (gtl::delta(rect, gtl::HORIZONTAL) < minWidth || gtl::delta(rect, gtl::VERTICAL) < minWidth)) {
-        //  continue;
-        //}
         initNet_pins_maxRectangles_helper(net, pin.get(), rect, i, fixedMaxRectangles);
       }
     }
   }
-  //if (enableOutput) {
-  //  cout <<"#fixed/route max rectangles = " <<cntFixed <<"/" <<cntRoute <<endl;
-  //}
 }
 
 void FlexGCWorker::initNet(gcNet* net) {
