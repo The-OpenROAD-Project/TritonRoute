@@ -30,7 +30,6 @@
 #define _DR_MARKER_H_
 
 #include "db/drObj/drBlockObject.h"
-//#include "db/tech/frConstraint.h"
 
 namespace fr {
   class frConstraint;
@@ -85,7 +84,6 @@ namespace fr {
       return drcMazeMarker;
     }
     bool operator< (const drMazeMarker &b) const {
-      //return (constraint == b.constraint) ? (trigNet < b.trigNet) : (constraint < b.constraint);
       return (constraint < b.constraint);
     }
   protected:

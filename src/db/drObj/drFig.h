@@ -41,7 +41,6 @@ namespace fr {
     drFig(): drBlockObject() {}
     // getters
     virtual void getBBox(frBox &box) const = 0;
-    //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
   };

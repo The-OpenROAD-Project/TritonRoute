@@ -274,19 +274,6 @@ namespace fr {
       boxIn.transform(xform);
     }
     
-    //void setIter(frListIter<std::unique_ptr<frVia> >& in) {
-    //  iter = in;
-    //}
-    //frListIter<std::unique_ptr<frVia> > getIter() const {
-    //  return iter;
-    //}
-    // determine whether shape is stored in net fixed obj or routed obj
-    //bool isExt() const {
-    //  return ext;
-    //}
-    //void setExt(bool in) {
-    //  ext = in;
-    //}
     bool hasMazeIdx() const {
       return (!beginMazeIdx.empty());
     }
@@ -303,8 +290,6 @@ namespace fr {
     frPoint        origin;
     frViaDef*      viaDef;
     drBlockObject* owner;
-    //frListIter<std::unique_ptr<frVia> > iter;
-    //bool           ext;
     FlexMazeIdx    beginMazeIdx;
     FlexMazeIdx    endMazeIdx;
   };

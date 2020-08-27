@@ -49,7 +49,6 @@ namespace fr {
     // getters
     virtual frLayerNum getLayerNum() const = 0;
     // others
-    //drBlockObjectEnum typeId() const override = 0;
 
     /* drom drPinFig
      * hasPin
@@ -70,12 +69,6 @@ namespace fr {
      * move
      * overlaps
      */
-
-    //virtual void setIter(frListIter<std::unique_ptr<drShape> > &in) = 0;
-    //virtual frListIter<std::unique_ptr<drShape> > getIter() const = 0;
-    //virtual bool isExt() const  = 0;
-    //virtual void setExt() = 0;
-  protected:
   };
 
   class drPathSeg: public drShape {
@@ -111,7 +104,7 @@ namespace fr {
       return drcPathSeg;
     }
 
-    /* drom drShape
+    /* from drShape
      * setLayerNum
      * getLayerNum
      */
@@ -122,7 +115,7 @@ namespace fr {
       return layer;
     }
     
-    /* drom drPinFig
+    /* from drPinFig
      * hasPin
      * getPin
      * addToPin
@@ -144,7 +137,7 @@ namespace fr {
       owner = nullptr;
     }
 
-    /* drom drConnFig
+    /* from drConnFig
      * hasNet
      * getNet
      * addToNet
@@ -166,7 +159,7 @@ namespace fr {
       owner = nullptr;
     }
 
-    /* drom drFig
+    /* from drFig
      * getBBox
      * move, in .cpp
      * overlaps, in .cpp
@@ -189,20 +182,6 @@ namespace fr {
       }
     }
 
-    //void setIter(frListIter<std::unique_ptr<drShape> >& in) override {
-    //  iter = in;
-    //}
-    //frListIter<std::unique_ptr<drShape> > getIter() const override {
-    //  return iter;
-    //}
-
-    // determine whether shape is stored in net fixed obj or routed obj
-    //bool isExt() const override {
-    //  return ext;
-    //}
-    //void setExt(bool in) override {
-    //  ext = in;
-    //}
     bool hasMazeIdx() const {
       return (!beginMazeIdx.empty());
     }
@@ -226,8 +205,6 @@ namespace fr {
     frLayerNum     layer;
     frSegStyle     style;
     drBlockObject* owner;
-    //frListIter<std::unique_ptr<drShape> > iter;
-    //bool           ext;
     FlexMazeIdx    beginMazeIdx;
     FlexMazeIdx    endMazeIdx;
     bool           patchSeg; 
@@ -309,9 +286,6 @@ namespace fr {
       boxIn.set(offsetBox);
       boxIn.transform(xform);
     }
-    // void setBBox (const frBox &boxIn) {
-    //   box.set(boxIn);
-    // }
 
     void getOffsetBox (frBox &boxIn) const {
       boxIn = offsetBox;
@@ -320,9 +294,6 @@ namespace fr {
       offsetBox.set(boxIn);
     }
 
-    // frPoint getOrigin() const {
-    //   return origin;
-    // }
     void getOrigin(frPoint &in) const {
       in.set(origin);
     }
@@ -330,9 +301,7 @@ namespace fr {
       origin.set(in);
     }
 
-
   protected:
-    // frBox           box;
     frBox           offsetBox;
     frPoint         origin;
     frLayerNum      layer;
