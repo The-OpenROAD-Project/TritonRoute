@@ -32,7 +32,7 @@
 using namespace std;
 using namespace fr;
 
-/*inline*/ void FlexGridGraph::expand(FlexWavefrontGrid &currGrid, const frDirEnum &dir, 
+void FlexGridGraph::expand(FlexWavefrontGrid &currGrid, const frDirEnum &dir, 
                                       const FlexMazeIdx &dstMazeIdx1, const FlexMazeIdx &dstMazeIdx2,
                                       const frPoint &centerPt) {
   bool enableOutput = false;
@@ -54,15 +54,7 @@ using namespace fr;
               << "(" << gridX << ", " << gridY << ", " << gridZ << ") [pathCost / totalCost = " 
               << nextPathCost << " / " << nextPathCost + nextEstCost << "]\n";
   }
-  //FlexWavefrontGrid nextWavefrontGrid(gridX, gridY, gridZ, nextPathCost, nextPathCost + nextEstCost, currGrid.getBackTraceBuffer());
   auto lNum = getLayerNum(currGrid.z());
-  //auto isH  = getZDir(currGrid.z());
-  //frCoord via2viaLen = 1;// penalize length on non-pref dir
-  //if ((isH  && (dir == frDirEnum::W || dir == frDirEnum::E)) ||
-  //    (!isH && (dir == frDirEnum::S || dir == frDirEnum::N))) {
-  //  via2viaLen = getEdgeLength(currGrid.x(), currGrid.y(), currGrid.z(), dir); 
-  //}
-  //via2viaLen = (currGrid.getLength() == std::numeric_limits<frCoord>::max()) ? 0 : via2viaLen;
   auto pathWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
   frPoint currPt;
   getPoint(currPt, gridX, gridY);
@@ -106,24 +98,12 @@ using namespace fr;
     nextTLength = std::numeric_limits<frCoord>::max();
   }
 
-  // preTurn calculation for planar turn
-  // auto currGridLastDir = currGrid.getLastDir();
-  // auto nextPreTurnDir = currGrid.getPreTurnDir();
-  // if (dir == frDirEnum::U || dir == frDirEnum::D) {
-  //   nextPreTurnDir = frDirEnum::UNKNOWN;
-  // } else if (currGridLastDir != frDirEnum::UNKNOWN && currGridLastDir != dir && 
-  //     dir != frDirEnum::U && dir != frDirEnum::D &&
-  //     currGridLastDir != frDirEnum::U && currGridLastDir != frDirEnum::D) {
-  //   nextPreTurnDir = currGridLastDir;
-  // }
-
   FlexWavefrontGrid nextWavefrontGrid(gridX, gridY, gridZ, 
                                       currGrid.getLayerPathArea() + getEdgeLength(currGrid.x(), currGrid.y(), currGrid.z(), dir) * pathWidth, 
                                       nextVLengthX, nextVLengthY, nextIsPrevViaUp,
-                                      /*currGrid.getLength() + via2viaLen, currGrid.getLength() + via2viaLen, currGrid.isPrevViaUp(),*/
                                       nextTLength,
                                       currDist,
-                                      nextPathCost, nextPathCost + nextEstCost, /*nextPreTurnDir, */currGrid.getBackTraceBuffer());
+                                      nextPathCost, nextPathCost + nextEstCost, currGrid.getBackTraceBuffer());
   if (dir == frDirEnum::U || dir == frDirEnum::D) {
     nextWavefrontGrid.resetLayerPathArea();
     nextWavefrontGrid.resetLength();
@@ -134,41 +114,29 @@ using namespace fr;
     }
     nextWavefrontGrid.addLayerPathArea((dir == frDirEnum::U) ? getHalfViaEncArea(currGrid.z(), false) : getHalfViaEncArea(gridZ, true));
   }
-  //if (currGrid.getLastDir() != frDirEnum::UNKNOWN && currGrid.getLastDir() != dir) {
-  //  nextWavefrontGrid.resetLength();
-  //}
   // update wavefront buffer
   auto tailDir = nextWavefrontGrid.shiftAddBuffer(dir);
   // non-buffer enablement is faster for ripup all
-  // if (drWorker && drWorker->getRipupMode() == 0) {
-    // commit grid prev direction if needed
-    auto tailIdx = getTailIdx(nextIdx, nextWavefrontGrid);
-    if (tailDir != frDirEnum::UNKNOWN) {
-      if (getPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z()) == frDirEnum::UNKNOWN ||
-          getPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z()) == tailDir) {
-        setPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z(), tailDir);
-        wavefront.push(nextWavefrontGrid);
-        if (enableOutput) {
-          std::cout << "    commit (" << tailIdx.x() << ", " << tailIdx.y() << ", " << tailIdx.z() << ") prev accessing dir = " << (int)tailDir << "\n";
-        }
-      }
-    } else {  
-      // add to wavefront
+  // commit grid prev direction if needed
+  auto tailIdx = getTailIdx(nextIdx, nextWavefrontGrid);
+  if (tailDir != frDirEnum::UNKNOWN) {
+    if (getPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z()) == frDirEnum::UNKNOWN ||
+        getPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z()) == tailDir) {
+      setPrevAstarNodeDir(tailIdx.x(), tailIdx.y(), tailIdx.z(), tailDir);
       wavefront.push(nextWavefrontGrid);
+      if (enableOutput) {
+        std::cout << "    commit (" << tailIdx.x() << ", " << tailIdx.y() << ", " << tailIdx.z() << ") prev accessing dir = " << (int)tailDir << "\n";
+      }
     }
-  // } else {
-  //   // update grid astar cost if needed (non-buffer enablement)
-  //   if (nextWavefrontGrid.getCost() < getAStarCost(gridX, gridY, gridZ) || !hasAStarCost(gridX, gridY, gridZ)) {
-  //     setAStarCost(gridX, gridY, gridZ, nextPathCost);
-  //     setPrevAstarNodeDir(gridX, gridY, gridZ, dir);
-  //     wavefront.push(nextWavefrontGrid);
-  //   }
-  // }
+  } else {  
+    // add to wavefront
+    wavefront.push(nextWavefrontGrid);
+  }
 
   return;
 }
 
-/*inline*/ void FlexGridGraph::expandWavefront(FlexWavefrontGrid &currGrid, const FlexMazeIdx &dstMazeIdx1, 
+void FlexGridGraph::expandWavefront(FlexWavefrontGrid &currGrid, const FlexMazeIdx &dstMazeIdx1, 
                                                const FlexMazeIdx &dstMazeIdx2, const frPoint &centerPt) {
   bool enableOutput = false;
   //bool enableOutput = true;
@@ -262,7 +230,7 @@ using namespace fr;
   // }
 }
 
-/*inline*/ frCost FlexGridGraph::getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1,
+frCost FlexGridGraph::getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1,
                                 const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir) {
   //bool enableOutput = true;
   bool enableOutput = false;
@@ -278,9 +246,6 @@ using namespace fr;
   getPoint(srcPoint, src.x(), src.y());
   getPoint(dstPoint1, dstMazeIdx1.x(), dstMazeIdx1.y());
   getPoint(dstPoint2, dstMazeIdx2.x(), dstMazeIdx2.y());
-  //auto minCostX = std::abs(srcPoint.x() - dstPoint.x()) * 1;
-  //auto minCostY = std::abs(srcPoint.y() - dstPoint.y()) * 1;
-  //auto minCostZ = std::abs(gridGraph.getZHeight(src.z()) - gridGraph.getZHeight(dst.z())) * VIACOST;
   frCoord minCostX = max(max(dstPoint1.x() - srcPoint.x(), srcPoint.x() - dstPoint2.x()), 0) * 1;
   frCoord minCostY = max(max(dstPoint1.y() - srcPoint.y(), srcPoint.y() - dstPoint2.y()), 0) * 1;
   frCoord minCostZ = max(max(getZHeight(dstMazeIdx1.z()) - getZHeight(src.z()), 
@@ -292,8 +257,6 @@ using namespace fr;
   bendCnt += (minCostX && dir != frDirEnum::UNKNOWN && dir != frDirEnum::E && dir != frDirEnum::W) ? 1 : 0;
   bendCnt += (minCostY && dir != frDirEnum::UNKNOWN && dir != frDirEnum::S && dir != frDirEnum::N) ? 1 : 0;
   bendCnt += (minCostZ && dir != frDirEnum::UNKNOWN && dir != frDirEnum::U && dir != frDirEnum::D) ? 1 : 0;
-  //bendCnt -= bendCnt ? 1 : 0;
-  // return (deltaX + deltaY + VIACOST * deltaZ + ((deltaX && deltaY) ? 1 : 0));
   if (enableOutput) {
     cout << "  est cost = " << minCostX + minCostY + minCostZ + bendCnt << endl;
   }
@@ -306,30 +269,26 @@ using namespace fr;
   getPoint(nextPoint, gridX, gridY);
   // avoid propagating to location that will cause fobidden via spacing to boundary pin
   if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
-    // if (drWorker && drWorker->getDRIter() >= 3) {
     if (drWorker && drWorker->getDRIter() >= 30 && drWorker->getRipupMode() == 0) {
       if (dstMazeIdx1 == dstMazeIdx2 && gridZ == dstMazeIdx1.z()) {
         auto layerNum = (gridZ + 1) * 2;
         auto layer = getDesign()->getTech()->getLayer(layerNum);
         bool isH = (layer->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-        // if ((isH && (dir == frDirEnum::E || dir == frDirEnum::W)) || 
-            // (!isH && (dir == frDirEnum::N || dir == frDirEnum::S))) {
-          if (isH) {
-            auto gap = abs(nextPoint.y() - dstPoint1.y());
-            if (gap &&
-                (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, false, false, false, gap, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
-                (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, true, true, false, gap, false) || layerNum + 2 > getDesign()->getTech()->getTopLayerNum())) {
-              forbiddenPenalty = layer->getPitch() * ggDRCCost * 20;
-            }
-          } else {
-            auto gap = abs(nextPoint.x() - dstPoint1.x());
-            if (gap &&
-                (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, false, false, true, gap, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
-                (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, true, true, true, gap, false) || layerNum + 2 > getDesign()->getTech()->getTopLayerNum())) {
-              forbiddenPenalty = layer->getPitch() * ggDRCCost * 20;
-            }
+        if (isH) {
+          auto gap = abs(nextPoint.y() - dstPoint1.y());
+          if (gap &&
+              (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, false, false, false, gap, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
+              (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, true, true, false, gap, false) || layerNum + 2 > getDesign()->getTech()->getTopLayerNum())) {
+            forbiddenPenalty = layer->getPitch() * ggDRCCost * 20;
           }
-        // }
+        } else {
+          auto gap = abs(nextPoint.x() - dstPoint1.x());
+          if (gap &&
+              (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, false, false, true, gap, false) || layerNum - 2 < BOTTOM_ROUTING_LAYER) &&
+              (getDesign()->getTech()->isVia2ViaForbiddenLen(gridZ, true, true, true, gap, false) || layerNum + 2 > getDesign()->getTech()->getTopLayerNum())) {
+            forbiddenPenalty = layer->getPitch() * ggDRCCost * 20;
+          }
+        }
       }
     }
   }
@@ -338,7 +297,7 @@ using namespace fr;
 
 }
 
-/*inline*/ frDirEnum FlexGridGraph::getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer) {
+frDirEnum FlexGridGraph::getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer) {
   auto currDirVal = buffer.to_ulong() & 0b111u;
   return static_cast<frDirEnum>(currDirVal);
 }
@@ -403,87 +362,14 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
   frMIdx gridZ = currGrid.z();
   frCost nextPathCost = currGrid.getPathCost();
   // bending cost
-  //auto currDir = getLastDir(currGrid.getBackTraceBuffer());
   auto currDir = currGrid.getLastDir();
-  // std::cout << "(currDir = " << (int)currDir << ") ";
-  // if (currDir != dir && (int)currDir >= 1 && (int)currDir <= 4 &&
-  //                       (int)dir     >= 1 && (int)dir     <= 4) {
-  //   ++nextPathCost;
-  // }
   auto lNum = getLayerNum(currGrid.z());
   auto pathWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
   if (currDir != dir && currDir != frDirEnum::UNKNOWN) {
     // original
     ++nextPathCost;
-
-    // test to give more penalty to turns
-    // if (ggMarkerCost == 0) {
-    //   nextPathCost += getEdgeLength(gridX, gridY, gridZ, dir);
-    // } else {
-    //   nextPathCost++;
-    // }
   }
-
-  //frCoord currArea = (currGrid.getLayerPathLength() + pathWidth) * pathWidth; 
-  /* min-area enablement
-  frCoord currArea = currGrid.getLayerPathArea();
-  if (dir == frDirEnum::U) {
-    currArea += getHalfViaEncArea(currGrid.z(), true);
-  } else if (dir == frDirEnum::D) {
-    currArea += getHalfViaEncArea(currGrid.z() - 1, false);
-  }
-  auto minAreaConstraint = getDesign()->getTech()->getLayer(lNum)->getAreaConstraint();
-  if (minAreaConstraint && (dir == frDirEnum::U || dir == frDirEnum::D) && currArea < minAreaConstraint->getMinArea()) {
-    nextPathCost += ggDRCCost * minAreaConstraint->getMinArea() / pathWidth;
-    //nextPathCost += ggDRCCost * pathWidth;
-    // if (TEST) {
-    //   std::cout << "@@@MAR (" <<currGrid.x() <<", " <<currGrid.y() <<", " <<currGrid.z() <<") dir = " << (int)dir << "\n";
-    // }
-  }
-  */
-  // via2viaminlen enablement
-  //if (dir == frDirEnum::U && currGrid.getLength() != 0 && currGrid.getLength() < getVia2ViaMinLen(gridZ, currGrid.isPrevViaUp(), true)) {
-  //if (dir == frDirEnum::U && 
-  //    (allowVia2ViaZeroLen(gridZ, currGrid.isPrevViaUp(), true) ? !(currGrid.getLength() == 0) : true) && 
-  //    currGrid.getLength() < getVia2ViaMinLen(gridZ, currGrid.isPrevViaUp(), true)) {
-  //  nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //  // if (TEST) {
-  //  //   std::cout << "@@@MAR (" <<currGrid.x() <<", " <<currGrid.y() <<", " <<currGrid.z() <<") dir = " << (int)dir << "\n";
-  //  // }
-  //} else if (dir == frDirEnum::D && 
-  //           (allowVia2ViaZeroLen(gridZ, currGrid.isPrevViaUp(), false) ? !(currGrid.getLength() == 0) : true) && 
-  //           currGrid.getLength() < getVia2ViaMinLen(gridZ, currGrid.isPrevViaUp(), false)) {
-  //  nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //  // if (TEST) {
-  //  //   std::cout << "@@@MAR (" <<currGrid.x() <<", " <<currGrid.y() <<", " <<currGrid.z() <<") dir = " << (int)dir << "\n";
-  //  // }
-  //}
-
-  // via2viaminlenNew enablement
-  // if (dir == frDirEnum::U || dir == frDirEnum::D) {
-  //   frCoord currVLengthX = 0;
-  //   frCoord currVLengthY = 0;
-  //   currGrid.getVLength(currVLengthX, currVLengthY);
-  //   bool isCurrViaUp = (dir == frDirEnum::U);
-  //   // if allow zero length and both x and y = 0 
-  //   if (allowVia2ViaZeroLen(gridZ, currGrid.isPrevViaUp(), isCurrViaUp) && currVLengthX == 0 && currVLengthY == 0) {
-  //     ;
-  //   } else {
-  //     // check only y
-  //     if (currVLengthX == 0 && currVLengthY > 0 && currVLengthY < getVia2ViaMinLenNew(gridZ, currGrid.isPrevViaUp(), isCurrViaUp, true)) {
-  //       nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //     // check only x
-  //     } else if (currVLengthX > 0 && currVLengthY == 0 && currVLengthX < getVia2ViaMinLenNew(gridZ, currGrid.isPrevViaUp(), isCurrViaUp, false)) {
-  //       nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //     // check both x and y
-  //     } else if (currVLengthX > 0 && currVLengthY > 0 && 
-  //                ((currVLengthY < getVia2ViaMinLenNew(gridZ, currGrid.isPrevViaUp(), isCurrViaUp, true)) &&
-  //                  currVLengthX < getVia2ViaMinLenNew(gridZ, currGrid.isPrevViaUp(), isCurrViaUp, false))) {
-  //       nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //     }
-  //   }
-  // }
 
   // via2viaForbiddenLen enablement
   if (dir == frDirEnum::U || dir == frDirEnum::D) {
@@ -514,56 +400,9 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
     }
   }
 
-
-  // via2turnminlen enablement
-  // frCoord tLength    = std::numeric_limits<frCoord>::max();
-  // frCoord tLengthDummy = 0;
-  // frCoord tLengthReq = 0;
-  // //bool    isTLengthY = false;
-  // bool    isTLengthViaUp = false;
-  // if (currDir != frDirEnum::UNKNOWN && currDir != dir) {
-  //   // next dir is a via
-  //   if (dir == frDirEnum::U || dir == frDirEnum::D) {
-  //     isTLengthViaUp = (dir == frDirEnum::U);
-  //     // if there was a turn before
-  //     if (tLength != std::numeric_limits<frCoord>::max()) {
-  //       if (currDir == frDirEnum::W || currDir == frDirEnum::E) {
-  //         tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, false);
-  //         tLength = currGrid.getTLength();
-  //         //isTLengthY = false;
-  //       } else if (currDir == frDirEnum::S || currDir == frDirEnum::N) {
-  //         tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, true);
-  //         tLength = currGrid.getTLength();
-  //         //isTLengthY = true;
-  //       } else {
-  //         ;
-  //       }
-  //     }
-  //   // curr is a planar turn
-  //   } else {
-  //     isTLengthViaUp = currGrid.isPrevViaUp();
-  //     if (currDir == frDirEnum::W || currDir == frDirEnum::E) {
-  //       tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, false);
-  //       //isTLengthY = false;
-  //       currGrid.getVLength(tLength, tLengthDummy);
-  //     } else if (currDir == frDirEnum::S || currDir == frDirEnum::N) {
-  //       tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, true);
-  //       //isTLengthY = true;
-  //       currGrid.getVLength(tLengthDummy, tLength);
-  //     } else {
-  //       ;
-  //     }
-  //   }
-  //   if (tLength < tLengthReq) {
-  //     nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //   }
-  // }
-
   // via2turn forbidden len enablement
   frCoord tLength    = std::numeric_limits<frCoord>::max();
   frCoord tLengthDummy = 0;
-  // frCoord tLengthReq = 0;
-  //bool    isTLengthY = false;
   bool    isTLengthViaUp = false;
   bool    isForbiddenTLen = false;
   if (currDir != frDirEnum::UNKNOWN && currDir != dir) {
@@ -573,42 +412,30 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
       // if there was a turn before
       if (tLength != std::numeric_limits<frCoord>::max()) {
         if (currDir == frDirEnum::W || currDir == frDirEnum::E) {
-          // tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, false);
           tLength = currGrid.getTLength();
           if (getTech()->isViaForbiddenTurnLen(gridZ, !isTLengthViaUp, true, tLength)) {
             isForbiddenTLen = true;
           }
-          //isTLengthY = false;
         } else if (currDir == frDirEnum::S || currDir == frDirEnum::N) {
-          // tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, true);
           tLength = currGrid.getTLength();
           if (getTech()->isViaForbiddenTurnLen(gridZ, !isTLengthViaUp, false, tLength)) {
             isForbiddenTLen = true;
           }
-          //isTLengthY = true;
-        } else {
-          ;
         }
       }
     // curr is a planar turn
     } else {
       isTLengthViaUp = currGrid.isPrevViaUp();
       if (currDir == frDirEnum::W || currDir == frDirEnum::E) {
-        // tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, false);
-        //isTLengthY = false;
         currGrid.getVLength(tLength, tLengthDummy);
         if (getTech()->isViaForbiddenTurnLen(gridZ, !isTLengthViaUp, true, tLength)) {
           isForbiddenTLen = true;
         }
       } else if (currDir == frDirEnum::S || currDir == frDirEnum::N) {
-        // tLengthReq = getVia2TurnMinLen(gridZ, isTLengthViaUp, true);
-        //isTLengthY = true;
         currGrid.getVLength(tLengthDummy, tLength);
         if (getTech()->isViaForbiddenTurnLen(gridZ, !isTLengthViaUp, false, tLength)) {
           isForbiddenTLen = true;
         }
-      } else {
-        ;
       }
     }
     if (isForbiddenTLen) {
@@ -620,29 +447,6 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
     }
   }
 
-  // min length planar U turn enablement
-  // if (currDir != frDirEnum::UNKNOWN && currDir != dir &&
-  //     currDir != frDirEnum::U && currDir != frDirEnum::D &&
-  //     dir != frDirEnum::U && dir != frDirEnum::D) {
-  //   auto preTurnDir = currGrid.getPreTurnDir();
-  //   if (preTurnDir != frDirEnum::UNKNOWN && 
-  //       ((int)preTurnDir + (int)dir) == OPPOSITEDIR &&
-  //       currGrid.getTLength() < (int)pathWidth) {
-  //     nextPathCost += ggDRCCost * getEdgeLength(gridX, gridY, gridZ, dir);
-  //   }
-  // }
-
-
-
-
-  //if (currDir != dir && currDir != frDirEnum::UNKNOWN && currGrid.getLength() != 0 && currGrid.getLength() < (frCoord)pathWidth * 2) {
-  //  nextPathCost += ggDRCCost * pathWidth * 2;
-  //}
-  //frMIdx nextGridX = gridX;
-  //frMIdx nextGridY = gridY;
-  //frMIdx nextGridZ = gridZ;
-  //getNextGrid(nextGridX, nextGridY, nextGridZ, dir);
-  //nextPathCost += gridGraph.getEdgeCost(gridX, gridY, gridZ, dir) * gridGraph.getEdgeLength(gridX, gridY, gridZ, dir);
   bool gridCost   = hasGridCost(gridX, gridY, gridZ, dir);
   bool drcCost    = hasDRCCost(gridX, gridY, gridZ, dir);
   bool markerCost = hasMarkerCost(gridX, gridY, gridZ, dir);
@@ -655,7 +459,6 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
                   + (gridCost   ? GRIDCOST         * getEdgeLength(gridX, gridY, gridZ, dir) : 0)
                   + (drcCost    ? ggDRCCost        * getEdgeLength(gridX, gridY, gridZ, dir) : 0)
                   + (markerCost ? ggMarkerCost     * getEdgeLength(gridX, gridY, gridZ, dir) : 0)
-                  // + (markerCost ? ggMarkerCost     * pathWidth                               : 0)
                   + (shapeCost  ? SHAPECOST        * getEdgeLength(gridX, gridY, gridZ, dir) : 0)
                   + (blockCost  ? BLOCKCOST        * pathWidth * 20                          : 0)
                   + (!guideCost ? GUIDECOST        * getEdgeLength(gridX, gridY, gridZ, dir) : 0);
@@ -666,7 +469,6 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
          <<hasDRCCost(gridX, gridY, gridZ, dir)    <<"/"
          <<hasMarkerCost(gridX, gridY, gridZ, dir) <<"/"
          <<isBlocked(gridX, gridY, gridZ, dir) <<"/"
-         //<<hasGuide(gridX, gridY, gridZ, dir) <<"/"
          <<getEdgeLength(gridX, gridY, gridZ, dir) <<endl;
   }
   return nextPathCost;
@@ -693,7 +495,6 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
   frMIdx gridX = currGrid.x();
   frMIdx gridY = currGrid.y();
   frMIdx gridZ = currGrid.z();
-  //bool hg = hasEdge(gridX, gridY, gridZ, dir) && hasGuide(gridX, gridY, gridZ, dir);
   bool hg = hasEdge(gridX, gridY, gridZ, dir);
   if (enableOutput) {
     if (!hasEdge(gridX, gridY, gridZ, dir)) {
@@ -706,7 +507,7 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
   reverse(gridX, gridY, gridZ, dir);
   if (!hg || 
       isSrc(gridX, gridY, gridZ) || 
-      (/*drWorker && drWorker->getRipupMode() == 0 &&*/ getPrevAstarNodeDir(gridX, gridY, gridZ) != frDirEnum::UNKNOWN) || // comment out for non-buffer enablement
+      (getPrevAstarNodeDir(gridX, gridY, gridZ) != frDirEnum::UNKNOWN) || // comment out for non-buffer enablement
       currGrid.getLastDir() == dir) {
     return false;
   } else {
@@ -737,12 +538,7 @@ void FlexGridGraph::traceBackPath(const FlexWavefrontGrid &currGrid, vector<Flex
       cout << "Warning: unexpected direction in tracBackPath\n";
       break;
     }
-    // add to root // when path makes a planar turn, dropping via on the turn is dangerous. Avoid it.
-    // if (prevDir != frDirEnum::UNKNOWN && 
-    //     currDir != prevDir && 
-    //     (currDir != frDirEnum::U && currDir != frDirEnum::D && prevDir != frDirEnum::U && prevDir != frDirEnum::U)) {
-      root.push_back(FlexMazeIdx(currX, currY, currZ));
-    // }
+    root.push_back(FlexMazeIdx(currX, currY, currZ));
     // push point to path
     if (currDir != prevDir) {
       path.push_back(FlexMazeIdx(currX, currY, currZ));
@@ -757,12 +553,7 @@ void FlexGridGraph::traceBackPath(const FlexWavefrontGrid &currGrid, vector<Flex
   while (isSrc(currX, currY, currZ) == false) {
     // get last direction
     currDir = getPrevAstarNodeDir(currX, currY, currZ);
-    // add to root
-    // if (prevDir != frDirEnum::UNKNOWN && 
-    //     currDir != prevDir && 
-    //     (currDir != frDirEnum::U && currDir != frDirEnum::D && prevDir != frDirEnum::U && prevDir != frDirEnum::U)) {
-      root.push_back(FlexMazeIdx(currX, currY, currZ));
-    // }
+    root.push_back(FlexMazeIdx(currX, currY, currZ));
     if (currDir == frDirEnum::UNKNOWN) {
       cout << "Warning: unexpected direction in tracBackPath\n";
       break;
@@ -819,10 +610,7 @@ bool FlexGridGraph::search(vector<FlexMazeIdx> &connComps, drPin* nextPin, vecto
                     max(dstMazeIdx2.z(), mi.z()));
   }
 
-  // std::cout << "start astarSearch\n";
-  //wavefront = FlexWavefront();
   wavefront.cleanup();
-  //cout <<"xxx1" <<endl;
   // init wavefront
   frPoint currPt;
   for (auto &idx: connComps) {
@@ -835,37 +623,25 @@ bool FlexGridGraph::search(vector<FlexMazeIdx> &connComps, drPin* nextPin, vecto
     }
     // get min area min length
     auto lNum = getLayerNum(idx.z());
-    //auto pathWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
     auto minAreaConstraint = getDesign()->getTech()->getLayer(lNum)->getAreaConstraint();
     frCoord fakeArea = minAreaConstraint ? minAreaConstraint->getMinArea() : 0;
     getPoint(currPt, idx.x(), idx.y());
     frCoord currDist = abs(currPt.x() - centerPt.x()) + abs(currPt.y() - centerPt.y());
-    //frCoord fakeLen  = getVia2ViaMinLen(idx.z(), true, true);
     FlexWavefrontGrid currGrid(idx.x(), idx.y(), idx.z(), fakeArea, 
                                std::numeric_limits<frCoord>::max(), std::numeric_limits<frCoord>::max(), true, 
-                               /*fakeLen, fakeLen, true,*/
                                std::numeric_limits<frCoord>::max(),
-                               currDist, 0, getEstCost(idx, dstMazeIdx1, dstMazeIdx2, frDirEnum::UNKNOWN)/*, frDirEnum::UNKNOWN*/);
+                               currDist, 0, getEstCost(idx, dstMazeIdx1, dstMazeIdx2, frDirEnum::UNKNOWN));
     wavefront.push(currGrid);
     if (enableOutput) {
       cout <<"src add to wavefront (" <<idx.x() <<", " <<idx.y() <<", " <<idx.z() <<")" <<endl;
     }
   }
-  //cout <<"xxx2" <<endl;
   while(!wavefront.empty()) {
-    // std::cout << "here1\n";
     auto currGrid = wavefront.top();
     wavefront.pop();
-    // if (drWorker && drWorker->getRipupMode() == 0) {
-      if (getPrevAstarNodeDir(currGrid.x(), currGrid.y(), currGrid.z()) != frDirEnum::UNKNOWN) {
-        continue;
-      }
-    // } else {
-    //   if (hasAStarCost(currGrid.x(), currGrid.y(), currGrid.z()) && getAStarCost(currGrid.x(), currGrid.y(), currGrid.z()) != currGrid.getPathCost()) {
-    //     // cout << getAStarCost(currGrid.x(), currGrid.y(), currGrid.z()) << " != " << currGrid.getCost() << " continue\n";
-    //     continue;
-    //   }
-    // }
+    if (getPrevAstarNodeDir(currGrid.x(), currGrid.y(), currGrid.z()) != frDirEnum::UNKNOWN) {
+      continue;
+    }
 
     // test
     if (enableOutput) {

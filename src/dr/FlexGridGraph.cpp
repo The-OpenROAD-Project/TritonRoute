@@ -35,138 +35,6 @@
 using namespace std;
 using namespace fr;
 
-//void FlexGridGraph::resetCost(frMIdx x, frMIdx y, frMIdx z) {
-//  resetGridCostE(x, y, z);
-//  resetGridCostN(x, y, z);
-//  resetGridCostU(x, y, z);
-//  resetShapePlanar(x, y, z);
-//  resetShapeVia(x, y, z);
-//  resetDRCCostPlanar(x, y, z);
-//  resetDRCCostVia(x, y, z);
-//  resetMarkerCostPlanar(x, y, z);
-//  resetMarkerCostVia(x, y, z);
-//}
-
-/*
-frCoord FlexGridGraph::initVia2ViaMinLen_helper(frLayerNum lNum, frViaDef* viaDef1, frViaDef* viaDef2) {
-  if (!(viaDef1 && viaDef2)) {
-    return 0;
-  }
-
-  frCoord sol = 0;
-
-  // check min len in lNum assuming pre dir routing
-  bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-  frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
-
-  frVia via1(viaDef1);
-  frBox viaBox1;
-  if (viaDef1->getLayer1Num() == lNum) {
-    via1.getLayer1BBox(viaBox1);
-  } else {
-    via1.getLayer2BBox(viaBox1);
-  }
-  auto width1    = viaBox1.width();
-  bool isVia1Fat = isH ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
-  auto prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
-
-  frVia via2(viaDef2);
-  frBox viaBox2;
-  if (viaDef2->getLayer1Num() == lNum) {
-    via2.getLayer1BBox(viaBox2);
-  } else {
-    via2.getLayer2BBox(viaBox2);
-  }
-  auto width2    = viaBox2.width();
-  bool isVia2Fat = isH ? (viaBox2.top() - viaBox2.bottom() > defaultWidth) : (viaBox2.right() - viaBox2.left() > defaultWidth);
-  auto prl2      = isH ? (viaBox2.top() - viaBox2.bottom()) : (viaBox2.right() - viaBox2.left());
-
-  frCoord reqDist = 0;
-  if (isVia1Fat && isVia2Fat) {
-    auto con = getDesign()->getTech()->getLayer(lNum)->getMinSpacing();
-    if (con) {
-      if (con->typeId() == frConstraintTypeEnum::frcSpacingConstraint) {
-        reqDist = static_cast<frSpacingConstraint*>(con)->getMinSpacing();
-      } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTablePrlConstraint) {
-        reqDist = static_cast<frSpacingTablePrlConstraint*>(con)->find(max(width1, width2), min(prl1, prl2));
-      } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTableTwConstraint) {
-        reqDist = static_cast<frSpacingTableTwConstraint*>(con)->find(width1, width2, min(prl1, prl2));
-      }
-    }
-    if (isH) {
-      reqDist += max((viaBox1.right() - 0), (0 - viaBox1.left()));
-      reqDist += max((viaBox2.right() - 0), (0 - viaBox2.left()));
-    } else {
-      reqDist += max((viaBox1.top() - 0), (0 - viaBox1.bottom()));
-      reqDist += max((viaBox2.top() - 0), (0 - viaBox2.bottom()));
-    }
-    sol = max(sol, reqDist);
-  }
-
-  // check min len in layer2 if two vias are in same layer
-  if (viaDef1 != viaDef2) {
-    return sol;
-  }
-
-  if (viaDef1->getLayer1Num() == lNum) {
-    via1.getLayer2BBox(viaBox1);
-    lNum = lNum + 2;
-  } else {
-    via1.getLayer1BBox(viaBox1);
-    lNum = lNum - 2;
-  }
-  width1    = viaBox1.width();
-  prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
-  reqDist   = 0;
-  auto con = getDesign()->getTech()->getLayer(lNum)->getMinSpacing();
-  if (con) {
-    if (con->typeId() == frConstraintTypeEnum::frcSpacingConstraint) {
-      reqDist = static_cast<frSpacingConstraint*>(con)->getMinSpacing();
-    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTablePrlConstraint) {
-      reqDist = static_cast<frSpacingTablePrlConstraint*>(con)->find(max(width1, width2), prl1);
-    } else if (con->typeId() == frConstraintTypeEnum::frcSpacingTableTwConstraint) {
-      reqDist = static_cast<frSpacingTableTwConstraint*>(con)->find(width1, width2, prl1);
-    }
-  }
-  if (isH) {
-    reqDist += (viaBox1.right() - 0) + (0 - viaBox1.left());
-  } else {
-    reqDist += (viaBox1.top() - 0) + (0 - viaBox1.bottom());
-  }
-  sol = max(sol, reqDist);
-  
-  return sol;
-}
-
-void FlexGridGraph::initVia2ViaMinLen() {
-  bool enableOutput = false;
-  for (int z = 0; z < (int)zCoords.size(); z++) {
-    frViaDef* downVia = nullptr;
-    frViaDef* upVia   = nullptr;
-    auto lNum = zCoords[z];
-    if (getDesign()->getTech()->getBottomLayerNum() <= lNum - 1) {
-      downVia = getDesign()->getTech()->getLayer(lNum - 1)->getDefaultViaDef();
-    }
-    if (getDesign()->getTech()->getTopLayerNum() >= lNum + 1) {
-      upVia = getDesign()->getTech()->getLayer(lNum + 1)->getDefaultViaDef();
-    }
-    via2viaMinLen[z][0] = initVia2ViaMinLen_helper(lNum, downVia, downVia);
-    via2viaMinLen[z][1] = initVia2ViaMinLen_helper(lNum, downVia, upVia);
-    //via2viaMinLen[z][2] = initVia2ViaMinLen_helper(lNum, upVia, downVia);
-    via2viaMinLen[z][2] = via2viaMinLen[z][1];
-    via2viaMinLen[z][3] = initVia2ViaMinLen_helper(lNum, upVia, upVia);
-    if (enableOutput) {
-      cout <<"initVia2ViaMinLen " <<getDesign()->getTech()->getLayer(lNum)->getName()
-           <<" (d2d, d2u, u2d, u2u) = (" 
-           <<via2viaMinLen[z][0] <<", "
-           <<via2viaMinLen[z][1] <<", "
-           <<via2viaMinLen[z][2] <<", "
-           <<via2viaMinLen[z][3] <<")" <<endl;
-    }
-  }
-}
-*/
-
 void FlexGridGraph::initGrids(const map<frCoord, map<frLayerNum, frTrackPattern* > > &xMap,
                               const map<frCoord, map<frLayerNum, frTrackPattern* > > &yMap,
                               const map<frLayerNum, frPrefRoutingDirEnum> &zMap,
@@ -179,8 +47,6 @@ void FlexGridGraph::initGrids(const map<frCoord, map<frLayerNum, frTrackPattern*
   zCoords.clear();
   zHeights.clear();
   zDirs.clear();
-  //halfViaEncArea.clear();
-  //via2viaMinLen.clear();
   for (auto &[k, v]: xMap) {
     xCoords.push_back(k);
   }
@@ -191,42 +57,9 @@ void FlexGridGraph::initGrids(const map<frCoord, map<frLayerNum, frTrackPattern*
   //vector<frCoord> via2viaMinLenTmp(4, 0);
   for (auto &[k, v]: zMap) {
     zCoords.push_back(k);
-    // frViaDef* defaultViaDef = nullptr;
-    // bool isFatVia = false;
-    // if (k + 1 <= getTech()->getTopLayerNum()) {
-    //   defaultViaDef = getTech()->getLayer(k + 1)->getDefaultViaDef();  
-    // }
-    // if (defaultViaDef) {
-    //   frCoord defaultWidth = getTech()->getLayer(k)->getWidth();
-    //   frVia via(defaultViaDef);
-    //   frBox layer1Box;
-    //   via.getLayer1BBox(layer1Box);
-    //   if (layer1Box.width() > defaultWidth * 2) {
-    //     isFatVia = true;
-    //   }
-    // }
-    // if (!isFatVia) {
-      zHeight += getTech()->getLayer(k)->getPitch() * VIACOST;
-    // } else {
-    //   zHeight += getTech()->getLayer(k)->getPitch() * DRCCOST;
-    // }
+    zHeight += getTech()->getLayer(k)->getPitch() * VIACOST;
     zHeights.push_back(zHeight);
     zDirs.push_back((v == frPrefRoutingDirEnum::frcHorzPrefRoutingDir));
-    //if (k + 1 <= getTech()->getTopLayerNum() && getTech()->getLayer(k + 1)->getType() == frLayerTypeEnum::CUT) {
-    //  auto viaDef = getTech()->getLayer(k + 1)->getDefaultViaDef();
-    //  frVia via(viaDef);
-    //  frBox layer1Box;
-    //  frBox layer2Box;
-    //  via.getLayer1BBox(layer1Box);
-    //  via.getLayer2BBox(layer2Box);
-    //  auto layer1HalfArea = layer1Box.width() * layer1Box.length() / 2;
-    //  auto layer2HalfArea = layer2Box.width() * layer2Box.length() / 2;
-    //  // cout <<"z = " <<zCoords.size() <<" " <<"layer1/2HalfArea = " <<layer1HalfArea <<"/" <<layer2HalfArea <<endl;
-    //  halfViaEncArea.push_back(make_pair(layer1HalfArea, layer2HalfArea));
-    //} else {
-    //  halfViaEncArea.push_back(make_pair(0,0));
-    //}
-    //via2viaMinLen.push_back(via2viaMinLenTmp);
   }
   // initialize all grids
   frMIdx xDim, yDim, zDim;
@@ -249,20 +82,6 @@ void FlexGridGraph::initGrids(const map<frCoord, map<frLayerNum, frTrackPattern*
     guides.resize(xDim*yDim*zDim, 1);
   }
 
-  //initVia2ViaMinLen();
-
-  //pinBlksE.clear();
-  //pinBlksN.clear();
-  //pinBlksE.resize(xDim*yDim*zDim, 0);
-  //pinBlksN.resize(xDim*yDim*zDim, 0);
-
-  //for (int k = 0; k < (int)zDim; k++) {
-  //  for (int j = 0; j < (int)yDim; j++) {
-  //    for (int i = 0; i < (int)xDim; i++) {
-  //      resetCost(i, j, k);
-  //    }
-  //  }
-  //}
   if (enableOutput) {
     cout <<"x ";
     for (auto &k: xCoords) {
@@ -299,25 +118,10 @@ void FlexGridGraph::initEdges(const map<frCoord, map<frLayerNum, frTrackPattern*
   frMIdx xIdx = 0, yIdx = 0, zIdx = 0;
   bool flag = false;
 
-  // add cost to out-of-die edge
-  //frBox blockBox;
-  //getDesign()->getTopBlock()->getBoundaryBBox(blockBox);
-  //frBox viaBox, planarBox;
-  //frVia dVia(nullptr);
-  //dVia.setOrigin(frPoint(0,0));
-  //frCoord halfWidth = 0;
-  //frTransform xform;
-
   for (auto &[layerNum, dir]: zMap) {
-    // auto currLayer = getTech()->getLayer(layerNum);
     frLayerNum nonPrefLayerNum;
-    //viaBox.set(0,0,0,0);
-    //halfWidth = getDesign()->getTech()->getLayer(layerNum)->getWidth() / 2;
-    //planarBox.set(-halfWidth, -halfWidth, halfWidth, halfWidth);
     if (layerNum + 2 <= getTech()->getTopLayerNum()) {
       nonPrefLayerNum = layerNum + 2;
-      //dVia.setViaDef(getDesign()->getTech()->getLayer(layerNum + 1)->getDefaultViaDef());
-      //dVia.getBBox(viaBox);
     } else if (layerNum - 2 >= getTech()->getBottomLayerNum()) {
       nonPrefLayerNum = layerNum - 2;
     } else {
@@ -341,14 +145,8 @@ void FlexGridGraph::initEdges(const map<frCoord, map<frLayerNum, frTrackPattern*
         bool xFound3 = (xIt3 != xSubMap.end());
 
         // add cost to out-of-die edge
-        //xform.set(frPoint(xCoord, yCoord));
-        //viaBox.transform(xform);
-        //planarBox.transform(xform);
-        //bool outOfDiePlanar = !blockBox.contains(planarBox);
-        //bool outOfDieVia    = !blockBox.contains(viaBox);
         bool outOfDiePlanar = false;
         bool outOfDieVia    = false;
-      //for (auto &[layerNum, dir]: zMap) {
         // add edge for preferred direction
         if (dir == frcHorzPrefRoutingDir && yFound) {
           if (layerNum >= BOTTOM_ROUTING_LAYER && layerNum <= TOP_ROUTING_LAYER) {
@@ -567,15 +365,13 @@ void FlexGridGraph::initTracks(map<frCoord, map<frLayerNum, frTrackPattern* > > 
     }
     frLayerNum currLayerNum = layer->getLayerNum();
     frPrefRoutingDirEnum currPrefRouteDir = layer->getDir();
-    //bool hasTrack = false;
     for (auto &tp: getDesign()->getTopBlock()->getTrackPatterns(currLayerNum)) {
       // allow wrongway if global varialble and design rule allow
-      bool flag = (USENONPREFTRACKS/* && layer->getLef58RectOnlyConstraint() == nullptr*/) ? 
+      bool flag = (USENONPREFTRACKS) ? 
                   (tp->isHorizontal()  && currPrefRouteDir == frcVertPrefRoutingDir ||
                   !tp->isHorizontal() && currPrefRouteDir == frcHorzPrefRoutingDir) : 
                   true;
       if (flag) {
-        //cout <<"checkPoint 1" <<endl <<flush;
         int trackNum = ((tp->isHorizontal() ? bbox.left() : bbox.bottom()) - tp->getStartCoord()) / (int)tp->getTrackSpacing();
         if (trackNum < 0) {
           trackNum = 0;
@@ -588,8 +384,6 @@ void FlexGridGraph::initTracks(map<frCoord, map<frLayerNum, frTrackPattern* > > 
              trackNum * (int)tp->getTrackSpacing() + tp->getStartCoord() < (tp->isHorizontal() ? bbox.right() : bbox.top()); 
              ++trackNum) {
           frCoord trackLoc = trackNum * tp->getTrackSpacing() + tp->getStartCoord();
-          //cout <<"checkPoint 2" <<endl <<flush;
-          //hasTrack = true;
           if (tp->isHorizontal()) {
             xMap[trackLoc][currLayerNum] = tp.get();
           } else {
@@ -598,10 +392,7 @@ void FlexGridGraph::initTracks(map<frCoord, map<frLayerNum, frTrackPattern* > > 
         }
       }
     }
-    //if (hasTrack) {
-      //cout <<"checkPoint 3" <<endl <<flush;
-      zMap[currLayerNum] = currPrefRouteDir;
-    //}
+    zMap[currLayerNum] = currPrefRouteDir;
   }
   if (enableOutput) {
     cout <<"finish initTracks" <<endl <<flush;
@@ -609,17 +400,6 @@ void FlexGridGraph::initTracks(map<frCoord, map<frLayerNum, frTrackPattern* > > 
 }
 
 void FlexGridGraph::resetStatus() {
-  //frMIdx xDim, yDim, zDim;
-  //getDim(xDim, yDim, zDim);
-  //for (frMIdx z = 0; z < zDim; z++) {
-  //  for (frMIdx y = 0; y < yDim; y++) {
-  //    for (frMIdx x = 0; x < xDim; x++) {
-  //      //resetSrc(x, y, z);
-  //      //resetDst(x, y, z);
-  //      setPrevAstarNodeDir(x, y, z, frDirEnum::UNKNOWN);
-  //    }
-  //  }
-  //}
   resetSrc();
   resetDst();
   resetAStarCosts();
@@ -639,15 +419,6 @@ void FlexGridGraph::resetAStarCosts() {
 }
 
 void FlexGridGraph::resetPrevNodeDir() {
-  //frMIdx xDim, yDim, zDim;
-  //getDim(xDim, yDim, zDim);
-  //for (frMIdx z = 0; z < zDim; z++) {
-  //  for (frMIdx y = 0; y < yDim; y++) {
-  //    for (frMIdx x = 0; x < xDim; x++) {
-  //      setPrevAstarNodeDir(x, y, z, frDirEnum::UNKNOWN);
-  //    }
-  //  }
-  //}
   prevDirs.assign(prevDirs.size(), 0);
 }
 
@@ -670,14 +441,10 @@ void FlexGridGraph::print() {
       cout << "extBBox (xDim, yDim, zDim) = (" << xDim << ", " << yDim << ", " << zDim << ")\n";
     }
 
-    // mazeLog << "xDim = " << xDim << ", yDim = " << yDim << ", zDim = " << zDim << "\n";
-
     frPoint p;
     for (frMIdx xIdx = 0; xIdx < xDim; ++xIdx) {
-      // mazeLog << "xxxIdx = " << xIdx << "\n" << std::flush;
       for (frMIdx yIdx = 0; yIdx < yDim; ++yIdx) {
         for (frMIdx zIdx = 0; zIdx < zDim; ++zIdx) {
-          // mazeLog << "xIdx = " << xIdx << ", yIdx = " << yIdx << ", zIdx = " << zIdx << "\n" << std::flush;
           if (hasEdge(xIdx, yIdx, zIdx, frDirEnum::N)) {
             if (yIdx + 1 >= yDim) {
               cout <<"Error: no edge (" <<xIdx <<", " <<yIdx <<", " <<zIdx <<", N) " <<yDim <<endl;

@@ -137,58 +137,6 @@ void FlexDR::checkConnectivity_pin2epMap(frNet* net, vector<frConnFig*> &netDROb
 
 }
 
-
-// void FlexDR::checkConnectivity_pin2epMap(frNet* net, vector<frConnFig*> &netDRObjs,
-//                                          map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap) {
-//   bool enableOutput = false;
-//   //bool enableOutput = true;
-//   frPoint bp, ep;
-//   for (auto &connFig: netDRObjs) {
-//     if (connFig->typeId() == frcPathSeg) {
-//       auto obj = static_cast<frPathSeg*>(connFig);
-//       obj->getPoints(bp, ep);
-//       auto lNum = obj->getLayerNum();
-//       if (enableOutput) {
-//        cout <<"(bp, ep) (" <<bp.x() / 2000.0 <<" ," <<bp.y() / 2000.0 <<") ("
-//                            <<ep.x() / 2000.0 <<" ," <<ep.y() / 2000.0 <<") " 
-//             <<getTech()->getLayer(lNum)->getName() <<endl;
-//       }
-//       if (enableOutput) {
-//         cout <<"  query bp" <<endl;
-//       }
-//       checkConnectivity_pin2epMap_helper(net, bp, lNum, pin2epMap);
-//       if (enableOutput) {
-//         cout <<"  query ep" <<endl;
-//       }
-//       checkConnectivity_pin2epMap_helper(net, ep, lNum, pin2epMap);
-//     } else if (connFig->typeId() == frcVia) {
-//       auto obj = static_cast<frVia*>(connFig);
-//       obj->getOrigin(bp);
-//       auto l1Num = obj->getViaDef()->getLayer1Num();
-//       auto l2Num = obj->getViaDef()->getLayer2Num();
-//       if (enableOutput) {
-//         cout <<"pt (" <<bp.x() / 2000.0 <<" ," <<bp.y() / 2000.0 <<") "
-//              <<obj->getViaDef()->getName() <<endl;
-//       }
-//       if (enableOutput) {
-//         cout <<"  query pt l1" <<endl;
-//       }
-//       checkConnectivity_pin2epMap_helper(net, bp, l1Num, pin2epMap);
-//       if (enableOutput) {
-//         cout <<"  query pt l2" <<endl;
-//       }
-//       checkConnectivity_pin2epMap_helper(net, bp, l2Num, pin2epMap);
-//     //} else if (connFig->typeId() == frcPatchWire) {
-//     //  ;
-//     } else {
-//       cout <<"Error: checkConnectivity_pin2epMap unsupported type" <<endl;
-//     }
-//   }
-
-// }
-
-
-
 void FlexDR::checkConnectivity_initDRObjs(frNet* net, vector<frConnFig*> &netDRObjs) {
   bool enableOutput = false;
   //bool enableOutput = true;
@@ -227,29 +175,6 @@ void FlexDR::checkConnectivity_initDRObjs(frNet* net, vector<frConnFig*> &netDRO
       cout <<"Error: checkConnectivity_initDRObjs unsupported type" <<endl;
     }
   }
-  //for (auto &uPtr: net->getPatchWires()) {
-  //  auto connFig = uPtr.get();
-  //  if (connFig->typeId() == frcPatchWire) {
-  //    netDRObjs.push_back(connFig);
-  //    if (enableOutput) {
-  //      auto obj = static_cast<frPatchWire*>(connFig);
-  //      frPoint bp;
-  //      auto lNum = obj->getLayerNum();
-  //      obj->getOrigin(bp);
-  //      frBox box;
-  //      obj->getOffsetBox(box);
-  //      cout <<" (" <<bp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
-  //                  <<bp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") RECT ("
-  //                  <<box.left()   * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-  //                  <<box.bottom() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-  //                  <<box.right()  * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-  //                  <<box.top()    * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") "
-  //           <<getTech()->getLayer(lNum)->getName() <<endl;
-  //    }
-  //  } else {
-  //    cout <<"Error: checkConnectivity_initDRObjs unsupported type" <<endl;
-  //  }
-  //}
 }
 
 void FlexDR::checkConnectivity_nodeMap_routeObjEnd(frNet* net, vector<frConnFig*> &netRouteObjs,
@@ -280,15 +205,6 @@ void FlexDR::checkConnectivity_nodeMap_routeObjEnd(frNet* net, vector<frConnFig*
         cout <<"node idx = " <<i <<", (" <<bp.x() / 2000.0 <<", " <<bp.y() / 2000.0 <<") "
              <<getTech()->getLayer(l1Num)->getName() <<" --> " <<getTech()->getLayer(l2Num)->getName() <<endl;
       }
-    //} else if (connFig->typeId() == frcPatchWire) {
-    //  auto obj = static_cast<frPatchWire*>(connFig);
-    //  obj->getOrigin(bp);
-    //  auto lNum = obj->getLayerNum();
-    //  nodeMap[make_pair(bp, lNum)].insert(i);
-    //  if (enableOutput) {
-    //    cout <<"node idx = " <<i <<", (" <<bp.x() / 2000.0 <<", " <<bp.y() / 2000.0 <<") RECT " 
-    //         <<getTech()->getLayer(lNum)->getName() <<endl;
-    //  }
     } else {
       cout <<"Error: checkConnectivity_nodeMap_routeObjEnd unsupported type" <<endl;
     }
@@ -392,20 +308,6 @@ void FlexDR::checkConnectivity_nodeMap_routeObjSplit(frNet* net, vector<frConnFi
       trackCoord = bp.x();
       splitCoord = bp.y();
       checkConnectivity_nodeMap_routeObjSplit_helper(crossPt, trackCoord, splitCoord, lNum, vertMergeHelper, nodeMap);
-    //} else if (connFig->typeId() == frcPatchWire) {
-    //  auto obj = static_cast<frPatchWire*>(connFig);
-    //  obj->getOrigin(bp);
-    //  auto lNum = obj->getLayerNum();
-    //  //find whether there is horz track at bp
-    //  auto crossPt    = bp;
-    //  auto trackCoord = bp.y();
-    //  auto splitCoord = bp.x();
-    //  checkConnectivity_nodeMap_routeObjSplit_helper(crossPt, trackCoord, splitCoord, lNum, horzMergeHelper, nodeMap);
-    //  //find whether there is vert track at bp
-    //  crossPt    = bp;
-    //  trackCoord = bp.x();
-    //  splitCoord = bp.y();
-    //  checkConnectivity_nodeMap_routeObjSplit_helper(crossPt, trackCoord, splitCoord, lNum, vertMergeHelper, nodeMap);
     }
   }
 }
@@ -462,21 +364,6 @@ void FlexDR::checkConnectivity_nodeMap(frNet* net,
              <<bp.x() * 1.0/ getDesign()->getTopBlock()->getDBUPerUU() <<", "
              <<bp.y() * 1.0/ getDesign()->getTopBlock()->getDBUPerUU() <<") "
              <<obj->getViaDef()->getName() <<endl;
-      //} else if (connFig->typeId() == frcPatchWire) {
-      //  auto obj = static_cast<frPatchWire*>(connFig);
-      //  frPoint bp;
-      //  auto lNum = obj->getLayerNum();
-      //  obj->getOrigin(bp);
-      //  frBox box;
-      //  obj->getOffsetBox(box);
-      //  cout <<"#" <<idx <<" (" 
-      //       <<bp.x() * 1.0/ getDesign()->getTopBlock()->getDBUPerUU() <<", "
-      //       <<bp.y() * 1.0/ getDesign()->getTopBlock()->getDBUPerUU() <<") RECT ("
-      //       <<box.left()   * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-      //       <<box.bottom() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-      //       <<box.right()  * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<" "
-      //       <<box.top()    * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") "
-      //       <<getTech()->getLayer(lNum)->getName() <<endl;
       } else {
         cout <<"Error: checkConnectivity_nodeMap unsupported type" <<endl;
       }
@@ -819,17 +706,6 @@ void FlexDR::checkConnectivity_final(frNet *net, vector<frConnFig*> &netRouteObj
 
   }
   
-  // // rebuild reverseNodeMap
-  // reverseNodeMap.clear();
-  // for (auto &[pr, idxS]: nodeMap) {
-  //   if (idxS.size() == 1) {
-  //     continue;
-  //   }
-  //   for (auto &idx: idxS) {
-  //     reverseNodeMap[idx].insert(pr);
-  //   }
-  // }
-
   for (auto &[idx, ptS]: reverseNodeMap) {
     frPathSeg *ps = nullptr;
     if (idx < gCnt) {
@@ -918,7 +794,6 @@ void FlexDR::checkConnectivity_merge1(frNet *net, vector<frConnFig*> &netRouteOb
                                       vector<map<frCoord, vector<int> > > &vertPathSegs) {
   //bool enableOutput = false;
   frPoint bp, ep;
-  // vector<bool> isVictim(netRouteObjs.size(), false);
   if (netRouteObjs.empty()) {
     return;
   }
@@ -929,13 +804,6 @@ void FlexDR::checkConnectivity_merge1(frNet *net, vector<frConnFig*> &netRouteOb
       auto obj = static_cast<frPathSeg*>(connFig);
       obj->getPoints(bp, ep);
       auto lNum = obj->getLayerNum();
-      // if (net->getName() == string("pci_devsel_oe_o")) {
-      //   if (lNum == 2) {
-      //     if (bp.x() == 254600 && ep.x() == 254600) {
-      //       cout << "vert M2 wire at x = 254600 (127.3): (" << bp.y() / 2000.0 << ", " << ep.y() / 2000.0 << ")\n";
-      //     }
-      //   }
-      // }
       // vert
       if (bp.x() == ep.x()) {
         vertPathSegs[lNum][bp.x()].push_back(i);
@@ -963,10 +831,6 @@ void FlexDR::checkConnectivity_merge2(frNet *net, vector<frConnFig*> &netRouteOb
                                       vector<vector<vector<pair<frCoord, frCoord> > > > &horzNewSegSpans,
                                       vector<vector<vector<pair<frCoord, frCoord> > > > &vertNewSegSpans) {
 
-  // if (net->getName() != string("net41448")) {
-  //   return;
-  // }
-
   for (auto lNum = 0; lNum < (int)horzPathSegs.size(); lNum++) {
     auto &track2Segs = horzPathSegs[lNum];
     horzVictims[lNum].resize(track2Segs.size());
@@ -977,15 +841,6 @@ void FlexDR::checkConnectivity_merge2(frNet *net, vector<frConnFig*> &netRouteOb
       auto &newSegSpans = horzNewSegSpans[lNum][i];
       checkConnectivity_merge_perform(netRouteObjs, indices, victims, newSegSpans, true/*isHorz*/);
       i++;
-      // if (victims.size() > 1) {
-      //   for (auto idx: victims) {
-      //     auto obj = static_cast<frPathSeg*>(netRouteObjs[idx]);
-      //     frPoint bp, ep;
-      //     obj->getPoints(bp, ep);
-      //     cout << "  (" << bp.x() / 2000.0 << ", " << bp.y() / 2000.0 << ") - ("
-      //          << ep.x() / 2000.0 << ", " << ep.y() / 2000.0 << ")\n";
-      //   }
-      // }
     }
   }
   
@@ -1010,9 +865,6 @@ void FlexDR::checkConnectivity_merge3(frNet *net, vector<frConnFig*> &netRouteOb
                                       vector<vector<vector<int> > > &vertVictims,
                                       vector<vector<vector<pair<frCoord, frCoord> > > > &horzNewSegSpans,
                                       vector<vector<vector<pair<frCoord, frCoord> > > > &vertNewSegSpans) {
-  // if (net->getName() != string("net41448")) {
-  //   return;
-  // }
 
   for (auto lNum = 0; lNum < (int)horzPathSegs.size(); lNum++) {
     auto &track2Segs = horzPathSegs[lNum];
@@ -1052,13 +904,11 @@ void FlexDR::checkConnectivity_merge_perform(const vector<frConnFig*> &netRouteO
       if (bp.x() >= ep.x()) {
         cout << "Error: bp >= ep\n";
       }
-      // segSpans.push_back(make_pair(make_pair(min(bp.x(), ep.x()), max(bp.x(), ep.x())), idx));
     } else {
       segSpans.push_back(make_pair(make_pair(bp.y(), ep.y()), idx));
       if (bp.y() >= ep.y()) {
         cout << "Error: bp >= ep\n";
       }
-      // segSpans.push_back(make_pair(make_pair(min(bp.y(), ep.y()), max(bp.y(), ep.y())), idx));
     }
   }
   sort(segSpans.begin(), segSpans.end());
@@ -1072,14 +922,10 @@ void FlexDR::checkConnectivity_merge_perform_helper(const vector<pair<pair<frCoo
                                                     vector<pair<frCoord, frCoord> > &newSegSpans) {
   // bool enableOutput = true;
   map<int, int> victimIdx2SegSpanIdx;
-  //int segIdx = 0;
   int ovlpCnt = 0;
   frCoord currStart = INT_MAX, currEnd = INT_MIN;
   vector<int> localVictims;
   for (auto &segSpan: segSpans) {
-    // if (enableOutput) {
-    //   victimIdx2SegSpanIdx[segSpan.second] = segIdx;
-    // }
     if (segSpan.first.first >= currEnd) {
       ovlpCnt++;
       if (ovlpCnt >= 2) {
@@ -1109,9 +955,6 @@ void FlexDR::checkConnectivity_merge_perform_helper(const vector<pair<pair<frCoo
       currEnd = max(currEnd, segSpan.first.second);
       localVictims.push_back(segSpan.second);
     }
-    // if (enableOutput) {
-    //   segIdx++;
-    // }
   }
   if (ovlpCnt >= 1) {
     newSegSpans.push_back(make_pair(currStart, currEnd));
@@ -1129,17 +972,10 @@ void FlexDR::checkConnectivity_merge_commit(frNet *net,
   if (victims.empty()) {
     return;
   }
-  // frRegionQuery* regionQuery = nullptr;
   auto regionQuery = getRegionQuery();
   // add segments from overlapped segments
   int cnt = 0;
-  // auto templatePathSeg = static_cast<frPathSeg*>(netRouteObjs[victims[0]]);
   for (auto &newSegSpan: newSegSpans) {
-    // if (regionQuery == nullptr) {
-    //   regionQuery = getRegionQuery();
-    // }
-    // unique_ptr<frShape> uShape = make_unique<frPathSeg>(*templatePathSeg);
-    // auto rptr = static_cast<frPathSeg*>(uShape.get());
     auto victimPathSeg = static_cast<frPathSeg*>(netRouteObjs[victims[cnt]]);
     regionQuery->removeDRObj(static_cast<frShape*>(victimPathSeg));
 
@@ -1152,13 +988,7 @@ void FlexDR::checkConnectivity_merge_commit(frNet *net,
       ep.set(trackCoord, newSegSpan.second);
     }
     victimPathSeg->setPoints(bp, ep);
-    // cout << "creating segment from (" << bp.x() << ", " << bp.y() 
-    //      << ") - (" << ep.x() << ", " << ep.y() << ")\n";
-    // rptr->setLayerNum(lNum);
-
-    // net->addShape(uShape);
     regionQuery->addDRObj(victimPathSeg);
-    // netRouteObjs[victims[cnt]] = victimPathSeg;
     cnt++;
   }
   // remove previously overlapped segments
@@ -1188,20 +1018,7 @@ void FlexDR::checkConnectivity_addMarker(frNet* net, frLayerNum lNum, const frBo
 
 // feedthrough and loop check
 void FlexDR::checkConnectivity(int iter) {
-  //cout <<"checking connectivity " <<endl;
-
-  // if (iter != -1) {
-  //   io::Writer writer(getDesign());
-  //   string defSuffix("_iter");
-  //   defSuffix = defSuffix + to_string(iter);
-  //   writer.writeFromDR(defSuffix.c_str());
-  // }
-
   bool isWrong = false;
-  //auto &nets = getDesign()->getTopBlock()->getNets();
-  //int numNets = nets.size();
-  //vector<frConnFig*> netDRObjs;
-  //map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> pin2epMap;
 
   int batchSize = 131072;
   vector<vector<frNet*> > batches(1);
@@ -1327,62 +1144,6 @@ void FlexDR::checkConnectivity(int iter) {
 
   }
 
-  /*
-  for (auto &uPtr: getDesign()->getTopBlock()->getNets()) {
-    auto net = uPtr.get();
-    //if (net->getName() != "net3097") {
-    //  continue;
-    //}
-    if (!net->isModified()) {
-      continue;
-    } else {
-      net->setModified(false);
-    }
-    //vector<frConnFig*> initNetDRObjs;
-    vector<frConnFig*> initNetDRObjs, netDRObjs;
-    checkConnectivity_initDRObjs(net, initNetDRObjs);
-
-    // fix for overlapped same-net wire
-    vector<map<frCoord, vector<int> > > horzPathSegs(getTech()->getLayers().size());
-    vector<map<frCoord, vector<int> > > vertPathSegs(getTech()->getLayers().size());
-    vector<vector<int> > > horzVictims(getTech()->getLayers().size());
-    vector<vector<int> > > vertVictims(getTech()->getLayers().size());
-    vector<vector<pair<frCoord, frCoord> > > horzNewSegSpans(getTech()->getLayers().size());
-    vector<vector<pair<frCoord, frCoord> > > vertNewSegSpans(getTech()->getLayers().size());
-    checkConnectivity_merge1(net, initNetDRObjs, horzPathSegs, vertPathSegs);
-    checkConnectivity_merge2(net, initNetDRObjs, horzPathSegs, vertPathSegs, 
-                             horzVictims, vertVictims, horzNewSegSpans, vertNewSegSpans);
-    // lock
-    checkConnectivity_merge3(net, initNetDRObjs, horzPathSegs, vertPathSegs, 
-                             horzVictims, vertVictims, horzNewSegSpans, vertNewSegSpans);
-    // release lock
-
-    checkConnectivity_initDRObjs(net, netDRObjs);
-    
-    map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> pin2epMap;
-    checkConnectivity_pin2epMap(net, netDRObjs, pin2epMap);  
-
-    vector<frBlockObject*> netPins;
-    map<pair<frPoint, frLayerNum>, set<int> > nodeMap;
-    checkConnectivity_nodeMap(net, netDRObjs, netPins, pin2epMap, nodeMap);
-
-    int gCnt = (int)netDRObjs.size();
-    int nCnt = (int)netDRObjs.size() + (int)netPins.size();
-    vector<bool> adjVisited;
-    vector<int>  adjPrevIdx;
-    if (!checkConnectivity_astar(net, adjVisited, adjPrevIdx, nodeMap, gCnt, nCnt)) {
-      cout <<"Error: checkConnectivity break, net " <<net->getName() <<endl;
-      isWrong = true;
-    } else {
-      // get lock
-      // delete / shrink netRouteObjs, 
-      checkConnectivity_final(net, netDRObjs, netPins, adjVisited, gCnt, nCnt, nodeMap);
-      // release lock
-    }
-
-
-  }
-  */
   if (isWrong) {
     io::Writer writer(getDesign());
     writer.writeFromDR("_conn");

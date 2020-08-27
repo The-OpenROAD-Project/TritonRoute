@@ -38,14 +38,6 @@
 using namespace std;
 using namespace fr;
 
-// std::chrono::duration<double> time_span_init(0);
-// std::chrono::duration<double> time_span_init0(0);
-// std::chrono::duration<double> time_span_init1(0);
-// std::chrono::duration<double> time_span_init2(0);
-// std::chrono::duration<double> time_span_init3(0);
-// std::chrono::duration<double> time_span_route(0);
-// std::chrono::duration<double> time_span_end(0);
-
 int FlexDRWorker::main() {
   using namespace std::chrono;
   high_resolution_clock::time_point t0 = high_resolution_clock::now();
@@ -59,30 +51,17 @@ int FlexDRWorker::main() {
                 <<routeBox.top()    * 1.0 / getTech()->getDBUPerUU() <<" )" <<endl;
     cout <<ss.str() <<flush;
   }
-  //return 0;
 
   init();
-  //FlexMazeRoute mazeInst(getDesign(), routeBox, extBox);
-  //mazeInst.setInitDR(isInitDR());
-  //mazeInst.init();
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //mazeInst.route();
-  // if (getFixMode() != 9) {
-    route();
-  // } else {
-    // route_queue();
-  // }
+  route();
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   end();
-  //mazeInst.end();
   high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
   duration<double> time_span0 = duration_cast<duration<double>>(t1 - t0);
-  //time_span_init  += time_span0;
   duration<double> time_span1 = duration_cast<duration<double>>(t2 - t1);
-  //time_span_route += time_span1;
   duration<double> time_span2 = duration_cast<duration<double>>(t3 - t2);
-  //time_span_end   += time_span2;
 
   if (VERBOSE > 1) {
     stringstream ss;
@@ -108,14 +87,9 @@ int FlexDRWorker::main_mt() {
                 <<routeBox.top()    * 1.0 / getTech()->getDBUPerUU() <<" )" <<endl;
     cout <<ss.str() <<flush;
   }
-  //return 0;
 
   init();
-  //FlexMazeRoute mazeInst(getDesign(), routeBox, extBox);
-  //mazeInst.setInitDR(isInitDR());
-  //mazeInst.init();
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //mazeInst.route();
   if (getFixMode() != 9) {
     route();
   } else {
@@ -123,16 +97,11 @@ int FlexDRWorker::main_mt() {
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   cleanup();
-  // end();
-  //mazeInst.end();
   high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
   duration<double> time_span0 = duration_cast<duration<double>>(t1 - t0);
-  //time_span_init  += time_span0;
   duration<double> time_span1 = duration_cast<duration<double>>(t2 - t1);
-  //time_span_route += time_span1;
   duration<double> time_span2 = duration_cast<duration<double>>(t3 - t2);
-  //time_span_end   += time_span2;
 
   if (VERBOSE > 1) {
     stringstream ss;
@@ -148,7 +117,6 @@ int FlexDRWorker::main_mt() {
 void FlexDR::initFromTA() {
   bool enableOutput = false;
   // initialize lists
-  int cnt = 0;
   for (auto &net: getDesign()->getTopBlock()->getNets()) {
     for (auto &guide: net->getGuides()) {
       for (auto &connFig: guide->getRoutes()) {
@@ -166,19 +134,7 @@ void FlexDR::initFromTA() {
         }
       }
     }
-    //net->clearGuides(); // should not clear guide because of initGCellBoundary
-    cnt++;
-    //if (cnt < 100000) {
-    //  if (cnt % 10000 == 0) {
-    //    cout <<"  initFromTA complete " <<cnt <<" nets" <<endl;
-    //  }
-    //} else {
-    //  if (cnt % 100000 == 0) {
-    //    cout <<"  initFromTA complete " <<cnt <<" nets" <<endl;
-    //  }
-    //}
   }
-  //getRegionQuery()->clearGuides(); // should not clear guide because of initGCellBoundary
 
   if (enableOutput) {
     for (auto &net: getDesign()->getTopBlock()->getNets()) {
@@ -195,12 +151,6 @@ void FlexDR::initGCell2BoundaryPin() {
   auto gCellPatterns = getDesign()->getTopBlock()->getGCellPatterns();
   auto &xgp = gCellPatterns.at(0);
   auto &ygp = gCellPatterns.at(1);
-  //frCoord GCELLGRIDX   = xgp.getSpacing();
-  //frCoord GCELLGRIDY   = ygp.getSpacing();
-  //frCoord GCELLOFFSETX = xgp.getStartCoord();
-  //frCoord GCELLOFFSETY = ygp.getStartCoord();
-  //frCoord GCELLCNTX    = xgp.getCount();
-  //frCoord GCELLCNTY    = ygp.getCount();
   auto tmpVec = vector<map<frNet*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> >((int)ygp.getCount());
   gcell2BoundaryPin = vector<vector<map<frNet*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> > >((int)xgp.getCount(), tmpVec);
   for (auto &net: getDesign()->getTopBlock()->getNets()) {
@@ -220,36 +170,15 @@ void FlexDR::initGCell2BoundaryPin() {
           frPoint idx1, idx2;
           getDesign()->getTopBlock()->getGCellIdx(bp, idx1);
           getDesign()->getTopBlock()->getGCellIdx(ep, idx2);
-          //frBox gcellBox1, gcellBox2;
-          //getDesign()->getTopBlock()->getGCellBox(idx1, gcellBox1);
-          //getDesign()->getTopBlock()->getGCellBox(idx2, gcellBox2);
           // update gcell2BoundaryPin
           // horizontal
           if (bp.y() == ep.y()) {
-            //int x1 = (bp.x() - xgp.getStartCoord()) / xgp.getSpacing();
-            //int x2 = (ep.x() - xgp.getStartCoord()) / xgp.getSpacing();
-            //int y  = (bp.y() - ygp.getStartCoord()) / ygp.getSpacing();
             int x1 = idx1.x();
             int x2 = idx2.x();
             int y  = idx1.y();
-            //if (x1 < 0 || x2 < 0 || y < 0) {
-            //  cout <<"Warning: initGCell2BoundaryPin < 0";
-            //  exit(1);
-            //}
-            //if (x1 >= (int)GCELLCNTX) {
-            //  x1 = (int)GCELLCNTX - 1;
-            //}
-            //if (x2 >= (int)GCELLCNTX) {
-            //  x2 = (int)GCELLCNTX - 1;
-            //}
-            //if (y >= (int)GCELLCNTY) {
-            //  y = (int)GCELLCNTY - 1;
-            //}
             for (auto x = x1; x <= x2; ++x) {
               frBox gcellBox;
               getDesign()->getTopBlock()->getGCellBox(frPoint(x, y), gcellBox);
-              //frCoord leftBound  = x * xgp.getSpacing() + xgp.getStartCoord();
-              //frCoord rightBound = (x == (int)GCELLCNTX - 1) ? dieBox.right() : (x + 1) * xgp.getSpacing() + xgp.getStartCoord();
               frCoord leftBound  = gcellBox.left();
               frCoord rightBound = gcellBox.right();
               bool hasLeftBound  = true;
@@ -290,30 +219,12 @@ void FlexDR::initGCell2BoundaryPin() {
               }
             }
           } else if (bp.x() == ep.x()) {
-            //int x  = (bp.x() - xgp.getStartCoord()) / xgp.getSpacing();
-            //int y1 = (bp.y() - ygp.getStartCoord()) / ygp.getSpacing();
-            //int y2 = (ep.y() - ygp.getStartCoord()) / ygp.getSpacing();
             int x  = idx1.x();
             int y1 = idx1.y();
             int y2 = idx2.y();
-            //if (y1 < 0 || y2 < 0 || x < 0) {
-            //  cout <<"Warning: initGCell2BoundaryPin < 0";
-            //  exit(1);
-            //}
-            //if (x >= (int)GCELLCNTX) {
-            //  x = (int)GCELLCNTX - 1;
-            //}
-            //if (y1 >= (int)GCELLCNTY) {
-            //  y1 = (int)GCELLCNTY - 1;
-            //}
-            //if (y2 >= (int)GCELLCNTY) {
-            //  y2 = (int)GCELLCNTY - 1;
-            //}
             for (auto y = y1; y <= y2; ++y) {
               frBox gcellBox;
               getDesign()->getTopBlock()->getGCellBox(frPoint(x, y), gcellBox);
-              //frCoord bottomBound = y * ygp.getSpacing() + ygp.getStartCoord();
-              //frCoord topBound    = (y == (int)GCELLCNTY - 1) ? dieBox.top() : (y + 1) * ygp.getSpacing() + ygp.getStartCoord();
               frCoord bottomBound = gcellBox.bottom();
               frCoord topBound    = gcellBox.top();
               bool hasBottomBound = true;
@@ -364,7 +275,6 @@ void FlexDR::initGCell2BoundaryPin() {
 
 frCoord FlexDR::init_via2viaMinLen_minimumcut1(frLayerNum lNum, frViaDef* viaDef1, frViaDef* viaDef2) {
   if (!(viaDef1 && viaDef2)) {
-    //cout <<"hehehehe" <<endl;
     return 0;
   }
 
@@ -372,7 +282,6 @@ frCoord FlexDR::init_via2viaMinLen_minimumcut1(frLayerNum lNum, frViaDef* viaDef
 
   // check min len in lNum assuming pre dir routing
   bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-  //frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
   bool isVia1Above = false;
   frVia via1(viaDef1);
@@ -387,8 +296,6 @@ frCoord FlexDR::init_via2viaMinLen_minimumcut1(frLayerNum lNum, frViaDef* viaDef
   via1.getCutBBox(cutBox1);
   auto width1    = viaBox1.width();
   auto length1   = viaBox1.length();
-  //bool isVia1Fat = isH ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
-  //auto prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
 
   bool isVia2Above = false;
   frVia via2(viaDef2);
@@ -403,25 +310,8 @@ frCoord FlexDR::init_via2viaMinLen_minimumcut1(frLayerNum lNum, frViaDef* viaDef
   via2.getCutBBox(cutBox2);
   auto width2    = viaBox2.width();
   auto length2   = viaBox2.length();
-  //bool isVia2Fat = isH ? (viaBox2.top() - viaBox2.bottom() > defaultWidth) : (viaBox2.right() - viaBox2.left() > defaultWidth);
-  //auto prl2      = isH ? (viaBox2.top() - viaBox2.bottom()) : (viaBox2.right() - viaBox2.left());
 
   for (auto &con: getDesign()->getTech()->getLayer(lNum)->getMinimumcutConstraints()) {
-    //// two via enclsoure <= width, minimumcut rule not applied
-    //if (defaultWidth <= con->getWidth() && width1 <= con->getWidth() && width2 <= con->getWidth()) {
-    //  continue;
-    //}
-    //// skip if hasConnection but no via satisfies
-    //if (con->hasConnection() && con->getConnection() == frMinimumcutConnectionEnum::FROMABOVE &&
-    //    !isVia1Above && !isVia2Above) {
-    //  continue;
-    //}
-    //if (con->hasConnection() && con->getConnection() == frMinimumcutConnectionEnum::FROMBELOW &&
-    //    isVia1Above && isVia2Above) {
-    //  continue;
-    //}
-    // check via2cut to via1metal
-    // no length OR metal1 shape satisfies --> check via2
     if ((!con->hasLength() || (con->hasLength() && length1 > con->getLength())) && 
         width1 > con->getWidth()) {
       bool checkVia2 = false;
@@ -674,23 +564,13 @@ void FlexDR::init_via2viaMinLen() {
     frViaDef* upVia   = nullptr;
     if (getDesign()->getTech()->getBottomLayerNum() <= lNum - 1) {
       downVia = getDesign()->getTech()->getLayer(lNum - 1)->getDefaultViaDef();
-      //cout <<"d via found " <<downVia <<endl;
     }
     if (getDesign()->getTech()->getTopLayerNum() >= lNum + 1) {
       upVia = getDesign()->getTech()->getLayer(lNum + 1)->getDefaultViaDef();
-      //cout <<"u via found " <<upVia <<endl;
-    //} else {
-    //  cout <<"lNum=" <<lNum <<endl;
-    //  cout <<"topLayerNum=" <<getDesign()->getTech()->getTopLayerNum() <<endl;
     }
-    //vector<frCoord> via2viaMinLenTmp(4, 0);
-    //cout <<"@@@0" <<endl;
     (via2viaMinLen[i].first)[0] = max((via2viaMinLen[i].first)[0], init_via2viaMinLen_minSpc(lNum, downVia, downVia));
-    //cout <<"@@@1" <<endl;
     (via2viaMinLen[i].first)[1] = max((via2viaMinLen[i].first)[1], init_via2viaMinLen_minSpc(lNum, downVia, upVia));
-    //cout <<"@@@2" <<endl;
     (via2viaMinLen[i].first)[2] = max((via2viaMinLen[i].first)[2], init_via2viaMinLen_minSpc(lNum, upVia, downVia));
-    //cout <<"@@@3" <<endl;
     (via2viaMinLen[i].first)[3] = max((via2viaMinLen[i].first)[3], init_via2viaMinLen_minSpc(lNum, upVia, upVia));
     if (enableOutput) {
       cout <<"initVia2ViaMinLen_minSpc " <<getDesign()->getTech()->getLayer(lNum)->getName()
@@ -718,13 +598,9 @@ void FlexDR::init_via2viaMinLen() {
       upVia = getDesign()->getTech()->getLayer(lNum + 1)->getDefaultViaDef();
     }
     vector<frCoord> via2viaMinLenTmp(4, 0);
-    //cout <<"@@@0" <<endl;
     (via2viaMinLen[i].first)[0] = max((via2viaMinLen[i].first)[0], init_via2viaMinLen_minimumcut1(lNum, downVia, downVia));
-    //cout <<"@@@1" <<endl;
     (via2viaMinLen[i].first)[1] = max((via2viaMinLen[i].first)[1], init_via2viaMinLen_minimumcut1(lNum, downVia, upVia));
-    //cout <<"@@@2" <<endl;
     (via2viaMinLen[i].first)[2] = max((via2viaMinLen[i].first)[2], init_via2viaMinLen_minimumcut1(lNum, upVia, downVia));
-    //cout <<"@@@3" <<endl;
     (via2viaMinLen[i].first)[3] = max((via2viaMinLen[i].first)[3], init_via2viaMinLen_minimumcut1(lNum, upVia, upVia));
     (via2viaMinLen[i].second)[0] = (via2viaMinLen[i].second)[0] && init_via2viaMinLen_minimumcut2(lNum, downVia, downVia);
     (via2viaMinLen[i].second)[1] = (via2viaMinLen[i].second)[1] && init_via2viaMinLen_minimumcut2(lNum, downVia, upVia);
@@ -751,16 +627,13 @@ void FlexDR::init_via2viaMinLen() {
 
 frCoord FlexDR::init_via2viaMinLenNew_minimumcut1(frLayerNum lNum, frViaDef* viaDef1, frViaDef* viaDef2, bool isCurrDirY) {
   if (!(viaDef1 && viaDef2)) {
-    //cout <<"hehehehe" <<endl;
     return 0;
   }
 
   frCoord sol = 0;
 
   // check min len in lNum assuming pre dir routing
-  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
   bool isCurrDirX = !isCurrDirY;
-  //frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
   bool isVia1Above = false;
   frVia via1(viaDef1);
@@ -775,8 +648,6 @@ frCoord FlexDR::init_via2viaMinLenNew_minimumcut1(frLayerNum lNum, frViaDef* via
   via1.getCutBBox(cutBox1);
   auto width1    = viaBox1.width();
   auto length1   = viaBox1.length();
-  //bool isVia1Fat = isH ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
-  //auto prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
 
   bool isVia2Above = false;
   frVia via2(viaDef2);
@@ -791,23 +662,8 @@ frCoord FlexDR::init_via2viaMinLenNew_minimumcut1(frLayerNum lNum, frViaDef* via
   via2.getCutBBox(cutBox2);
   auto width2    = viaBox2.width();
   auto length2   = viaBox2.length();
-  //bool isVia2Fat = isH ? (viaBox2.top() - viaBox2.bottom() > defaultWidth) : (viaBox2.right() - viaBox2.left() > defaultWidth);
-  //auto prl2      = isH ? (viaBox2.top() - viaBox2.bottom()) : (viaBox2.right() - viaBox2.left());
 
   for (auto &con: getDesign()->getTech()->getLayer(lNum)->getMinimumcutConstraints()) {
-    //// two via enclsoure <= width, minimumcut rule not applied
-    //if (defaultWidth <= con->getWidth() && width1 <= con->getWidth() && width2 <= con->getWidth()) {
-    //  continue;
-    //}
-    //// skip if hasConnection but no via satisfies
-    //if (con->hasConnection() && con->getConnection() == frMinimumcutConnectionEnum::FROMABOVE &&
-    //    !isVia1Above && !isVia2Above) {
-    //  continue;
-    //}
-    //if (con->hasConnection() && con->getConnection() == frMinimumcutConnectionEnum::FROMBELOW &&
-    //    isVia1Above && isVia2Above) {
-    //  continue;
-    //}
     // check via2cut to via1metal
     // no length OR metal1 shape satisfies --> check via2
     if ((!con->hasLength() || (con->hasLength() && length1 > con->getLength())) && 
@@ -874,7 +730,6 @@ frCoord FlexDR::init_via2viaMinLenNew_minSpc(frLayerNum lNum, frViaDef* viaDef1,
   frCoord sol = 0;
 
   // check min len in lNum assuming pre dir routing
-  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
   bool isCurrDirX = !isCurrDirY;
   frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
@@ -965,41 +820,23 @@ frCoord FlexDR::init_via2viaMinLenNew_cutSpc(frLayerNum lNum, frViaDef* viaDef1,
   frCoord sol = 0;
 
   // check min len in lNum assuming pre dir routing
-  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-  //bool isCurrDirX = !isCurrDirY;
-  //frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
-
-  //bool isVia1Above = false;
   frVia via1(viaDef1);
   frBox viaBox1, cutBox1;
   if (viaDef1->getLayer1Num() == lNum) {
     via1.getLayer1BBox(viaBox1);
-    //isVia1Above = true;
   } else {
     via1.getLayer2BBox(viaBox1);
-    //isVia1Above = false;
   }
   via1.getCutBBox(cutBox1);
-  //auto width1    = viaBox1.width();
-  //auto length1   = viaBox1.length();
-  //bool isVia1Fat = isH ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
-  //auto prl1      = isH ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
 
-  //bool isVia2Above = false;
   frVia via2(viaDef2);
   frBox viaBox2, cutBox2;
   if (viaDef2->getLayer1Num() == lNum) {
     via2.getLayer1BBox(viaBox2);
-    //isVia2Above = true;
   } else {
     via2.getLayer2BBox(viaBox2);
-    //isVia2Above = false;
   }
   via2.getCutBBox(cutBox2);
-  //auto width2    = viaBox2.width();
-  //auto length2   = viaBox2.length();
-  //bool isVia2Fat = isH ? (viaBox2.top() - viaBox2.bottom() > defaultWidth) : (viaBox2.right() - viaBox2.left() > defaultWidth);
-  //auto prl2      = isH ? (viaBox2.top() - viaBox2.bottom()) : (viaBox2.right() - viaBox2.left());
 
   // same layer (use samenet rule if exist, otherwise use diffnet rule)
   if (viaDef1->getCutLayerNum() == viaDef2->getCutLayerNum()) {
@@ -1032,10 +869,8 @@ frCoord FlexDR::init_via2viaMinLenNew_cutSpc(frLayerNum lNum, frViaDef* viaDef1,
           continue;
         }
         auto reqSpcVal = con->getCutSpacing();
-        // std::cout << "  reqSpcVal = " << reqSpcVal << "\n";
         if (!con->hasCenterToCenter()) {
           reqSpcVal += isCurrDirY ? (cutBox1.top() - cutBox1.bottom()) : (cutBox1.right() - cutBox1.left());
-          // std::cout << "    updated reqSpcVal = " << reqSpcVal << "\n";
         }
         sol = max(sol, reqSpcVal);
       }
@@ -1214,7 +1049,6 @@ void FlexDR::init_via2viaMinLenNew() {
 void FlexDR::init_halfViaEncArea() {
   auto bottomLayerNum = getDesign()->getTech()->getBottomLayerNum();
   auto topLayerNum    = getDesign()->getTech()->getTopLayerNum();
-  //vector<frCoord> via2viaMinLenTmp(4, 0);
   for (int i = bottomLayerNum; i <= topLayerNum; i++) {
     if (getDesign()->getTech()->getLayer(i)->getType() != frLayerTypeEnum::ROUTING) {
       continue;
@@ -1228,14 +1062,11 @@ void FlexDR::init_halfViaEncArea() {
       via.getLayer2BBox(layer2Box);
       auto layer1HalfArea = layer1Box.width() * layer1Box.length() / 2;
       auto layer2HalfArea = layer2Box.width() * layer2Box.length() / 2;
-      // cout <<"z = " <<zCoords.size() <<" " <<"layer1/2HalfArea = " <<layer1HalfArea <<"/" <<layer2HalfArea <<endl;
       halfViaEncArea.push_back(make_pair(layer1HalfArea, layer2HalfArea));
     } else {
       halfViaEncArea.push_back(make_pair(0,0));
     }
-    //via2viaMinLen.push_back(via2viaMinLenTmp);
   }
-  //init_via2ViaMinLen();
 }
 
 
@@ -1248,7 +1079,6 @@ frCoord FlexDR::init_via2turnMinLen_minSpc(frLayerNum lNum, frViaDef* viaDef, bo
   frCoord sol = 0;
 
   // check min len in lNum assuming pre dir routing
-  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
   bool isCurrDirX = !isCurrDirY;
   frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
@@ -1296,7 +1126,6 @@ frCoord FlexDR::init_via2turnMinLen_minStp(frLayerNum lNum, frViaDef* viaDef, bo
   frCoord sol = 0;
 
   // check min len in lNum assuming pre dir routing
-  //bool isH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
   bool isCurrDirX = !isCurrDirY;
   frCoord defaultWidth = getDesign()->getTech()->getLayer(lNum)->getWidth();
 
@@ -1307,9 +1136,7 @@ frCoord FlexDR::init_via2turnMinLen_minStp(frLayerNum lNum, frViaDef* viaDef, bo
   } else {
     via1.getLayer2BBox(viaBox1);
   }
-  //auto width1    = viaBox1.width();
   bool isVia1Fat = isCurrDirX ? (viaBox1.top() - viaBox1.bottom() > defaultWidth) : (viaBox1.right() - viaBox1.left() > defaultWidth);
-  //auto prl1      = isCurrDirX ? (viaBox1.top() - viaBox1.bottom()) : (viaBox1.right() - viaBox1.left());
 
   frCoord reqDist = 0;
   if (isVia1Fat) {
@@ -1409,13 +1236,8 @@ void FlexDR::init() {
   if (VERBOSE > 0) {
     cout <<endl <<"start routing data preparation" <<endl;
   }
-  //initFromTA(); // this does not help much for conservative boundary patch metal in initDR
   initGCell2BoundaryPin();
-  //if (VERBOSE > 0) {
-  //  cout <<endl <<"init dr objs ..." <<endl;
-  //}
   getRegionQuery()->initDRObj(getTech()->getLayers().size()); // first init in postProcess
-  //getRegionQuery()->printDRObj();
 
   init_halfViaEncArea();
   init_via2viaMinLen();
@@ -1456,12 +1278,6 @@ map<frNet*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> FlexDR::initDR_m
 void FlexDR::initDR(int size, bool enableDRC) {
   bool TEST = false;
   // bool TEST = true;
-  //cout <<"sizeof listiter   = " <<sizeof(frListIter<frPathSeg>) <<endl;
-  //cout <<"sizeof raw ptr    = " <<sizeof(frPathSeg*) <<endl;
-  //cout <<"sizeof unique ptr = " <<sizeof(unique_ptr<frPathSeg>) <<endl;
-  //cout <<"sizeof shared_ptr = " <<sizeof(shared_ptr<frPathSeg>) <<endl;
-  //exit(0);
-
   //FlexGridGraph gg(getTech(), getDesign());
   ////frBox testBBox(225000, 228100, 228000, 231100); // net1702 in ispd19_test1
   //frBox testBBox(0, 0, 2000, 2000); // net1702 in ispd19_test1
@@ -1531,130 +1347,11 @@ void FlexDR::initDR(int size, bool enableDRC) {
     //worker.setTest(true);
     worker.main();
     cout <<"done"  <<endl <<flush;
-    /*
-    {
-    //FlexDRWorker worker(getDesign());
-    FlexDRWorker worker(this);
-    //frBox routeBox;
-    //routeBox.set(0*2000, 0*2000, 1*2000, 1*2000);
-    frCoord xl = 84 * 2000;
-    frCoord yl = 0 * 2000;
-    //frCoord xh = 129 * 2000;
-    //frCoord yh = 94.05 * 2000;
-    frPoint idx;
-    getDesign()->getTopBlock()->getGCellIdx(frPoint(xl, yl), idx);
-    if (VERBOSE > 1) {
-      cout <<"(i,j) = (" <<idx.x() <<", " <<idx.y() <<")" <<endl;
-    }
-    //getDesign()->getTopBlock()->getGCellBox(idx, routeBox);
-    frBox routeBox1;
-    getDesign()->getTopBlock()->getGCellBox(frPoint(idx.x(), idx.y()), routeBox1);
-    frBox routeBox2;
-    getDesign()->getTopBlock()->getGCellBox(frPoint(min((int)xgp.getCount() - 1, idx.x() + size-1), 
-                                                    min((int)ygp.getCount(), idx.y() + size-1)), routeBox2);
-    frBox routeBox(routeBox1.left(), routeBox1.bottom(), routeBox2.right(), routeBox2.top());
-    auto bp = initDR_mergeBoundaryPin(idx.x(), idx.y(), size, routeBox);
-    //routeBox.set(129*2000, 94.05*2000, 132*2000, 96.9*2000);
-    worker.setRouteBox(routeBox);
-    frBox extBox;
-    routeBox.bloat(1000, extBox);
-    frBox drcBox;
-    routeBox.bloat(500, drcBox);
-    worker.setRouteBox(routeBox);
-    worker.setExtBox(extBox);
-    worker.setDrcBox(drcBox);
-    worker.setFollowGuide(false);
-    worker.setCost(DRCCOST, 0, 0, 0);
-    //int i = (129   * 2000 - xgp.getStartCoord()) / xgp.getSpacing();
-    //int j = (94.05 * 2000 - ygp.getStartCoord()) / ygp.getSpacing();
-    //worker.setDRIter(0, gcell2BoundaryPin[idx.x()][idx.y()]);
-    worker.setDRIter(0, bp);
-    worker.setEnableDRC(enableDRC);
-    //worker.setTest(true);
-    worker.main();
-    cout <<"done"  <<endl <<flush;
-    }
-    */
-  /*} else if (MAX_THREADS == 1) {
-    //vector<FlexDRWorker> workers;
-    int cnt = 0;
-    //int tot = (int)xgp.getCount() * (int)ygp.getCount();
-    int tot = (((int)xgp.getCount() - 1) / size + 1) * (((int)ygp.getCount() - 1) / size + 1);
-    int prev_perc = 0;
-    bool isExceed = false;
-    for (int i = 0; i < (int)xgp.getCount(); i += size) {
-      for (int j = 0; j < (int)ygp.getCount(); j += size) {
-    //for (int i = 310; i < 330; i++) {
-    //  for (int j = 300; j < 320; j++) {
-        //FlexDRWorker worker(getDesign());
-        FlexDRWorker worker(this);
-        frBox routeBox1;
-        getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox1);
-        frBox routeBox2;
-        getDesign()->getTopBlock()->getGCellBox(frPoint(min((int)xgp.getCount() - 1, i + size-1), 
-                                                        min((int)ygp.getCount(), j + size-1)), routeBox2);
-        //frBox routeBox;
-        frBox routeBox(routeBox1.left(), routeBox1.bottom(), routeBox2.right(), routeBox2.top());
-        //getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox);
-        //if (!(routeBox.left()   >= 504 * 2000  && routeBox.right() <= 525*2000 &&
-        //    routeBox.bottom() >= 538.65*2000 && routeBox.top()   <= 558.6*2000)) {
-        //  continue;
-        //}
-        frBox extBox;
-        routeBox.bloat(2000, extBox);
-        frBox drcBox;
-        routeBox.bloat(500, drcBox);
-        worker.setRouteBox(routeBox);
-        worker.setExtBox(extBox);
-        worker.setDrcBox(drcBox);
-        //workers.push_back(worker);
-        //worker.setDRIter(0, &gcell2BoundaryPin[i][j]);
-        auto bp = initDR_mergeBoundaryPin(i, j, size, routeBox);
-        worker.setDRIter(0, bp);
-        // set boundary pin
-        worker.setEnableDRC(enableDRC);
-        worker.setFollowGuide(false);
-        //worker.setFollowGuide(true);
-        worker.setCost(DRCCOST, 0, 0, 0);
-        worker.main();
-        numQuickMarkers += worker.getNumQuickMarkers();
-        //cout <<"i/j = " <<i <<", " <<j <<endl;
-        cnt++;
-        if (VERBOSE > 0) {
-          if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1) {
-            if (prev_perc == 0 && t.isExceed(0)) {
-              isExceed = true;
-            }
-            prev_perc += 10;
-            //if (true) {
-            if (isExceed) {
-              if (enableDRC) {
-                cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
-              } else {
-                cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
-              }
-              cout <<"    " <<t <<endl <<flush;
-            }
-          }
-        }
-        //if (cnt % 10000 == 0) {
-        //  cout <<"    complete " <<cnt <<"/" <<tot <<endl;
-        //  cout <<"    " <<t <<endl;
-        //  //cout <<"  completing XX% with YY violations" <<endl;
-        //  //cout <<"  elapsed time = 00:04:55, memory = ZZZZ.ZZ (MB)" <<endl;
-        //}
-      }
-    } 
-    checkConnectivity();*/
   } else {
     vector<unique_ptr<FlexDRWorker> > uworkers;
     int batchStepX, batchStepY;
 
     getBatchInfo(batchStepX, batchStepY);
-    // batchSizeX = ((int)xgp.getCount() / size + 1) / batchStepX + 1;
-    // batchSizeY = ((int)ygp.getCount() / size + 1) / batchStepY + 1;
-
-    // vector<vector<FlexDRWorker*> > workers(batchStepX * batchStepY, vector<FlexDRWorker*>(batchSizeX * batchSizeY, nullptr));
 
     vector<vector<vector<unique_ptr<FlexDRWorker> > > > workers(batchStepX * batchStepY);
 
@@ -1766,11 +1463,6 @@ void FlexDR::initDR(int size, bool enableDRC) {
     } else {
       cout <<"  number of quick violations = " <<numQuickMarkers <<endl;
     }
-    //cout <<"    by layer and type :" <<endl;
-    //cout <<"           MetSpc EOLSpc Loop CutSpc AdjCut CorSpc Others Totals" <<endl;
-    //cout <<"    Metal1      0      0    0      0      0      0      0      0" <<endl;
-    //cout <<"    Totals      0      0    0      0      0      0      0      0" <<endl;
-    //cout <<"cpu time = 00:00:00, elapsed time = 00:00:00, memory = 0000.00 (MB), peak = 0000.00 (MB)" <<endl;
     t.print();
     cout <<flush;
   }
@@ -1814,8 +1506,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
   }
   frBox dieBox;
   getDesign()->getTopBlock()->getBoundaryBBox(dieBox);
-  //getRegionQuery()->initDRObj(getTech()->getLayers().size());
-  //getRegionQuery()->printDRObj();
   auto gCellPatterns = getDesign()->getTopBlock()->getGCellPatterns();
   auto &xgp = gCellPatterns.at(0);
   auto &ygp = gCellPatterns.at(1);
@@ -1870,96 +1560,12 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     worker.main_mt();
     numQuickMarkers += worker.getNumQuickMarkers();
     cout <<"done"  <<endl <<flush;
-  /*} else if (MAX_THREADS == 1) {
-    //vector<FlexDRWorker> workers;
-    int clipSize = size;
-    int cnt = 0;
-    int tot = (((int)xgp.getCount() - 1 - offset) / clipSize + 1) * (((int)ygp.getCount() - 1 - offset) / clipSize + 1);
-    int prev_perc = 0;
-    bool isExceed = false;
-    //for (int i = offset; i < (int)xgp.getCount(); i += clipSize) {
-    //  for (int j = offset; j < (int)ygp.getCount(); j += clipSize) {
-    //    cnt++;
-    //  }
-    //}
-    //cout <<"tot/cnt=" <<tot <<"/" <<cnt <<endl;
-    //cnt = 0;
-    for (int i = offset; i < (int)xgp.getCount(); i += clipSize) {
-      for (int j = offset; j < (int)ygp.getCount(); j += clipSize) {
-    //for (int i = 312; i < 330; i += 3) {
-    //  for (int j = 300; j < 318; j += 3) {
-        //FlexDRWorker worker(getDesign());
-        FlexDRWorker worker(this);
-        frBox routeBox1;
-        getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox1);
-        //double dbu = getDesign()->getTopBlock()->getDBUPerUU();
-        //std::cout <<"routeBox1 (" <<routeBox1.left() / dbu <<", " <<routeBox1.bottom() / dbu <<") ("
-        //                          <<routeBox1.right()/ dbu <<", " <<routeBox1.top()    / dbu <<")" <<std::endl;
-        frBox routeBox2;
-        getDesign()->getTopBlock()->getGCellBox(frPoint(min((int)xgp.getCount() - 1, i + clipSize-1), 
-                                                        min((int)ygp.getCount(), j + clipSize-1)), routeBox2);
-        frBox routeBox(routeBox1.left(), routeBox1.bottom(), routeBox2.right(), routeBox2.top());
-        frBox extBox;
-        frBox drcBox;
-        routeBox.bloat(2000, extBox);
-        routeBox.bloat(500, drcBox);
-        worker.setRouteBox(routeBox);
-        worker.setExtBox(extBox);
-        worker.setDrcBox(drcBox);
-        worker.setMazeEndIter(mazeEndIter);
-        worker.setDRIter(iter);
-        worker.setEnableDRC(enableDRC);
-        worker.setRipupMode(ripupMode);
-        worker.setFollowGuide(followGuide);
-        //worker.setNetOrderingMode(netOrderingMode);
-        worker.setFixMode(fixMode);
-        worker.setCost(workerDRCCost, workerMarkerCost, workerMarkerBloatWidth, workerMarkerBloatDepth);
-        //workers.push_back(worker);
-        worker.main();
-        //if (iter == 2) {
-        //  double dbu = getDesign()->getTopBlock()->getDBUPerUU();
-        //  if (routeBox.left()    == 63     * dbu && 
-        //      routeBox.right()   == 84     * dbu && 
-        //      routeBox.bottom()  == 139.65 * dbu && 
-        //      routeBox.top()     == 159.6  * dbu) { 
-        //    return;
-        //  }
-        //}
-        numQuickMarkers += worker.getNumQuickMarkers();
-        cnt++;
-        if (VERBOSE > 0) {
-          if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1) {
-            if (prev_perc == 0 && t.isExceed(0)) {
-              isExceed = true;
-            }
-            prev_perc += 10;
-            //if (true) {
-            if (isExceed) {
-              if (enableDRC) {
-                cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
-              } else {
-                cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
-              }
-              cout <<"    " <<t <<endl <<flush;
-            }
-          }
-        }
-        //if (cnt > 10000 && ) {
-        //  cout <<"    completing " <<cnt <<"/" <<tot <<endl;
-        //  cout <<"    " <<t <<endl;
-        //  //cout <<"  completing XX% with YY violations" <<endl;
-        //  //cout <<"  elapsed time = 00:04:55, memory = ZZZZ.ZZ (MB)" <<endl;
-        //}
-      }
-    }*/
   } else {
 
     vector<unique_ptr<FlexDRWorker> > uworkers;
     int batchStepX, batchStepY;
 
     getBatchInfo(batchStepX, batchStepY);
-    // batchSizeX = ((int)xgp.getCount() / size + 1) / batchStepX + 1;
-    // batchSizeY = ((int)ygp.getCount() / size + 1) / batchStepY + 1;
 
     vector<vector<vector<unique_ptr<FlexDRWorker> > > > workers(batchStepX * batchStepY);
 
@@ -1967,7 +1573,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     for (int i = offset; i < (int)xgp.getCount(); i += clipSize) {
       for (int j = offset; j < (int)ygp.getCount(); j += clipSize) {
         auto worker = make_unique<FlexDRWorker>(this);
-        // auto &worker = *(uworker.get());
         frBox routeBox1;
         getDesign()->getTopBlock()->getGCellBox(frPoint(i, j), routeBox1);
         frBox routeBox2;
@@ -1994,7 +1599,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
         worker->setEnableDRC(enableDRC);
         worker->setRipupMode(ripupMode);
         worker->setFollowGuide(followGuide);
-        //worker->setNetOrderingMode(netOrderingMode);
         worker->setFixMode(fixMode);
         worker->setCost(workerDRCCost, workerMarkerCost, workerMarkerBloatWidth, workerMarkerBloatDepth);
 
@@ -2012,9 +1616,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
 
 
     omp_set_num_threads(MAX_THREADS);
-    // if (iter >= 2) {
-    //   omp_set_num_threads(1);
-    // }
 
     // parallel execution
     for (auto &workerBatch: workers) {
@@ -2053,7 +1654,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
       }
     }
   }
-  //cout <<"  number of violations = " <<numMarkers <<endl;
   if (!iter) {
     removeGCell2BoundaryPin();
   }
@@ -2082,11 +1682,6 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
     } else {
       cout <<"  number of quick violations = " <<numQuickMarkers <<endl;
     }
-    //cout <<"    by layer and type :" <<endl;
-    //cout <<"           MetSpc EOLSpc Loop CutSpc AdjCut CorSpc Others Totals" <<endl;
-    //cout <<"    Metal1      0      0    0      0      0      0      0      0" <<endl;
-    //cout <<"    Totals      0      0    0      0      0      0      0      0" <<endl;
-    //cout <<"cpu time = 00:00:00, elapsed time = 00:00:00, memory = 0000.00 (MB), peak = 0000.00 (MB)" <<endl;
     t.print();
     cout <<flush;
   }
@@ -2261,9 +1856,6 @@ void FlexDR::reportDRC() {
               break;
             case frcInstTerm: {
               frInstTerm* instTerm = (static_cast<frInstTerm*>(src));
-              // drcRpt << instTerm->getInst()->getName() 
-                     // << "/" << instTerm->getTerm()->getName() << " ";
-              //drcRpt << "Pin of Cell " << instTerm->getInst()->getName() << " ";
               drcRpt <<instTerm->getInst()->getName() <<"/" <<instTerm->getTerm()->getName() << " ";
               break;
             }
@@ -2274,9 +1866,6 @@ void FlexDR::reportDRC() {
             }
             case frcInstBlockage: {
               frInstBlockage* instBlockage = (static_cast<frInstBlockage*>(src));
-              // drcRpt << instTerm->getInst()->getName() 
-                     // << "/" << instTerm->getTerm()->getName() << " ";
-              //drcRpt << "Blockage of Cell " << instBlockage->getInst()->getName() << " ";
               drcRpt <<instBlockage->getInst()->getName() <<"/OBS" << " ";
               break;
             }
@@ -2311,20 +1900,10 @@ void FlexDR::reportDRC() {
 
 int FlexDR::main() {
   init();
-  //exit(1);
   frTime t;
   if (VERBOSE > 0) {
     cout <<endl <<endl <<"start detail routing ...";
   }
-  // initDR: enableDRC
-  // initDR(7, true);
-  //cout   <<endl
-  //       <<"time (INIT/ROUTE/POST) " <<time_span_init.count() <<" " 
-  //                                   <<time_span_route.count() <<" "
-  //                                   <<time_span_end.count() <<" "
-  //                                   <<endl;
-  //io::Writer writer(getDesign());
-  //writer.writeFromDR("_init");
   // search and repair: iter, size, offset, mazeEndIter, workerDRCCost, workerMarkerCost, 
   //                    markerBloatWidth, markerBloatDepth, enableDRC, ripupMode, followGuide, fixMode, TEST
   // fixMode:
@@ -2408,99 +1987,10 @@ int FlexDR::main() {
   searchRepair(iterNum++/* 56 */,  7, -4, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
   searchRepair(iterNum++/* 57 */,  7, -5, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
   searchRepair(iterNum++/* 58 */,  7, -6, 64, DRCCOST*64, MARKERCOST*16,  0, 0, true, 0, false, 9); // true search and repair
-  
-
-
-  // int iterNum = 0;
-  // // int iterNum = 1;
-  // // end();
-  // searchRepair(iterNum++/*  0 */,  7,  0, 3, DRCCOST, 0/*MAARKERCOST*/,  0, 0, true, 1, false, 9); // true search and repair
-  // // initDR(7, true);
-  // // end();
-  // searchRepair(iterNum++/*  1 */,  7, -3, 3, DRCCOST, DRCCOST/*MAARKERCOST*/,  0, 0, true, 1, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  2 */,  7, -6, 8, DRCCOST*1, MARKERCOST / 2,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  3 */,  7, -2, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  4 */,  7, -5, 8, DRCCOST*8, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  5 */,  7, -1, 8, DRCCOST*16, MARKERCOST,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  6 */,  7, -4, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  7 */,  7,  0, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  8 */,  7, -3, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/*  9 */,  7, -6, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 10 */,  7, -2, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 11 */,  7, -5, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 12 */,  7, -1, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 13 */,  7, -4, 8, DRCCOST*16, MARKERCOST*4,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 14 */,  7,  0, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 15 */,  7, -3, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 16 */,  7, -6, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 17 */,  7, -2, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 18 */,  7, -5, 8, DRCCOST*16, MARKERCOST*2,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 19 */,  7, -1, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-  // // end();
-  // searchRepair(iterNum++/* 20 */,  7, -4, 8, DRCCOST*16, MARKERCOST*1,  0, 0, true, 0, false, 9); // true search and repair
-
-
-
-  // for (; iterNum <= 40; iterNum++) {
-  //   if (numViols.back() == 0) {
-  //     break;
-  //   }
-  //   end();
-  //   int offset = (iterNum % 2) ? -4 : 0;
-  //   searchRepair(iterNum,  7,  offset, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
-  //   if ((double)numViols.back() / numViols[numViols.size() - 5] > 0.95) {
-  //     break;
-  //   }
-  // }
-  // for (; iterNum <= 80; iterNum++) {
-  //   if (numViols.back() == 0) {
-  //     break;
-  //   }
-  //   end();
-  //   int offset = (iterNum % 2) ? -4 : 0;
-  //   searchRepair(iterNum,  7,  offset, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
-  //   if ((double)numViols.back() / numViols[numViols.size() - 5] > 0.95) {
-  //     break;
-  //   }
-  // }
-  // searchRepair(6,  7,  0, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
-  // end();
-  // searchRepair(7,  7, -4, 8, DRCCOST*4, MARKERCOST,  0, 0, true, 0, false, 3); // true search and repair
-  // end();
-  // searchRepair(8,  7,  0, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
-  // end();
-  // searchRepair(9,  7, -4, 8, DRCCOST*4, MARKERCOST,  60, 4, true, 0, false, 3); // true search and repair
-  
 
   if (DRC_RPT_FILE != string("")) {
     reportDRC();
   }
-  //time_span_init  = std::chrono::duration<double>(0);
-  //time_span_route = std::chrono::duration<double>(0);
-  //time_span_end   = std::chrono::duration<double>(0);
-  //cout   <<endl 
-  //       <<"time (INIT/ROUTE/POST) " <<time_span_init.count() <<" " 
-  //                                   <<time_span_route.count() <<" "
-  //                                   <<time_span_end.count() <<" "
-  //                                   <<endl;
   if (VERBOSE > 0) {
     cout <<endl <<"complete detail routing";
     end();

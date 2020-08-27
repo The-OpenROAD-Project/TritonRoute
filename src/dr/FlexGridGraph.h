@@ -36,7 +36,6 @@
 #include "frDesign.h"
 #include "db/drObj/drPin.h"
 #include "dr/FlexWavefront.h"
-//#include <memory>
 #include <map>
 #include <iostream>
 
@@ -111,14 +110,6 @@ namespace fr {
       return getBit(getIdx(x, y, z), 9);
     }
     // unsafe access, no check
-    // bool hasShapePlanar(frMIdx x, frMIdx y, frMIdx z) const {
-    //   return getBit(getIdx(x, y, z), 10);
-    // }
-    // unsafe access, no check
-    // bool hasShapeVia(frMIdx x, frMIdx y, frMIdx z) const {
-    //   return getBit(getIdx(x, y, z), 11);
-    // }
-    // unsafe access, no check
     bool hasGridCostE(frMIdx x, frMIdx y, frMIdx z) const {
       return getBit(getIdx(x, y, z), 12);
     }
@@ -131,9 +122,6 @@ namespace fr {
       return getBit(getIdx(x, y, z), 14);
     }
 
-    //const frBox& getRouteBox() const {
-    //  return routeBox;
-    //}
     void getBBox(frBox &in) const {
       if (xCoords.size() && yCoords.size()) {
         in.set(xCoords.front(), yCoords.front(), xCoords.back(), yCoords.back());
@@ -232,18 +220,6 @@ namespace fr {
       }
       return sol;
     }
-    // bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
-    //   bool sol = false;
-    //   if (dir != frDirEnum::D && dir != frDirEnum::U) {
-    //     reverse(x, y, z, dir);
-    //     sol = hasShapePlanar(x, y, z);
-    //   } else {
-    //     correctU(x, y, z, dir);
-    //     sol = hasShapeVia(x, y, z);
-    //   }
-    //   return sol;
-    // }
-    // new
     bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       frUInt4 sol = 0;
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
@@ -580,15 +556,6 @@ namespace fr {
         subToBits(idx, 48, GRIDGRAPHDRCCOSTSIZE, 1);
       }
     }
-    //void resetMarkerCostPlanar(frMIdx x, frMIdx y, frMIdx z) {
-    //  auto idx = getIdx(x, y, z);
-    //  setBits(idx, 32, GRIDGRAPHDRCCOSTSIZE, 0);
-    //}
-    //void resetMarkerCostVia(frMIdx x, frMIdx y, frMIdx z) {
-    //  auto idx = getIdx(x, y, z);
-    //  setBits(idx, 40, GRIDGRAPHDRCCOSTSIZE, 0);
-    //}
-    //void resetCost(frMIdx x, frMIdx y, frMIdx z);
 
     void setAStarCost(frMIdx x, frMIdx y, frMIdx z, frCost cost) {
       astarCosts[getIdx(x, y, z)] = cost;
@@ -614,20 +581,10 @@ namespace fr {
     void setDst(const FlexMazeIdx &mi) {
       dsts[getIdx(mi.x(), mi.y(), mi.z())] = 1;
     }
-    // unsafe access, no idx check
-    //void setBlocked(frMIdx x, frMIdx y, frMIdx z) {
-    //  setBit(getIdx(x, y, z), 5);
-    //}
     // unsafe access
     void setSVia(frMIdx x, frMIdx y, frMIdx z) {
       setBit(getIdx(x, y, z), 9);
     }
-    // void setShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
-    //   setBit(getIdx(x, y, z), 10);
-    // }
-    // void setShapeVia(frMIdx x, frMIdx y, frMIdx z) {
-    //   setBit(getIdx(x, y, z), 11);
-    // }
     void setOverrideShapeCostVia(frMIdx x, frMIdx y, frMIdx z) {
       setBit(getIdx(x, y, z), 11);
     }
@@ -673,20 +630,6 @@ namespace fr {
     void resetDst(const FlexMazeIdx &mi) {
       dsts[getIdx(mi.x(), mi.y(), mi.z())] = 0;
     }
-    // unsafe access, no idx check
-    //void resetBlocked(frMIdx x, frMIdx y, frMIdx z) {
-    //  resetBit(getIdx(x, y, z), 5);
-    //}
-    // unsafe access
-    //void resetSVia(frMIdx x, frMIdx y, frMIdx z) {
-    //  resetBit(getIdx(x, y, z), 9);
-    //}
-    // void resetShapePlanar(frMIdx x, frMIdx y, frMIdx z) {
-    //   resetBit(getIdx(x, y, z), 10);
-    // }
-    // void resetShapeVia(frMIdx x, frMIdx y, frMIdx z) {
-    //   resetBit(getIdx(x, y, z), 11);
-    // }
     void resetGridCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       correct(x, y, z, dir);
       if (isValid(x, y, z)) {
@@ -703,26 +646,10 @@ namespace fr {
         }
       }
     }
-    //void resetGridCostE(frMIdx x, frMIdx y, frMIdx z) {
-    //  resetBit(getIdx(x, y, z), 12);
-    //}
-    //void resetGridCostN(frMIdx x, frMIdx y, frMIdx z) {
-    //  resetBit(getIdx(x, y, z), 13);
-    //}
-    //void resetGridCostU(frMIdx x, frMIdx y, frMIdx z) {
-    //  resetBit(getIdx(x, y, z), 14);
-    //}
-
-    //void setRouteBox(const frBox &in) const {
-    //  routeBox.set(in);
-    //}
 
     bool hasGuide(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
       reverse(x, y, z, dir);
       auto idx = getIdx(x, y, z);
-      //if (x == 16 && y == 56 && z == 0) {
-      //  std::cout <<"@@@" <<idx <<std::endl;
-      //}
       return guides[idx];
     }
     // must be safe access because idx1 and idx2 may be invalid
@@ -865,10 +792,6 @@ namespace fr {
     std::vector<bool>                          prevDirs;
     std::vector<bool>                          srcs;
     std::vector<bool>                          dsts;
-    //std::vector<bool>                          pinBlksE;
-    //std::vector<bool>                          pinBlksN;
-    //std::vector<bool>                          gridsE;
-    //std::vector<bool>                          gridsN;
     std::vector<bool>                          guides;
     frVector<frCoord>                          xCoords;
     frVector<frCoord>                          yCoords;
@@ -894,19 +817,9 @@ namespace fr {
     }
     frUInt4 getBits(frMIdx idx, frMIdx pos, frUInt4 length) const {
       auto tmp = bits[idx] & (((1ull << length) - 1) << pos); // mask
-      //auto tmp = bits[idx] & (((1u << length) - 1) << pos); // mask
       return tmp >> pos;
     }
     frMIdx getIdx(frMIdx xIdx, frMIdx yIdx, frMIdx zIdx) const {
-      ////auto sol = xIdx + yIdx * xCoords.size() + zIdx * xCoords.size() * yCoords.size();
-      ////if (sol >= 0 && sol < bits.size()) {
-      //  return xIdx + yIdx * xCoords.size() + zIdx * xCoords.size() * yCoords.size();
-      ////} else {
-      ////  std::cout <<"Error: currIdx x/y/z " <<xIdx <<"/" <<yIdx <<"/" <<zIdx <<" " <<sol <<" is illegal" <<std::endl <<std::flush;
-      ////  throw std::runtime_error("error");
-      ////}
-      
-      //      (isZDir == H)     
       return (getZDir(zIdx)) ? (xIdx + yIdx * xCoords.size() + zIdx * xCoords.size() * yCoords.size()): 
                                (yIdx + xIdx * yCoords.size() + zIdx * xCoords.size() * yCoords.size());
     }
@@ -931,8 +844,6 @@ namespace fr {
       //std::cout <<"setBits (idx/pos/len/val) " <<idx <<" " <<pos <<" " <<length <<" " <<val <<std::endl;
       bits[idx] &= ~(((1ull << length) - 1) << pos); // clear related bits to 0
       bits[idx] |= ((unsigned long long)val & ((1ull << length) - 1)) << pos; // only get last length bits of val
-      //bits[idx] &= ~(((1u << length) - 1) << pos); // clear related bits to 0
-      //bits[idx] |= (val & ((1u << length) - 1)) << pos; // only get last length bits of val
     }
 
     // internal utility
@@ -1012,9 +923,6 @@ namespace fr {
       reverse(x, y, z, dir);
       return sol && isValid(x, y, z);
     }
-    //bool isOpposite(const frDirEnum &dir1, const frDirEnum &dir2) const {
-    //  return ((int)dir1 + (int)dir2 == OPPOSITEDIR);
-    //}
     // internal init utility
     void initTracks(std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &horLoc2TrackPatterns,
                     std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &vertLoc2TrackPatterns,
@@ -1027,8 +935,6 @@ namespace fr {
                    const std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &yMap,
                    const std::map<frLayerNum, frPrefRoutingDirEnum> &zMap,
                    const frBox &bbox, bool initDR);
-    //void initVia2ViaMinLen();
-    //frCoord initVia2ViaMinLen_helper(frLayerNum lNum, frViaDef* via1, frViaDef* via2);
     frCost getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1, const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir);
     frCost getNextPathCost(const FlexWavefrontGrid &currGrid, const frDirEnum &dir);
     frDirEnum getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer);
