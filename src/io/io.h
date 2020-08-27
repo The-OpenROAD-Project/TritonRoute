@@ -54,9 +54,6 @@ namespace fr {
       void readGuide();
       void postProcess();
       void postProcessGuide();
-      // rtree init
-      //void buildRtree4Routes();
-      //void buildRtree4Insts();
       std::map<frBlock*, std::map<frOrient, std::map<std::vector<frCoord>, std::set<frInst*, frBlockObjectComp> > >, frBlockObjectComp> &getTrackOffsetMap() {
         return trackOffsetMap;
       }
@@ -190,7 +187,6 @@ namespace fr {
     class Writer {
     public:
       // constructors
-      //Writer(): tech(std::make_shared<frTechObject>()), design(std::make_shared<frDesign>()) {};
       Writer(frDesign* designIn): tech(designIn->getTech()), design(designIn) {}
       // getters
       frTechObject* getTech() const {
@@ -207,7 +203,6 @@ namespace fr {
     protected:
       frTechObject*                                  tech;
       frDesign*                                      design;
-      //std::list< // temp for merge and split
       
       void fillViaDefs();
       void fillConnFigs(bool isTA);

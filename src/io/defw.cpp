@@ -1569,8 +1569,6 @@ int snetf(defrCallbackType_e c, defiNet* net, defiUserData ud) {
 
   fprintf (fout, ";\n");
   --numObjs;
-  //if (numObjs <= 0)
-  //    fprintf(fout, "END SPECIALNETS\n");
   return 0;
 }
 
@@ -1636,11 +1634,7 @@ int tname(defrCallbackType_e c, const char* string, defiUserData ud) {
 }
 
 int dname(defrCallbackType_e c, const char* string, defiUserData data) {
-  // std::cout << "dname1\n";
-  // checkType(c);
-  // if (ud != userData) dataError();
   fprintf(fout, "DESIGN %s ;\n", string);
-  // std::cout << "dname2\n";
   return 0;
 }
 
@@ -3018,14 +3012,10 @@ void printWarning(const char *str)
 }
 
 int io::Writer::writeDef(bool isTA, const std::string &str) {
-  //int num = 99;
   char* inFile[6];
-  //char* outFile;
   FILE* f;
   int res;
   int noCalls = 0;
-//  long start_mem;
-  //int retStr = 0;
   int numInFile = 0;
   int fileCt = 0;
   int test1 = 0;
@@ -3039,17 +3029,9 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
-//  start_mem = (long)sbrk(0);
-
-  // inFile[0] = defaultName;
-  // char *cstr = new char[DEF_FILE.length() + 1];
-  // strcpy(cstr, DEF_FILE.c_str());
   char *cstr = new char[REF_OUT_FILE.length() + 1];
   strcpy(cstr, REF_OUT_FILE.c_str());
   inFile[numInFile++] = cstr;
-  // std::cout << inFile[0] << std::endl;
-  //outFile = defaultOut;
-  // fout = stdout;
   if (isTA) {
     fout = fopen(OUTTA_FILE.c_str(), "w");
   } else {
@@ -3057,100 +3039,19 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
   }
   userData = this;
 
-  // while (argc--) {
-  //   if (strcmp(*argv, "-d") == 0) {
-  //     argv++;
-  //     argc--;
-  //     sscanf(*argv, "%d", &num);
-  //     defiSetDebug(num, 1);
-  //   } else if (strcmp(*argv, "-nc") == 0) {
-  //     noCalls = 1;
-  //   } else if (strcmp(*argv, "-o") == 0) {
-  //     argv++;
-  //     argc--;
-  //     outFile = *argv;
-  //     if ((fout = fopen(outFile, "w")) == 0) {
-  //         fprintf(stderr, "ERROR: could not open output file\n");
-  //         return 2;
-  //       }
-  //   } else if (strcmp(*argv, "-verStr") == 0) {
-  //       /* New to set the version callback routine to return a string    */
-  //       /* instead of double.                                            */
-  //       retStr = 1;
-  //   } else if (strcmp(*argv, "-i") == 0) {
-  //       argv++;
-  //       argc--;
-  //       line_num_print_interval = atoi(*argv);
-  //   } else if (strcmp(*argv, "-test1") == 0) {
-  //     test1 = 1;
-  //   } else if (strcmp(*argv, "-test2") == 0) {
-  //     test2 = 1;
-  //   } else if (strcmp(*argv, "-noNet") == 0) {
-  //     noNetCb = 1;
-  //   } else if (strcmp(*argv, "-ccr749853") == 0) {
-  //     ccr749853 = 1;
-  //   } else if (strcmp(*argv, "-ccr1131444") == 0) {
-  //       ccr1131444 = 1;
-  //   } else if (strcmp(*argv, "-testDebugPrint") == 0) {
-  //       testDebugPrint = 1;
-  //   } else if (strcmp(*argv, "-sessionless") == 0) {
-  //       isSessionless = 1;
-  //   } else if (strcmp(*argv, "-ignoreRowNames") == 0) {
-  //       ignoreRowNames = 1;
-  //   } else if (strcmp(*argv, "-ignoreViaNames") == 0) {
-  //         ignoreViaNames = 1;
-  //   } else if (argv[0][0] != '-') {
-  //     if (numInFile >= 6) {
-  //       fprintf(stderr, "ERROR: too many input files, max = 6.\n");
-  //       return 2;
-  //     }
-  //     inFile[numInFile++] = *argv;
-  //   } else if ((strcmp(*argv, "-h") == 0) || (strcmp(*argv, "--help") == 0)) {
-  //     fprintf(stderr, "Usage: defrw (<option>|<file>)* \n");
-  //     fprintf(stderr, "Files:\n");
-  //     fprintf(stderr, "\tupto 6 DEF files many be supplied.\n");
-  //     fprintf(stderr, "\tif <defFileName> is set to 'STDIN' - takes data from stdin.\n");
-  //     fprintf(stderr, "Options:\n");
-  //     fprintf(stderr, "\t-i <num_lines> -- sets processing msg interval (default: 50 lines).\n");
-  //     fprintf(stderr, "\t-nc            -- no functional callbacks will be called.\n");
-  //     fprintf(stderr, "\t-o <out_file>  -- write output to the file.\n");
-  //     fprintf(stderr, "\t-ignoreRowNames   -- don't output row names.\n");
-  //     fprintf(stderr, "\t-ignoreViaNames   -- don't output via names.\n");
-  //     return 2;
-  //   } else if (strcmp(*argv, "-setSNetWireCbk") == 0) {
-  //     setSNetWireCbk = 1;
-  //   } else {
-  //     fprintf(stderr, "ERROR: Illegal command line option: '%s'\n", *argv);
-  //     return 2;
-  //   }
-
-  //   argv++;
-  // }
-
-
-
-  //defrSetLogFunction(myLogFunction);
-  //defrSetWarningLogFunction(myWarningLogFunction);
-  // std::cout << "1\n";
   if (isSessionless) {
       defrInitSession(0);
     defrSetLongLineNumberFunction(lineNumberCB);
     defrSetDeltaNumberLines(line_num_print_interval);
   }
 
-  // defrInitSession(isSessionless ? 0 : 1);
   defrInitSession(1);
-  // std::cout << "2\n";
   if (noCalls == 0) {
-    // std::cout << "3\n";
-    // fprintf(fout, "xxx\n");
     defrSetWarningLogFunction(printWarning);
 
 
     defrSetUserData((lefiUserData)this);
-    // std::cout << "3.5 \n";
     defrSetDesignCbk(dname);
-    // std::cout << "4\n";
     defrSetTechnologyCbk(tname);
     defrSetExtensionCbk(extension);
     defrSetDesignEndCbk(done);
@@ -3165,8 +3066,6 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetNetSubnetNameCbk(subnetNamef);
     defrSetNetPartialPathCbk(netpath);
     defrSetSNetCbk(snetf);
-    // std::cout << "5\n";
-    //defrSetSNetPartialPathCbk(snetpath);
     if (setSNetWireCbk)
       defrSetSNetWireCbk(snetwire);
     defrSetComponentMaskShiftLayerCbk(compMSL);
@@ -3176,7 +3075,6 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetConstraintCbk(constraint);
     defrSetAssertionCbk(constraint);
     defrSetArrayNameCbk(an);
-    // std::cout << "6\n";
     defrSetFloorPlanNameCbk(fn);
     defrSetDividerCbk(dn);
     defrSetBusBitCbk(bbn);
@@ -3191,7 +3089,6 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetViaStartCbk(cs);
     defrSetRegionStartCbk(cs);
     defrSetSNetStartCbk(cs);
-    // std::cout << "7\n";
     defrSetGroupsStartCbk(cs);
     defrSetScanchainsStartCbk(cs);
     defrSetIOTimingsStartCbk(cs);
@@ -3209,7 +3106,6 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetComponentExtCbk(ext);
     defrSetPinExtCbk(ext);
     defrSetViaExtCbk(ext);
-    // std::cout << "8\n";
     defrSetNetConnectionExtCbk(ext);
     defrSetGroupExtCbk(ext);
     defrSetScanChainExtCbk(ext);
@@ -3217,10 +3113,7 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetPartitionsExtCbk(ext);
 
     defrSetUnitsCbk(unitsFn);
-    //if (!retStr)
-    //   defrSetVersionCbk(vers);
-    //else
-       defrSetVersionStrCbk(versStr);
+    defrSetVersionStrCbk(versStr);
     defrSetCaseSensitiveCbk(casesens);
 
     // The following calls are an example of using one function "cls"
@@ -3279,8 +3172,6 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetMallocFunction(mallocCB);
     defrSetReallocFunction(reallocCB);
     defrSetFreeFunction(freeCB);
-
-    //defrSetRegisterUnusedCallbacks();
 
     // Testing to set the number of warnings
     defrSetAssertionWarnings(3);
@@ -3393,25 +3284,8 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
        if (res)
            fprintf(stderr, "Reader returns bad status.\n", inFile[fileCt]);
 
-       // Testing the aliases API.
-       //defrAddAlias ("alias1", "aliasValue1", 1);
-
-       //defiAlias_itr aliasStore;
-       //const char    *alias1Value = NULL;
-
-       //while (aliasStore.Next()) {
-       //    if (strcmp(aliasStore.Key(), "alias1") == 0) {
-       //         alias1Value = aliasStore.Data();
-       //    }
-       //} 
-
-       //if (!alias1Value || strcmp(alias1Value, "aliasValue1")) {
-       //      fprintf(stderr, "ERROR: Aliases don't work\n");
-       //}
-
        (void)defrPrintUnusedCallbacks(fout);
        (void)defrReleaseNResetMemory();
-       // LW 18/02/06
        (void)defrUnsetNonDefaultCbk();
        (void)defrUnsetNonDefaultStartCbk();
        (void)defrUnsetNonDefaultEndCbk();

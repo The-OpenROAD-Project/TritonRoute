@@ -68,14 +68,6 @@ namespace fr {
     rectOut = Rectangle(rectInBox.left(), rectInBox.bottom(), rectInBox.right(), rectInBox.top());
   }
 
-  //void frBlockage2Poly(frBlockage &blockageIn, boostPolygon &polyOut) {
-  //  auto points = blockageIn.getPoints();
-  //  polyOut = boostPolygon();
-  //  for (auto point: points) {
-  //    bg::append(polyOut, boostPoint(point.x(), point.y()));
-  //  }
-  //}
-
   // Use before checking overlapping
   double frBox2BoxDist(frBox &box1, frBox &box2) {
     frCoord xDist = std::max(0, std::max(box1.left(), box2.left()) - std::min(box1.right(), box2.right()) );
@@ -251,7 +243,6 @@ namespace fr {
     }
     
     std::vector<std::tuple<int, int, int, int> > coveredRects;
-    // isSkip = false;
     for (auto it = maxRectSet.begin(); it != maxRectSet.end(); it++) {
       boostBox tmpRect(boostPoint(std::get<0>(*it), std::get<1>(*it)), boostPoint(std::get<2>(*it), std::get<3>(*it)));
       // std::cout << "    checking against (" << std::get<0>(*it) << ", " << std::get<1>(*it) << ") -- (" 
@@ -264,9 +255,6 @@ namespace fr {
         return;
       } else if (bg::covered_by(tmpRect, tmpNewRect)) {
         coveredRects.push_back(*it);
-        // maxRectSet.erase(it);
-        // maxRectSet.insert(newRect);
-        // break;
       }
     }
 
@@ -316,8 +304,6 @@ namespace fr {
         return false;
       } else if (bg::covered_by(tmpRect, tmpNewRect)) {
         coveredRects.push_back(*it);
-        // maxRectSet.erase(it);
-        // maxRectSet.insert(newRect);
         isChanged = true;
         break;
       }
@@ -431,8 +417,6 @@ namespace fr {
     std::tuple<int, int, int, int> tmpTuple = std::make_tuple(xl, yl, xh, yh);
     // printRect(tmpTuple);
     maintainMaxRects(tmpTuple, maxRectSet);
-    // return (maintainRects(tmpTuple, maxRectSet));
-
   }
 
 
@@ -486,8 +470,6 @@ namespace fr {
     // std::cout << "yl = " << yl << ", " << "yh = " << yh << std::endl;
     std::tuple<int, int, int, int> tmpTuple = std::make_tuple(xl, yl, xh, yh);
     maintainMaxRects(tmpTuple, maxRectSet);
-    // return (processNewRect(tmpTuple, maxRectSet));
-
   }
 
   void getPolyWithHole(const std::vector<Point> &vertices, Polygon &outline, std::vector<Polygon> &holes) {
@@ -725,7 +707,6 @@ namespace fr {
       origVertices.push_back(*ptIt);
     }
 
-    // getNonColinearVertex(origVertices, vertices);
     vertices = origVertices;
     std::vector<std::pair<Point, Point> > edges;
     std::vector<bool> validEdges;
@@ -882,26 +863,7 @@ namespace fr {
       }
 
     }
-    
-    // std::vector<Point> tmpPts;
-    // for (int currEdgeIdx = 0; currEdgeIdx < edges.size(); ++currEdgeIdx) {
-    //   if (validEdges[currEdgeIdx] == false) {
-    //     continue;
-    //   }
-    //   tmpPts.push_back(edges[currEdgeIdx].second);
-    //   // std::cout << "pushing (" << tmpPts.back().x() << ", " << tmpPts.back().y() << "\n";
-    // }
-
-    // for (int i = 0; i < (int)polys.size() - 1; ++i) {
-    //   holes.push_back(polys[i]);
-    // }
-    // if (polys.size() > 0) {
-    //   outline = polys.back();
-    // }
-
-
   }
-
 }
 
 

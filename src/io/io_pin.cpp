@@ -39,7 +39,6 @@ void io::Parser::instAnalysis() {
   }
   trackOffsetMap.clear();
   prefTrackPatterns.clear();
-  //vector<frTrackPattern*> prefTrackPatterns;
   for (auto &trackPattern: design->getTopBlock()->getTrackPatterns()) {
     auto isVerticalTrack = trackPattern->isHorizontal(); // yes = vertical track
     if (design->getTech()->getLayer(trackPattern->getLayerNum())->getDir() == frcHorzPrefRoutingDir) {
@@ -86,7 +85,7 @@ void io::Parser::instAnalysis() {
   if (VERBOSE > 0) {
     cout <<endl <<"instance analysis ..." <<endl;
   }
-  //map<frBlock*, map<frOrient, map<vector<frCoord>, frInst*> > > trackOffsetMap;
+
   vector<frCoord> offset;
   int cnt = 0;
   for (auto &inst: design->getTopBlock()->getInsts()) {
@@ -109,7 +108,6 @@ void io::Parser::instAnalysis() {
         }
       }
     }
-    // trackOffsetMap[inst->getRefBlock()][orient][offset] = inst.get();
     trackOffsetMap[inst->getRefBlock()][orient][offset].insert(inst.get());
     cnt++;
     if (VERBOSE > 0) {

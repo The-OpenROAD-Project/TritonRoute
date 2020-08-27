@@ -29,147 +29,15 @@
 #include <chrono>
 #include <iostream>
 #include <boost/graph/connected_components.hpp>
-//#include <boost/property_map/property_map.hpp>
 #include "global.h"
 #include "io/io.h"
 #include "frBaseTypes.h"
 #include <fstream>
 #include <sstream>
 
-//#include "frGuidePrep.h"
 using namespace std;
 using namespace fr;
 using namespace boost::polygon::operators;
-
-// void io::Parser::initDefaultVias() {
-//   for (int layerNum = 1; layerNum < (int)tech->getLayers().size(); layerNum += 2) {
-//     map<frViaDef*, bool>    isWithinLayer1;
-//     map<frViaDef*, bool>    isWithinLayer2;
-//     map<frViaDef*, frCoord> layer1Area;
-//     map<frViaDef*, frCoord> layer2Area;
-//     map<frViaDef*, int>     numCuts;
-//     for (auto &uViaDef: tech->getVias()) {
-//       auto viaDef = uViaDef.get();
-//       if (viaDef->getCutLayerNum() == layerNum && viaDef->getDefault()) {
-//         std::cout << "add " << viaDef->getName() << " to layer " << layerNum << "\n";
-//         tech->getLayer(layerNum)->addViaDef(viaDef);
-//         numCuts[viaDef] = viaDef->getCutFigs().size();
-//         isWithinLayer1[viaDef] = true;
-//         isWithinLayer2[viaDef] = true;
-//         layer1Area[viaDef]     = 0;
-//         layer2Area[viaDef]     = 0;
-//         for (auto &pinFig: viaDef->getLayer1Figs()) {
-//           if (pinFig->typeId() == frcRect) {
-//             auto routeLayerNum = viaDef->getLayer1Num();
-//             frBox box;
-//             pinFig->getBBox(box);
-//             layer1Area[viaDef] += (box.right() - box.left()) * (box.top() - box.bottom());
-//             if (tech->getLayers().at(routeLayerNum)->getDir() == frcHorzPrefRoutingDir) {
-//               if (frCoord(tech->getLayers().at(routeLayerNum)->getWidth()) < box.top() - box.bottom()) {
-//                 isWithinLayer1[viaDef] = false;
-//               }
-//             } else {
-//               if (frCoord(tech->getLayers().at(routeLayerNum)->getWidth()) < box.right() - box.left()) {
-//                 isWithinLayer1[viaDef] = false;
-//               }
-//             }
-//           } else if (pinFig->typeId() == frcPolygon) {
-//             cout <<"Error: initDefaultVias does not support polygons" <<endl;
-//             exit(0);
-//           } else {
-//             cout <<"Error: initDefaultVias cannot find rect or poly shapes" <<endl;
-//             exit(0);
-//           }
-//         }
-//         for (auto &pinFig: viaDef->getLayer2Figs()) {
-//           if (pinFig->typeId() == frcRect) {
-//             auto routeLayerNum = viaDef->getLayer2Num();
-//             frBox box;
-//             pinFig->getBBox(box);
-//             layer2Area[viaDef] += (box.right() - box.left()) * (box.top() - box.bottom());
-//             if (tech->getLayers().at(routeLayerNum)->getDir() == frcHorzPrefRoutingDir) {
-//               if (frCoord(tech->getLayers().at(routeLayerNum)->getWidth()) < box.top() - box.bottom()) {
-//                 isWithinLayer2[viaDef] = false;
-//               }
-//             } else {
-//               if (frCoord(tech->getLayers().at(routeLayerNum)->getWidth()) < box.right() - box.left()) {
-//                 isWithinLayer2[viaDef] = false;
-//               }
-//             }
-//           } else if (pinFig->typeId() == frcPolygon) {
-//             cout <<"Error: initDefaultVias does not support polygons" <<endl;
-//             exit(0);
-//           } else {
-//             cout <<"Error: initDefaultVias cannot find rect or poly shapes" <<endl;
-//             exit(0);
-//           }
-//         }
-//       } else {
-//         continue;
-//       }
-//     }
-      
-//     // single-cut only
-//     frViaDef* defaultSingleCutVia = nullptr;
-//     for (auto &it: numCuts) {
-//       auto viaDef = it.first;
-//       if (numCuts[viaDef] == 1) {
-//         if (isWithinLayer1[viaDef] && isWithinLayer2[viaDef]) {
-//           if (defaultSingleCutVia) {
-//             auto defaultViaArea = layer1Area[defaultSingleCutVia] + layer2Area[defaultSingleCutVia];
-//             auto currentViaArea = layer1Area[viaDef] + layer2Area[viaDef];
-//             if (currentViaArea < defaultViaArea) {
-//               defaultSingleCutVia = viaDef;
-//             }
-//           } else {
-//             defaultSingleCutVia = viaDef;
-//           }
-//         }
-//       }
-//     }
-//     if (!defaultSingleCutVia) {
-//       for (auto &it: numCuts) {
-//         auto viaDef = it.first;
-//         if (numCuts[viaDef] == 1) {
-//           if (isWithinLayer1[viaDef] || isWithinLayer2[viaDef]) {
-//             if (defaultSingleCutVia) {
-//               auto defaultViaArea = layer1Area[defaultSingleCutVia] + layer2Area[defaultSingleCutVia];
-//               auto currentViaArea = layer1Area[viaDef] + layer2Area[viaDef];
-//               if (currentViaArea < defaultViaArea) {
-//                 defaultSingleCutVia = viaDef;
-//               }
-//             } else {
-//               defaultSingleCutVia = viaDef;
-//             }
-//           }
-//         }
-//       }
-//     }
-//     if (!defaultSingleCutVia) {
-//       for (auto &it: numCuts) {
-//         auto viaDef = it.first;
-//         if (numCuts[viaDef] == 1) {
-//             if (defaultSingleCutVia) {
-//               auto defaultViaArea = layer1Area[defaultSingleCutVia] + layer2Area[defaultSingleCutVia];
-//               auto currentViaArea = layer1Area[viaDef] + layer2Area[viaDef];
-//               if (currentViaArea < defaultViaArea) {
-//                 defaultSingleCutVia = viaDef;
-//               }
-//             } else {
-//               defaultSingleCutVia = viaDef;
-//             }
-//         }
-//       }
-//     }
-
-//     if (defaultSingleCutVia) {
-//       tech->getLayer(layerNum)->setDefaultViaDef(defaultSingleCutVia);
-//     } else {
-//       cout <<"Error: no default single-cut via available!" <<endl;
-//       exit(0);
-//     }
-//   }
-// }
 
 void io::Parser::initDefaultVias() {
   for (auto &uViaDef: tech->getVias()) {
@@ -192,9 +60,7 @@ void io::Parser::initDefaultVias() {
     }
     if (!layerNum2ViaDefs[layerNum][1].empty()) {
       auto defaultSingleCutVia = (layerNum2ViaDefs[layerNum][1].begin())->second;
-      // if (tech->getLayer(layerNum)->getDefaultViaDef() == nullptr) {
-        tech->getLayer(layerNum)->setDefaultViaDef(defaultSingleCutVia);
-      // }
+      tech->getLayer(layerNum)->setDefaultViaDef(defaultSingleCutVia);
     } else {
       if (layerNum >= BOTTOM_ROUTING_LAYER) {
         std::cout << "Error: " << tech->getLayer(layerNum)->getName() << " does not have single-cut via\n";
@@ -434,11 +300,6 @@ void io::Parser::initDefaultVias_GF14(const string &node) {
       auto viaDef = uViaDef.get();
       if (viaDef->getCutLayerNum() == layerNum && node == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
         switch(layerNum) {
-          // case 1 : // VIA0
-          //          if (viaDef->getName() == "NR_VIA1_PH") {
-          //            tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
-          //          }
-          //          break;
           case 3 : // VIA1
                    if (viaDef->getName() == "V1_0_15_0_25_VH_Vx") {
                      tech->getLayer(layerNum)->setDefaultViaDef(viaDef);
@@ -788,8 +649,6 @@ void io::Parser::postProcess() {
     BOTTOM_ROUTING_LAYER = 4;
     TOP_ROUTING_LAYER = 18;
     ENABLE_VIA_GEN = false;
-    // VIAONLY_STDCELLPIN_BOTTOMLAYERNUM = 2;
-    // VIAONLY_STDCELLPIN_TOPLAYERNUM = 2;
   }
 
   initDefaultVias();
@@ -814,44 +673,6 @@ void io::Parser::postProcess() {
   design->getRegionQuery()->init(design->getTech()->getLayers().size());
   design->getRegionQuery()->print();
   design->getRegionQuery()->initDRObj(design->getTech()->getLayers().size()); // second init from FlexDR.cpp
-  // test
-  /*
-  frBox box(207.4045*2000, 256.2600*2000, 207.4045*2000, 256.2600*2000);
-  for (frLayerNum i = 0; i < (int)design->getTech()->getLayers().size(); i++) {
-    vector<rq_rptr_value_t<frBlockObject> > result;
-    design->getRegionQuery()->query(box, i, result);
-    for (auto &[bBox, rptr]: result) {
-      cout <<"bBox (" <<bg::get<bg::min_corner, 0>(bBox) * 1.0 / design->getTopBlock()->getDBUPerUU() <<", "
-                      <<bg::get<bg::min_corner, 1>(bBox) * 1.0 / design->getTopBlock()->getDBUPerUU() <<") ("
-                      <<bg::get<bg::max_corner, 0>(bBox) * 1.0 / design->getTopBlock()->getDBUPerUU() <<", "
-                      <<bg::get<bg::max_corner, 1>(bBox) * 1.0 / design->getTopBlock()->getDBUPerUU() <<") "
-                      <<design->getTech()->getLayer(i)->getName() <<endl;
-      if (rptr->typeId() == frcInstTerm) {
-        cout <<" instTerm " <<static_cast<frInstTerm*>(rptr)->getInst()->getName() <<"/"
-             <<static_cast<frInstTerm*>(rptr)->getTerm()->getName() <<endl;
-      } else if (rptr->typeId() == frcTerm) {
-        cout <<"     term PIN/" <<static_cast<frTerm*>(rptr)->getName() <<endl;
-      } else if (rptr->typeId() == frcInstBlockage) {
-        cout <<"     inst blk" <<endl;
-      } else if (rptr->typeId() == frcPathSeg) {
-        cout <<"     pseg ";
-        if (static_cast<frPathSeg*>(rptr)->hasNet()) {
-          cout <<static_cast<frPathSeg*>(rptr)->getNet()->getName();
-        }
-        cout <<endl;
-      } else if (rptr->typeId() == frcVia) {
-        cout <<"      via ";
-        if (static_cast<frVia*>(rptr)->hasNet()) {
-          cout <<static_cast<frVia*>(rptr)->getNet()->getName();
-        }
-        cout <<endl;
-      } else {
-        cout <<"Error: unknown type in rq test" <<endl;
-      }
-    }
-  }
-  exit(1);
-  */
 }
 
 void io::Parser::postProcessGuide() {
@@ -867,7 +688,6 @@ void io::Parser::postProcessGuide() {
   //    cout <<"Error: postProcessGuide cannot find net" <<endl;
   //    exit(1);
   //  }
-  //  auto net = design->getTopBlock()->name2net[netName];
   for (auto &[net, rects]:tmpGuides) {
     genGuides(net, rects);
     cnt++;
@@ -1045,21 +865,15 @@ void io::Parser::buildGCellPatterns() {
   xgp.setHorizontal(false);
   // find first coord >= dieBox.left()
   frCoord startCoordX = dieBox.left() / (frCoord)GCELLGRIDX * (frCoord)GCELLGRIDX + GCELLOFFSETX;
-  //cout <<"here " <<dieBox.left() <<" " <<GCELLGRIDX <<endl;
   if (startCoordX > dieBox.left()) {
     startCoordX -= (frCoord)GCELLGRIDX;
   }
-  // if (startCoordX < dieBox.left()) {
-  //   startCoordX += (frCoord)GCELLGRIDX;
-  // }
   xgp.setStartCoord(startCoordX);
-  //xgp.setStartCoord(GCELLOFFSETX);
   xgp.setSpacing(GCELLGRIDX);
   if ((dieBox.right() - (frCoord)GCELLOFFSETX) / (frCoord)GCELLGRIDX < 1) {
     cout <<"Error: gcell cnt < 1" <<endl;
     exit(1);
   }
-  //xgp.setCount((dieBox.right() - GCELLOFFSETX) / GCELLGRIDX + 1);
   xgp.setCount((dieBox.right() - (frCoord)startCoordX) / (frCoord)GCELLGRIDX);
   
   frGCellPattern ygp;
@@ -1069,17 +883,12 @@ void io::Parser::buildGCellPatterns() {
   if (startCoordY > dieBox.bottom()) {
     startCoordY -= (frCoord)GCELLGRIDY;
   }
-  // if (startCoordY < dieBox.bottom()) {
-  //   startCoordY += (frCoord)GCELLGRIDY;
-  // }
   ygp.setStartCoord(startCoordY);
-  //ygp.setStartCoord(GCELLOFFSETY);
   ygp.setSpacing(GCELLGRIDY);
   if ((dieBox.top() - (frCoord)GCELLOFFSETY) / (frCoord)GCELLGRIDY < 1) {
     cout <<"Error: gcell cnt < 1" <<endl;
     exit(1);
   }
-  //ygp.setCount((dieBox.top() - GCELLOFFSETY) / GCELLGRIDY + 1);
   ygp.setCount((dieBox.top() - startCoordY) / (frCoord)GCELLGRIDY);
 
   if (VERBOSE > 0) {
@@ -1100,15 +909,6 @@ void io::Parser::buildGCellPatterns() {
         bool isH = (tech->getLayers().at(layerNum)->getDir() == frcHorzPrefRoutingDir);
         frCoord gcLow  = isH ? gcellBox.bottom() : gcellBox.right();
         frCoord gcHigh = isH ? gcellBox.top()    : gcellBox.left();
-        //if (isH) {
-        //  if (j == (int)ygp.getCount() - 1) {
-        //    gcHigh = dieBox.top();
-        //  }
-        //} else {
-        //  if (i == (int)xgp.getCount() - 1) {
-        //    gcHigh = dieBox.right();
-        //  }
-        //}
         int trackCnt = 0;
         for (auto &tp: design->getTopBlock()->getTrackPatterns(layerNum)) {
           if ((tech->getLayer(layerNum)->getDir() == frcHorzPrefRoutingDir &&
@@ -1132,7 +932,6 @@ void io::Parser::buildGCellPatterns() {
       }
     }
   }
-  //design->getTopBlock()->setCMap(cmap);
 }
 
 void io::Parser::buildCMap() {
@@ -1146,9 +945,6 @@ void io::Parser::buildCMap() {
   if (enableOutput) {
     cout <<"all guides = " <<guides.size() <<endl;
   }
-  //auto &gCellPatterns = design->getTopBlock()->getGCellPatterns();
-  //auto &xgp = gCellPatterns.at(0);
-  //auto &ygp = gCellPatterns.at(1);
   auto &cmap = design->getTopBlock()->getCMap();
 
   frPoint begin, end;
@@ -1160,15 +956,6 @@ void io::Parser::buildCMap() {
   frUInt4 layerNum2 = 0;
   for (auto &guide: guides) {
     guide->getPoints(begin, end);
-    //xIndex1 = (begin.x() - xgp.getStartCoord()) / xgp.getSpacing();
-    //yIndex1 = (begin.y() - ygp.getStartCoord()) / ygp.getSpacing();
-    //xIndex2 = (end.x()   - xgp.getStartCoord()) / xgp.getSpacing();
-    //yIndex2 = (end.y()   - ygp.getStartCoord()) / ygp.getSpacing();
-    
-    //xIndex1 = (xIndex1 >= xgp.getCount()) ? xgp.getCount() - 1 : xIndex1;
-    //xIndex2 = (xIndex2 >= xgp.getCount()) ? xgp.getCount() - 1 : xIndex2;
-    //yIndex1 = (yIndex1 >= ygp.getCount()) ? ygp.getCount() - 1 : yIndex1;
-    //yIndex2 = (yIndex2 >= ygp.getCount()) ? ygp.getCount() - 1 : yIndex2;
     frPoint idx;
     design->getTopBlock()->getGCellIdx(begin, idx);
     xIndex1 = idx.x();
@@ -1216,12 +1003,6 @@ void io::Parser::buildCMap() {
 }
 
 void io::Parser::writeGuideFile() {
-  //auto &gp = design->getTopBlock()->getGCellPatterns();
-  //auto &xgp = gp[0];
-  //auto &ygp = gp[1];
-  // use frCoord to prevent negative problems
-  //frCoord GCELLGRIDX   = xgp.getSpacing();
-  //frCoord GCELLGRIDY   = ygp.getSpacing();
   ofstream outputGuide(OUTGUIDE_FILE.c_str());
   if (outputGuide.is_open()) {
     for (auto &net: design->topBlock->getNets()) {
@@ -1242,17 +1023,11 @@ void io::Parser::writeGuideFile() {
         // append unit guide in case of stacked via
         if (bNum != eNum) {
           auto startLayerName = tech->getLayer(bNum)->getName();
-          //outputGuide << bp.x() - GCELLGRIDX / 2 << " " << bp.y() - GCELLGRIDY / 2 << " "
-          //            << bp.x() + GCELLGRIDX / 2 << " " << bp.y() + GCELLGRIDY / 2 << " "
-          //            << startLayerName <<".5" << endl;
           outputGuide << bbox.left()  << " " << bbox.bottom() << " "
                       << bbox.right() << " " << bbox.top()    << " "
                       << startLayerName <<".5" << endl;
         } else {
           auto layerName = tech->getLayer(bNum)->getName();
-          //outputGuide << bp.x() - GCELLGRIDX / 2 << " " << bp.y() - GCELLGRIDY / 2 << " "
-          //            << ep.x() + GCELLGRIDX / 2 << " " << ep.y() + GCELLGRIDY / 2 << " "
-          //            << layerName << endl;
           outputGuide << bbox.left()  << " " << bbox.bottom() << " "
                       << ebox.right() << " " << ebox.top()    << " "
                       << layerName << endl;
