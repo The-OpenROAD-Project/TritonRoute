@@ -140,19 +140,10 @@ namespace fr {
       return type;
     }
 
-    // cut classes (old)
-    // bool hasLef58CutClassConstraint() const {
-    //   return (lef58CutClassConstraint.lock()) ? true : false;
-    // }
-    // std::shared_ptr<frLef58CutClassConstraint> getLef58CutClassConstraint() const {
-    //   return lef58CutClassConstraint.lock();
-    // }
-
     // cut class (new)
     void addCutClass(frLef58CutClass *in) {
       name2CutClassIdxMap[in->getName()] = cutClasses.size();
       cutClasses.push_back(in);
-      // std::cout << "adding cut class " << in->getName() << ", width = " << in->getViaWidth() << ", length = " << in->getViaLength() << "\n";
     }
 
     int getCutClassIdx(frCoord width, frCoord length) const {
@@ -204,17 +195,6 @@ namespace fr {
                      [](auto &kv) {return kv.lock();});
       return sol;
     }
-    // cut spacing
-    // bool hasLef58CutSpacingConstraints() const {
-    //   return (lef58CutSpacingConstraints.size()) ? true : false;
-    // }
-    // frCollection<std::shared_ptr<frLef58CutSpacingConstraint> > getLef58CutSpacingConstraints() const {
-    //   frCollection<std::shared_ptr<frLef58CutSpacingConstraint> > sol;
-    //   std::transform(lef58CutSpacingConstraints.begin(), lef58CutSpacingConstraints.end(), 
-    //                  std::back_inserter(sol), 
-    //                  [](auto &kv) {return kv.lock();});
-    //   return sol;
-    // }
     // spacing end of line
     bool hasLef58SpacingEndOfLineConstraints() const {
       return (lef58SpacingEndOfLineConstraints.size()) ? true : false;
@@ -504,7 +484,6 @@ namespace fr {
     std::map<std::string, int>                                      name2CutClassIdxMap;
     frCollection<std::weak_ptr<frConstraint> >                      constraints;
     frCollection<std::weak_ptr<frLef58CutSpacingTableConstraint> >  lef58CutSpacingTableConstraints;
-    // frCollection<std::weak_ptr<frLef58CutSpacingConstraint> >       lef58CutSpacingConstraints;
     frCollection<std::weak_ptr<frLef58SpacingEndOfLineConstraint> > lef58SpacingEndOfLineConstraints;
     
     frConstraint*                                                   minSpc;
@@ -536,7 +515,6 @@ namespace fr {
     frLef58RectOnlyConstraint*                                      lef58RectOnlyConstraint;
     frLef58RightWayOnGridOnlyConstraint*                            lef58RightWayOnGridOnlyConstraint;
     std::vector<frLef58CornerSpacingConstraint*>                    lef58CornerSpacingConstraints;
-    // friend class io::Parser;
   };
 }
 

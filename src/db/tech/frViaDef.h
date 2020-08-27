@@ -55,9 +55,6 @@ namespace fr{
     frCoord getViaLength() const {
       return viaLength;
     }
-    //bool hasNumCut() const {
-    //  return hNumCut;
-    //}
     frUInt4 getNumCut() const {
       return numCut;
     }
@@ -69,7 +66,6 @@ namespace fr{
       viaWidth = in;
     }
     void setViaLength(frCoord in) {
-      //hViaLength = true;
       viaLength = in;
     }
     void setNumCut(frUInt4 in) {
@@ -78,7 +74,6 @@ namespace fr{
   protected:
     std::string name;
     frCoord  viaWidth;
-    //bool     hViaLength;
     frCoord  viaLength;
     frUInt4  numCut; // this value is not equal to #multi cuts, only used for calculating resistance, currently ignored in rule checking process
   };
@@ -88,7 +83,6 @@ namespace fr{
   public:
     // constructors
     frViaDef(): name(), isDefault(false), layer1Figs(), layer2Figs(), cutFigs(), cutClass(nullptr), cutClassIdx(-1), addedByRouter(false) {}
-    //frViaDef(const frViaDef &in): name(defIn.name), isDefault(defIn.isDefault), cutClass(defIn.cutClass) {}
     frViaDef(const std::string &nameIn): name(nameIn), isDefault(false), layer1Figs(),
                                      layer2Figs(), cutFigs(), cutClass(nullptr), cutClassIdx(-1), addedByRouter(false) {}
     // getters
@@ -161,9 +155,6 @@ namespace fr{
     bool isMultiCut() const {
       return (cutFigs.size() > 1) ? true : false;
     }
-    //void getLayer1BBox (frBox &boxIn) const;
-    //void getCutBBox (frBox &boxIn) const;
-    //void getLayer2BBox (frBox &boxIn) const;
     // setters
     void addLayer1Fig(std::unique_ptr<frShape> &figIn) {
       layer1Figs.push_back(std::move(figIn));
@@ -187,7 +178,7 @@ namespace fr{
       addedByRouter = in;
     }
   protected:
-    std::string                                 name;
+    std::string                              name;
     bool                                     isDefault;
     std::vector< std::unique_ptr<frShape> >  layer1Figs;
     std::vector< std::unique_ptr<frShape> >  layer2Figs;

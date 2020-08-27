@@ -38,25 +38,6 @@
 #include "db/tech/frLookupTbl.h"
 
 namespace fr {
-  // enum class frConstraintTypeEnum {
-  //   SPACING,
-  //   SPACINGTABLE
-  // };
-
-  //enum class frSpacingConstraintTypeEnum {
-  //  RANGE,
-  //  LENGTHTHRESHOLD,
-  //  ENDOFLINE,
-  //  SAMENET,
-  //  NOTCHLENGTH,
-  //  ENDOFNOTCHWIDTH
-  //};
-
-  //enum class frSpacingTableConstraintTypeEnum {
-  //  PARALLELRUNLENGTH,
-  //  TWOWIDTH
-  //};
-
   enum class frLef58CornerSpacingExceptionEnum {
     NONE,
     EXCEPTSAMENET,
@@ -816,62 +797,6 @@ namespace fr {
     bool pgonly;
   };
 
-  // PARALLELEDGE
-  //class frSpacingEndOfLineParallelEdgeConstraint : public frConstraint {
-  //public:
-  //  // constructor
-  //  frSpacingEndOfLineParallelEdgeConstraint(): parSpace(0), parWithin(0), isTwoEdges(false) {}
-  //  frSpacingEndOfLineParallelEdgeConstraint(frCoord parSpaceIn, frCoord parWithinIn, bool isTwoEdgesIn)
-  //    : parSpace(parSpaceIn), parWithin(parWithinIn), isTwoEdges(isTwoEdgesIn) {}
-  //  // getters
-  //  frCoord getParSpace() const {
-  //    return parSpace;
-  //  }
-  //  frCoord getParWithin() const {
-  //    return parWithin;
-  //  }
-  //  bool hasTwoEdges() const {
-  //    return isTwoEdges;
-  //  }
-  //  // setters
-  //  void setParSpace(frCoord parSpaceIn) {
-  //    parSpace = parSpaceIn;
-  //  }
-  //  void setParWithin(frCoord parWithinIn) {
-  //    parWithin = parWithinIn;
-  //  }
-  //  void setTwoEdges(bool isTwoEdgesIn) {
-  //    isTwoEdges = isTwoEdgesIn;
-  //  }
-  //  frConstraintTypeEnum typeId() const override {
-  //    return frConstraintTypeEnum::frcSpacingEndOfLineParallelEdgeConstraint;
-  //  }
-
-  //protected:
-  //  frCoord parSpace, parWithin;
-  //  bool isTwoEdges;
-  //};
-
-  //class frLef58SpacingEndOfLineParallelEdgeConstraint : public frSpacingEndOfLineParallelEdgeConstraint {
-  //public:
-  //  // constructors
-  //  frLef58SpacingEndOfLineParallelEdgeConstraint(): frSpacingEndOfLineParallelEdgeConstraint(), subtractEolWidth(false) {}
-  //  // getters
-  //  bool hasSubtractEolWidth() const {
-  //    return subtractEolWidth;
-  //  }
-  //  // setters
-  //  void setSubtractEolWidth(bool in) {
-  //    subtractEolWidth = in;
-  //  }
-  //  // others
-  //  frConstraintTypeEnum typeId() const override {
-  //    return frConstraintTypeEnum::frcLef58SpacingEndOfLineParallelEdgeConstraint;
-  //  }
-  //protected:
-  //  bool subtractEolWidth;
-  //};
-
   // EOL spacing
   class frSpacingEndOfLineConstraint : public frSpacingConstraint {
   public:
@@ -899,12 +824,6 @@ namespace fr {
     bool hasTwoEdges() const {
       return isTwoEdges;
     }
-    //bool hasParallelEdge() const {
-    //  return (parallelEdgeConstraint) ? true : false;
-    //}
-    //std::shared_ptr<frSpacingEndOfLineParallelEdgeConstraint> getParallelEdge() const {
-    //  return parallelEdgeConstraint;
-    //}
     // setter
     void setEolWithin(frCoord &eolWithinIn) {
       eolWithin = eolWithinIn;
@@ -921,9 +840,6 @@ namespace fr {
     void setTwoEdges(bool isTwoEdgesIn) {
       isTwoEdges = isTwoEdgesIn;
     }
-    //void setParallelEdge(const std::shared_ptr<frSpacingEndOfLineParallelEdgeConstraint> &parallelEdgeConstraintIn) {
-    //  parallelEdgeConstraint = parallelEdgeConstraintIn;
-    //}
     frConstraintTypeEnum typeId() const override {
       return frConstraintTypeEnum::frcSpacingEndOfLineConstraint;
     }
@@ -932,394 +848,7 @@ namespace fr {
     frCoord eolWidth, eolWithin;
     frCoord parSpace, parWithin;
     bool isTwoEdges;
-    //std::shared_ptr<frSpacingEndOfLineParallelEdgeConstraint> parallelEdgeConstraint;
   };
-
-  //class frLef58SpacingEndOfLineEndToEndConstraint: public frConstraint {
-  //public:
-  //  ;
-  //protected:
-  //  ;
-  //};
-
-  //class frLef58SpacingEndOfLineConstraint : public frSpacingEndOfLineConstraint {
-  //public:
-  //  // constructors
-  //  frLef58SpacingEndOfLineConstraint() : frSpacingEndOfLineConstraint(), sameMask(false), exactWidth(false),
-  //    wrongDirSpacing(false), wrongDirSpace(0), endToEnd(false), endToEndSpace(0), maxLength(false), 
-  //    minLength(false), length(0), twoSides(false) {}
-  //  // getters
-  //  std::shared_ptr<frLef58SpacingEndOfLineParallelEdgeConstraint> getParallelEdge() const {
-  //    return std::dynamic_pointer_cast<frLef58SpacingEndOfLineParallelEdgeConstraint>(parallelEdgeConstraint);
-  //  }
-  //  bool hasSameMask() const {
-  //    return sameMask;
-  //  }
-  //  bool hasExactWidth() const {
-  //    return exactWidth;
-  //  }
-  //  bool hasWrongDirSpacing() const {
-  //    return wrongDirSpacing;
-  //  }
-  //  frCoord getWrongDirSpace() const {
-  //    return wrongDirSpace;
-  //  }
-  //  bool hasEndToEnd() const {
-  //    return endToEnd;
-  //  }
-  //  frCoord getEndToEndSpace() const {
-  //    return endToEndSpace;
-  //  }
-  //  bool hasMaxLength() const {
-  //    return maxLength;
-  //  }
-  //  bool hasMinLength() const {
-  //    return minLength;
-  //  }
-  //  frCoord getLength() const {
-  //    return length;
-  //  }
-  //  bool hasTwoSides() const {
-  //    return twoSides;
-  //  }
-  //  // setters
-  //  void setSameMask(bool in) {
-  //    sameMask = in;
-  //  }
-  //  void setExactWidth(bool in) {
-  //    exactWidth = in;
-  //  }
-  //  void setWrongDirSpace(frCoord in) {
-  //    wrongDirSpacing = true;
-  //    wrongDirSpace   = in;
-  //  }
-  //  void setEndToEndSpace(frCoord in) {
-  //    endToEnd      = true;
-  //    endToEndSpace = in;
-  //  }
-  //  void setMaxLength(frCoord in) {
-  //    maxLength = true;
-  //    length = in;
-  //  }
-  //  void setMinLength(frCoord in) {
-  //    minLength = true;
-  //    length = in;
-  //  }
-  //  void setTwoSides(bool in) {
-  //    twoSides = in;
-  //  }
-  //  // others
-  //  frConstraintTypeEnum typeId() const override {
-  //    return frConstraintTypeEnum::frcLef58SpacingEndOfLineConstraint;
-  //  }
-  //protected:
-  //  bool sameMask;
-  //  bool exactWidth;
-  //  bool wrongDirSpacing;
-  //  frCoord wrongDirSpace;
-  //  bool endToEnd;
-  //  frCoord endToEndSpace;
-  //  bool maxLength;
-  //  bool minLength;
-  //  frCoord length;
-  //  bool twoSides;
-  //};
-
-
-  // class frLef58CutSpacingLayerConstraint : public frConstraint {
-  // public:
-  //   // constructor
-  //   frLef58CutSpacingLayerConstraint() : secondLayerName(""), className(""), 
-  //                                        hAboveWidth(false), aboveWidth(0),
-  //                                        hEnclosure(false), enclosure(0) {}
-  //   // getter
-  //   //frUInt4 getSecondLayerNum() const {
-  //   //  return secondLayerNum;
-  //   //}
-  //   frString getSecondLayerName() const {
-  //     return secondLayerName;
-  //   }
-  //   // cutclass
-  //   bool hasCutClass() const {
-  //     return (className == "");
-  //   }
-  //   frString getClassName() const {
-  //     return className;
-  //   }
-  //   void getClassName(frString &in) const {
-  //     in = className;
-  //   }
-  //   bool hasAboveWidth() const {
-  //     return hAboveWidth;
-  //   }
-  //   frCoord getAboveWidth() const {
-  //     return aboveWidth;
-  //   }
-  //   bool hasEnclosure() const {
-  //     return hEnclosure;
-  //   }
-  //   frCoord getEnclosure() const {
-  //     return enclosure;
-  //   }
-
-  //   // setter
-  //   //void setSecondLayerNum(frLayerNum in) {
-  //   //  secondLayerNum = in;
-  //   //}
-  //   void setSecondLayerName(const frString &in) {
-  //     secondLayerName = in;
-  //   }
-  //   void setCutClass(const frString &classNameIn) {
-  //     className = classNameIn;
-  //   }
-  //   void setAboveWidth(frCoord in) {
-  //     hAboveWidth = true;
-  //     aboveWidth  = in;
-  //   }
-  //   void setEnclosure(frCoord in) {
-  //     hEnclosure = true;
-  //     enclosure  = in;
-  //   }
-
-  //   // others
-  //   frConstraintTypeEnum typeId() const override {
-  //     return frConstraintTypeEnum::frcLef58CutSpacingLayerConstraint;
-  //   }
-  // protected:
-  //   //frUInt4  secondLayerNum;
-  //   frString secondLayerName;
-  //   // cutclass
-  //   frString className;
-  //   bool     hAboveWidth;
-  //   frCoord  aboveWidth;
-  //   bool     hEnclosure;
-  //   frCoord  enclosure;
-  // };
-
-  // class frLef58CutSpacingAdjacentCutsConstraint : public frConstraint {
-  // public:
-  //   // constructor
-  //   frLef58CutSpacingAdjacentCutsConstraint() : numAdjCuts(0), hTwoCuts(false), 
-  //                                               twoCuts(0), hTwoCutsSpacing(false), 
-  //                                               twoCutsSpacing(0), sameCut(false),
-  //                                               cutWithin1(0), cutWithin2(0),
-  //                                               className(""), toAll(false) {}
-  //   // getter
-  //   frUInt4 getNumAdjCuts() const {
-  //     return numAdjCuts;
-  //   }
-  //   // two cuts
-  //   bool hasTwoCuts() const {
-  //     return hTwoCuts;
-  //   }
-  //   frUInt4 getTwoCuts() const {
-  //     return twoCuts;
-  //   }
-  //   bool hasTwoCutsSpacing() const {
-  //     return hTwoCutsSpacing;
-  //   }
-  //   frCoord getTwoCutsSpacing() const {
-  //     return twoCutsSpacing;
-  //   }
-  //   bool isSameCut() const {
-  //     return sameCut;
-  //   }
-  //   // within
-  //   frCoord getCutWithin1() const {
-  //     return cutWithin1;
-  //   }
-  //   frCoord getCutWithin2() const {
-  //     return cutWithin2;
-  //   }
-  //   // cutclass
-  //   bool hasCutClass() const {
-  //     return (className == "");
-  //   }
-  //   frString getClassName() const {
-  //     return className;
-  //   }
-  //   void getClassName(frString &in) const {
-  //     in = className;
-  //   }
-  //   bool isToAll() const {
-  //     return toAll;
-  //   }
-
-  //   // setter
-  //   void setNumAdjCuts(frUInt4 in) {
-  //     numAdjCuts = in;
-  //   }
-  //   void setTwoCuts(frUInt4 twoCutsIn, bool sameCutIn = false) {
-  //     hTwoCuts        = true;
-  //     twoCuts         = twoCutsIn;
-  //     sameCut         = sameCutIn;
-  //   }
-  //   void setTwoCuts(frUInt4 twoCutsIn, frCoord twoCutsSpacingIn, bool sameCutIn = false) {
-  //     hTwoCuts        = true;
-  //     twoCuts         = twoCutsIn;
-  //     hTwoCutsSpacing = true;
-  //     twoCutsSpacing  = twoCutsSpacingIn;
-  //     sameCut         = sameCutIn;
-  //   }
-  //   void setWithin(frCoord cutWithin1In, frCoord cutWithin2In) {
-  //     cutWithin1 = cutWithin1In;
-  //     cutWithin2 = cutWithin2In;
-  //   }
-  //   void setCutClass(const frString &classNameIn, bool toAllIn) {
-  //     className = classNameIn;
-  //     toAll     = toAllIn;
-  //   }
-
-  //   // others
-  //   frConstraintTypeEnum typeId() const override {
-  //     return frConstraintTypeEnum::frcLef58CutSpacingAdjacentCutsConstraint;
-  //   }
-  // protected:
-  //   frUInt4  numAdjCuts;
-  //   // two cuts
-  //   bool     hTwoCuts;
-  //   frUInt4  twoCuts;
-  //   bool     hTwoCutsSpacing;
-  //   frCoord  twoCutsSpacing;
-  //   bool     sameCut;
-  //   // within
-  //   frCoord  cutWithin1;
-  //   frCoord  cutWithin2;
-  //   // cutclass
-  //   frString className;
-  //   bool     toAll;
-  // };
-
-  // class frLef58CutSpacingParallelWithinConstraint : public frConstraint {
-  // public:
-  //   // constructor
-  //   frLef58CutSpacingParallelWithinConstraint() : within(0), exceptSameNet(false), className(""), longEdgeOnly(false),
-  //                                                 enclosure(0), above(false), parLength(0), parWithin(0) {}
-  //   // getter
-  //   frCoord getWithin() const {
-  //     return within;
-  //   }
-  //   bool isExceptSameNet() const {
-  //     return exceptSameNet;
-  //   }
-  //   bool hasCutClass() const {
-  //     return (className == "");
-  //   }
-  //   frString getClassName() const {
-  //     return className;
-  //   }
-  //   void getClassName(frString &in) const {
-  //     in = className;
-  //   }
-  //   bool isLongEdgeOnly() const {
-  //     return longEdgeOnly;
-  //   }
-  //   bool isEnclosure() const {
-  //     return (longEdgeOnly) ? false : true;
-  //   }
-  //   frCoord getEnclosure() const {
-  //     return enclosure;
-  //   }
-  //   bool isAbove() const {
-  //     return above;
-  //   }
-  //   frCoord getParLength() const {
-  //     return parLength;
-  //   }
-  //   frCoord getParWithin() const {
-  //     return parWithin;
-  //   }
-
-  //   // setter
-  //   void setParallelWithin(frCoord withinIn, bool exceptSameNetIn) {
-  //     within        = withinIn;
-  //     exceptSameNet = exceptSameNetIn;
-  //   }
-  //   void setClassName(const frString &in) {
-  //     className = in;
-  //   }
-  //   void setLongEdgeOnly(bool in) {
-  //     longEdgeOnly = in;
-  //   }
-  //   void setEnclosure(frCoord enclosureIn, bool aboveIn) {
-  //     enclosure = enclosureIn;
-  //     above = aboveIn;
-  //   }
-  //   void setParallel(frCoord parLengthIn, frCoord parWithinIn) {
-  //     parLength = parLengthIn;
-  //     parWithin = parWithinIn;
-  //   }
-
-  //   // others
-  //   frConstraintTypeEnum typeId() const override {
-  //     return frConstraintTypeEnum::frcLef58CutSpacingParallelWithinConstraint;
-  //   }
-  // protected:
-  //   frCoord  within;
-  //   bool     exceptSameNet;
-  //   frString className;
-  //   // longedgeonly
-  //   bool     longEdgeOnly;
-  //   // enclosure
-  //   frCoord  enclosure;
-  //   bool     above;
-  //   frCoord  parLength;
-  //   frCoord  parWithin;
-  // };
-
-  // // LEF58 cut spacing (old)
-  // class frLef58CutSpacingConstraint : public frConstraint {
-  // public:
-  //   // constructor
-  //   frLef58CutSpacingConstraint() {}
-  //   // getter
-  //   frCoord getCutSpacing() const {
-  //     return cutSpacing;
-  //   }
-  //   bool hasParallelWithinConstraint() const {
-  //     return (parallelWithinConstraint) ? true : false;
-  //   }
-  //   std::shared_ptr<frLef58CutSpacingParallelWithinConstraint> getParallelWithinConstraint() const {
-  //     return parallelWithinConstraint;
-  //   }
-  //   bool hasAdjacentCutsConstraint() const {
-  //     return (adjacentCutsConstraint) ? true : false;
-  //   }
-  //   std::shared_ptr<frLef58CutSpacingAdjacentCutsConstraint> getAdjacentCutsConstraint() const {
-  //     return adjacentCutsConstraint;
-  //   }
-  //   bool hasLayerConstraint() const {
-  //     return (layerConstraint) ? true : false;
-  //   }
-  //   std::shared_ptr<frLef58CutSpacingLayerConstraint> getLayerConstraint() const {
-  //     return layerConstraint;
-  //   }
-  //   // setter
-  //   void setCutSpacing(frCoord in) {
-  //     cutSpacing = in;
-  //   }
-  //   void setParallelWithinConstraint(const std::shared_ptr<frLef58CutSpacingParallelWithinConstraint> &in) {
-  //     parallelWithinConstraint = in;
-  //   }
-  //   void setAdjacentCutsConstraint(const std::shared_ptr<frLef58CutSpacingAdjacentCutsConstraint> &in) {
-  //     adjacentCutsConstraint = in;
-  //   }
-  //   void setLayerConstraint(const std::shared_ptr<frLef58CutSpacingLayerConstraint> &in) {
-  //     layerConstraint = in;
-  //   }
-  //   // others
-  //   frConstraintTypeEnum typeId() const override {
-  //     return frConstraintTypeEnum::frcLef58CutSpacingConstraint;
-  //   }
-  // protected:
-  //   frCoord                                                    cutSpacing;
-  //   std::shared_ptr<frLef58CutSpacingParallelWithinConstraint> parallelWithinConstraint;
-  //   std::shared_ptr<frLef58CutSpacingAdjacentCutsConstraint>   adjacentCutsConstraint;
-  //   std::shared_ptr<frLef58CutSpacingLayerConstraint>          layerConstraint;
-  // };
-
-
-
 
 
   class frLef58CutSpacingTableLayerConstraint : public frConstraint {
@@ -1450,7 +979,6 @@ namespace fr {
   class frSpacingTablePrlConstraint : public frConstraint {
   public:
     // constructor
-    //frSpacingTablePrlConstraint() {}
     frSpacingTablePrlConstraint(const fr2DLookupTbl<frCoord, frCoord, frCoord> &in): tbl(in) {}
     // getter
     const fr2DLookupTbl<frCoord, frCoord, frCoord>& getLookupTbl() const {
@@ -1486,27 +1014,11 @@ namespace fr {
     bool operator<(const frSpacingTableTwRowType &b) const {
       return width < b.width || prl < b.prl;
     }
-    //bool operator<=(const frSpacingTableTwRowType &b) const {
-    //  return width <= b.width || prl <= b.prl;
-    //}
-    //bool operator>(const frSpacingTableTwRowType &b) const {
-    //  return width > b.width || prl > b.prl;
-    //}
-    //bool operator>=(const frSpacingTableTwRowType &b) const {
-    //  return width >= b.width || prl >= b.prl;
-    //}
-    //bool operator==(const frSpacingTableTwRowType &b) const {
-    //  return width == b.width && prl == b.prl;
-    //}
-    //bool operator!=(const frSpacingTableTwRowType &b) const {
-    //  return !(*this == b);
-    //}
   };
   // new SPACINGTABLE Constraints
   class frSpacingTableTwConstraint : public frConstraint {
   public:
     // constructor
-    //frSpacingTableTwConstraint() {}
     frSpacingTableTwConstraint(const fr2DLookupTbl<frSpacingTableTwRowType, frSpacingTableTwRowType, frCoord> &in): tbl(in) {}
     // getter
     const fr2DLookupTbl<frSpacingTableTwRowType, frSpacingTableTwRowType, frCoord>& getLookupTbl() const {
@@ -1602,27 +1114,12 @@ namespace fr {
       return frConstraintTypeEnum::frcLef58SpacingTableConstraint;
     }
   protected:
-    //std::shared_ptr<fr1DLookupTbl<frCoord, std::pair<frCoord, frCoord> > > exceptWithinConstraint;
     std::map<frCoord, std::pair<frCoord, frCoord> > exceptWithinConstraint;
     bool wrongDirection;
     bool sameMask;
     bool exceptEol;
     frUInt4 eolWidth;
   };
-
-  // class frSpacingTableTwoWidthConstraint : public frSpacingTableConstraint {
-  // public:
-  //   // getter
-  //   // setter
-  //   // check
-  //   virtual bool check() {
-
-  //   }
-  // protected:
-  //   frCollection<frCoord> widths;
-  //   frCollection<frCoord> lengths;
-  //   frCollection<frCollection<frCoord> > spTbl;
-  // };
 
   // ADJACENTCUTS
   class frCutSpacingConstraint : public frConstraint {

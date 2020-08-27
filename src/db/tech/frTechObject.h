@@ -135,8 +135,6 @@ namespace fr {
       vias.push_back(std::move(in));
     }
     void addCutClass(frLayerNum lNum, std::unique_ptr<frLef58CutClass> &in) {
-      // std::cout << in->getName() << std::flush << "\n";
-      // std::cout << lNum << ", " << layer2Name2CutClass.size() << std::flush << "\n";
       auto rptr = in.get();
       layer2Name2CutClass[lNum][in->getName()] = rptr;
       layerCutClass[lNum].push_back(std::move(in));
@@ -197,7 +195,6 @@ namespace fr {
     void printDefaultVias() {
       std::cout << "List of default vias:\n";
       for (auto &layer: layers) {
-        // if (layer->getType() == frLayerTypeEnum::CUT && layer->getLayerNum() > getBottomLayerNum()) {
         if (layer->getType() == frLayerTypeEnum::CUT && layer->getLayerNum() >= 2/*BOTTOM_ROUTING_LAYER*/) {
           std::cout << "  Layer " << layer->getName() << "\n" << std::flush;
           std::cout << "    default via: " << layer->getDefaultViaDef()->getName() << "\n";

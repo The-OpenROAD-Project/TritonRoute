@@ -247,67 +247,6 @@ namespace fr {
       auto pos = --(std::lower_bound(cols.begin(), cols.end(), colVal));
       return std::max(0, (int)std::distance(cols.begin(), pos));
     }
-    //frUInt4 getRowIdx(const rowClass &rowVal) const {
-    //  // currently only implement spacingtable style
-    //  // interpolation
-    //  frUInt4 retIdx;
-    //  if (rowVal >= rows.front() && rowVal <= rows.back()) {
-    //    if (true) {
-    //    // if (interpolateTypeRow == frInterpolateType::frcSnapDown) {
-    //      auto pos = lower_bound(rows.begin(), rows.end(), rowVal);
-    //      if (*pos != rowVal && pos != rows.begin()) {
-    //        --pos;
-    //      }
-    //      retIdx = pos - rows.begin();
-    //    }
-    //  }
-    //  // lower extrapolation
-    //  else if (rowVal < rows.front()) {
-    //    if (true) {
-    //    // if (extrapolateTypeRowLower == frExtrapolateType::frcSnapUp) {
-    //      retIdx = 0;
-    //    }
-    //  }
-    //  // upper extrapolation
-    //  else {
-    //    if (true) {
-    //    // if (extrapolateTypeRowUpper == frExtrapolateType::frcSnapDown) {
-    //      retIdx = rows.size() - 1;
-    //    }
-    //  }
-    //  return retIdx;
-    //}
-    //frUInt4 getColIdx(const colClass &colVal) const {
-    //  // currently only implement spacingtable style
-    //  // interpolation
-    //  frUInt4 retIdx;
-    //  if (colVal >= cols.front() && colVal <= cols.back()) {
-    //    if (true) {
-    //    // if (interpolateTypeCol == frInterpolateType::frcSnapDown) {
-    //      auto pos = lower_bound(cols.begin(), cols.end(), colVal);
-    //      if (*pos != colVal && pos != cols.begin()) {
-    //        --pos;
-    //      }
-    //      retIdx = pos - cols.begin();
-    //    }
-    //  }
-    //  // lower extrapolation
-    //  else if (colVal < cols.front()) {
-    //    if (true) {
-    //    // if (extrapolateTypeColLower == frExtrapolateType::frcSnapUp) {
-    //      retIdx = 0;
-    //    }
-    //  }
-    //  // upper extrapolation
-    //  else {
-    //    if (true) {
-    //    // if (extrapolateTypeColUpper == frExtrapolateType::frcSnapDown) {
-    //      retIdx = cols.size() - 1;
-    //    }
-    //  }
-    //  return retIdx;  
-    //}
-
 
     frCollection<rowClass> rows;
     frCollection<colClass> cols;
