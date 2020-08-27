@@ -30,39 +30,16 @@
 #define _TA_PIN_H_
 
 #include "db/taObj/taBlockObject.h"
-//#include "db/taObj/taFig.h"
 #include "db/taObj/taShape.h"
 #include "db/taObj/taVia.h"
 
 namespace fr{
-  //class taTrack;
   class frGuide;
-  //class frNet;
   class taPin: public taBlockObject {
   public:
     // constructors
-    //taPin(): begin(0), end(0), trackIdx(0), wlen_helper(0), nbrBegin(0), nbrEnd(0),
-    //         downViaCoords(), upViaCoords(), guide(nullptr), cost(0) {}
-    //taPin(const taIroute &in): taBlockObject(in), begin(in.begin), end(in.end), trackIdx(in.trackIdx), 
-    //                           wlen_helper(in.wlen_helper), nbrBegin(in.nbrBegin), nbrEnd(in.nbrEnd),
-    //                           downViaCoords(in.downViaCoords), upViaCoords(in.upViaCoords), guide(in.guide),
-    //                           cost(0) {}
-    taPin(): taBlockObject(), guide(nullptr), pinFigs(), wlen_helper(0), pin(false), wlen_helper2(0), cost(0), numAssigned(0)/*, drcCost(0)*/ {}
+    taPin(): taBlockObject(), guide(nullptr), pinFigs(), wlen_helper(0), pin(false), wlen_helper2(0), cost(0), numAssigned(0) {}
     // getters
-    //void getCoords(frCoord &bp, frCoord &ep) const {
-    //  bp = begin;
-    //  ep = end;
-    //}
-    //void getNbrCoords(frCoord &bp, frCoord &ep) const {
-    //  bp = nbrBegin;
-    //  ep = nbrEnd;
-    //}
-    //taTrack* getTrack() const {
-    //  return track;
-    //}
-    //int getTrackIdx() const {
-    //  return trackIdx;
-    //}
     int getWlenHelper() const {
       return wlen_helper;
     }
@@ -72,12 +49,6 @@ namespace fr{
     int getWlenHelper2() const {
       return wlen_helper2;
     }
-    //const std::vector<frCoord>& getViaCoords(bool isUpVia) const {
-    //  return isUpVia ? upViaCoords : downViaCoords;
-    //}
-    //std::vector<frCoord>& getViaCoords(bool isUpVia) {
-    //  return isUpVia ? upViaCoords : downViaCoords;
-    //}
     frGuide* getGuide() const {
       return guide;
     }
@@ -93,24 +64,6 @@ namespace fr{
     int getNumAssigned() const {
       return numAssigned;
     }
-    //frCost getDrcCost() const {
-    //  return drcCost;
-    //}
-    // setters
-    //void setCoords(frCoord bp, frCoord ep) {
-    //  begin = bp;
-    //  end = ep;
-    //}
-    //void setNbrCoords(frCoord bp, frCoord ep) {
-    //  nbrBegin = bp;
-    //  nbrEnd = ep;
-    //}
-    //void setTrack(taTrack *in) {
-    //  track = in;
-    //}
-    //void setTrackIdx(int in) {
-    //  trackIdx = in;
-    //}
     void setWlenHelper(int in) {
       wlen_helper = in;
     }
@@ -118,13 +71,6 @@ namespace fr{
       pin = true;
       wlen_helper2 = in;
     }
-    //void addViaCoords(frCoord in, bool isUpVia) {
-    //  if (isUpVia) {
-    //    upViaCoords.push_back(in);
-    //  } else {
-    //    downViaCoords.push_back(in);
-    //  }
-    //}
     void setGuide(frGuide* in) {
       guide = in;
     }
@@ -141,9 +87,6 @@ namespace fr{
     void addNumAssigned() {
       numAssigned++;
     }
-    //void setDrcCost(frCost in) {
-    //  drcCost = in;
-    //}
     // others
     frBlockObjectEnum typeId() const override {
       return tacPin;
@@ -156,11 +99,6 @@ namespace fr{
       }
     }
   protected:
-    //frCoord                begin, end;
-    //int                    trackIdx;
-    //frCoord                nbrBegin, nbrEnd; // for nbr local guides
-    //std::vector<frCoord>   downViaCoords;
-    //std::vector<frCoord>   upViaCoords;
     frGuide*                                guide;
     std::vector<std::unique_ptr<taPinFig> > pinFigs;
     int                                     wlen_helper; // for nbr global guides
@@ -168,7 +106,6 @@ namespace fr{
     frCoord                                 wlen_helper2; // for local guides and pin guides
     frCost                                  cost;
     int                                     numAssigned;
-    //frCost                                  drcCost;
   };
   struct taPinComp {
     bool operator()(const taPin* lhs, const taPin* rhs) const {
