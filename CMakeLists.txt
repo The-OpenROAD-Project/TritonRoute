@@ -173,14 +173,8 @@ include_directories(
   ${BOOST_ROOT}/include
 
   ${DEFLIB_HOME}/def
-  ${DEFLIB_HOME}/defzlib
-  ${DEFLIB_HOME}/cdef
-  ${DEFLIB_HOME}/cdefzlib
 
   ${LEFLIB_HOME}/lef
-  ${LEFLIB_HOME}/lefzlib
-  ${LEFLIB_HOME}/clef
-  ${LEFLIB_HOME}/clefzlib
 
   ${FLEXROUTE_HOME}/src
 )
@@ -198,13 +192,7 @@ add_dependencies( TritonRoute lef )
 target_link_libraries( TritonRoute 
   PUBLIC
   def
-  #defzlib
-  #cdef
-  #cdefzlib
   lef
-  #lefzlib
-  #clef
-  #clefzlib
 
   ${ZLIB_LIBRARIES}
   Threads::Threads
