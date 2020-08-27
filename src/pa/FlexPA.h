@@ -62,27 +62,12 @@ namespace fr {
     int macroCellPinValidViaApCnt;
     int macroCellPinNoApCnt;
 
-    //std::map<frBlock*, 
-    //         std::map<frOrient, std::map<std::vector<frCoord>, std::set<frInst*, frBlockObjectComp> > >,
-    //         frBlockObjectComp> refBlockOT2Insts; // refblock orient track-offset to instances
-    //std::vector<frTrackPattern*> prefTrackPatterns;
-
-    //std::map<frInst*, frInst*, frBlockObjectComp> inst2uniqueInst;
-    //uniqueInst
-    
     std::vector<frInst*>                          uniqueInstances;
     std::map<frInst*, frInst*, frBlockObjectComp> inst2unique;
     std::map<frInst*, int,     frBlockObjectComp> unique2paidx; //unique instance to pinaccess index;
     std::map<frInst*, int,     frBlockObjectComp> unique2Idx;
     std::vector<std::vector<std::unique_ptr<FlexPinAccessPattern> > > uniqueInstPatterns;
 
-    // temporary storage
-    // each vector indicates an access pattern (in the order of pin order)
-    // std::set<std::vector<int> > instAccessPatterns;
-    // std::set<std::pair<int, int> > usedAccessPoints;
-    // std::set<std::pair<int, int> > violAccessPoints;
-    // int currUniqueInstIdx;
-    // int maxAccessPointSize;
     int maxAccessPatternSize;
 
     // helper strutures

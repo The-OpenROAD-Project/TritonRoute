@@ -405,33 +405,4 @@ void FlexPA::initTrackCoords() {
       cnt++;
     }
   }
-  
-  // quarter coords
-  //halfTrackCoords.clear();
-  //halfTrackCoords.resize(numLayers);
-  //for (int i = 0; i < numLayers; i++) {
-  //  frCoord prevFullCoord = std::numeric_limits<frCoord>::max();
-  //  for (auto &[currFullCoord, cost]: trackCoords[i]) {
-  //    if (currFullCoord > prevFullCoord) {
-  //      frCoord currHalfGrid = (currFullCoord + prevFullCoord) / 2 / manuGrid * manuGrid;
-  //      if (currHalfGrid != currFullCoord && currHalfGrid != prevFullCoord) {
-  //        halfTrackCoords[i].push_back(currHalfGrid);
-  //      }
-  //    }
-  //    prevFullCoord = currFullCoord;
-  //  }
-  //  for (auto halfCoord: halfTrackCoords[i]) {
-  //    trackCoords[i][halfCoord] = 3; // cost 3 for quarter coords
-  //  }
-  //}
-  //if (enableOutput) {
-  //  cout <<"full+half+quarter coords: " <<endl;
-  //  int cnt = 0;
-  //  for (auto &m: trackCoords) {
-  //    if (!m.empty()) {
-  //      cout <<getDesign()->getTech()->getLayer(cnt)->getName() <<": " <<m.size() <<endl;
-  //    }
-  //    cnt++;
-  //  }
-  //}
 }
