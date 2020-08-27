@@ -63,6 +63,7 @@ namespace fr {
       count = cIn;
     }
     // others
+    frBlockObjectEnum typeId() const override { return frcGCellPattern;}
   protected:
     bool    horizontal;
     frCoord startCoord;
@@ -134,6 +135,7 @@ namespace fr {
       frCollection<frCollection<frCollection<frUInt4> > > v1(numX, v2);
       supply = cmap_through = cmap_local = cmap_edge1=  cmap_edge2 = cmap_up = v1;
     }
+    frBlockObjectEnum typeId() const override { return frcCMap;}
 
   protected:
     frUInt4 numX, numY;

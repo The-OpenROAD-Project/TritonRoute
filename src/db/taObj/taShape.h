@@ -46,7 +46,6 @@ namespace fr {
     // getters
     virtual frLayerNum getLayerNum() const = 0;
     // others
-    //frBlockObjectEnum typeId() const override = 0;
 
     /* from frPinFig
      * hasPin

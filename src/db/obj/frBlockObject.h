@@ -48,9 +48,7 @@ namespace fr {
       id = in;
     }
     // others
-    virtual frBlockObjectEnum typeId() const {
-      return frcBlockObject;
-    }
+    virtual frBlockObjectEnum typeId() const = 0;
     bool operator<(const frBlockObject &rhs) const {
       return id < rhs.id;
     }

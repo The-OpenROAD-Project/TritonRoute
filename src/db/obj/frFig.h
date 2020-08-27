@@ -44,7 +44,6 @@ namespace fr {
     //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
-    //frBlockObjectEnum typeId() const override = 0;
     virtual void move(const frTransform &xform) = 0;
     virtual bool overlaps(const frBox &box) const = 0;
   protected:
@@ -62,7 +61,6 @@ namespace fr {
     virtual void addToNet(frNet* in) = 0;
     virtual void removeFromNet() = 0;
     // others
-    //frBlockObjectEnum typeId() const override = 0;
 
     /* from frFig
      * getBBox
@@ -83,7 +81,6 @@ namespace fr {
     virtual void addToPin(frPin* in) = 0;
     virtual void removeFromPin() = 0;
     // others
-    //frBlockObjectEnum typeId() const override = 0;
 
     /* from frConnFig
      * hasNet

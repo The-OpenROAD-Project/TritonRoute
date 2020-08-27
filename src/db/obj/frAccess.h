@@ -214,7 +214,7 @@ namespace fr {
     }
     // others
     frBlockObjectEnum typeId() const override {
-      return frcAccessPoints;
+      return frcPinAccess;
     }
   private:
     std::vector<std::unique_ptr<frAccessPoint> > aps;

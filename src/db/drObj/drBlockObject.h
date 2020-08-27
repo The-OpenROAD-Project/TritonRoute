@@ -41,11 +41,6 @@ namespace fr {
     // getters
     // setters
     // others
-    frBlockObjectEnum typeId() const {
-      return drcBlockObject;
-    }
-  protected:
-
   };
 }
 

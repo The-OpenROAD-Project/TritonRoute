@@ -45,10 +45,6 @@ namespace fr {
     virtual void setOrient(const frOrient &tmpOrient) = 0;
     virtual void setOrigin(const frPoint &tmpPoint) = 0;
     virtual void setTransform(const frTransform &xform) = 0;
-    frBlockObjectEnum typeId() const override {
-      return drcRef;
-    }
-  protected:
   };
 }
 

@@ -76,6 +76,7 @@ namespace fr {
     void setLayerNum(frLayerNum tmpLayerNum) {
       layerNum = tmpLayerNum;
     }
+    frBlockObjectEnum typeId() const override { return frcTrackPattern;}
   protected:
     bool       horizontal;
     frCoord    startCoord;

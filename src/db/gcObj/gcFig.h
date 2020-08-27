@@ -45,10 +45,6 @@ namespace fr {
     //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
-    //frBlockObjectEnum typeId() const override {
-    //  return gccFig;
-    //}
-  protected:
   };
 
   class gcNet;
@@ -64,9 +60,6 @@ namespace fr {
     virtual void addToNet(gcNet* in) = 0;
     virtual void removeFromNet() = 0;
     // others
-    //frBlockObjectEnum typeId() const override {
-    //  return gccConnFig;
-    //}
 
     /* from gcFig
      * getBBox
@@ -88,9 +81,6 @@ namespace fr {
     virtual void addToPin(gcPin* in) = 0;
     virtual void removeFromPin() = 0;
     // others
-    //frBlockObjectEnum typeId() const override {
-    //  return gccPinFig;
-    //}
 
     /* from gcConnFig
      * hasNet

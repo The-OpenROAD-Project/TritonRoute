@@ -42,11 +42,6 @@ namespace fr {
     // getters
     // setters
     // others
-    frBlockObjectEnum typeId() const override {
-      return gccBlockObject;
-    }
-  protected:
-
   };
 }
 

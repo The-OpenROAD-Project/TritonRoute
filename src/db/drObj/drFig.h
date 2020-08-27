@@ -44,10 +44,6 @@ namespace fr {
     //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
-    frBlockObjectEnum typeId() const override {
-      return drcFig;
-    }
-  protected:
   };
 
   class drNet;
@@ -62,16 +58,12 @@ namespace fr {
     virtual void addToNet(drNet* in) = 0;
     virtual void removeFromNet() = 0;
     // others
-    frBlockObjectEnum typeId() const override {
-      return drcConnFig;
-    }
 
     /* drom drFig
      * getBBox
      * move
      * overlaps
      */
-  protected:
   };
 
   class drPin;
@@ -85,9 +77,6 @@ namespace fr {
     virtual void addToPin(drPin* in) = 0;
     virtual void removeFromPin() = 0;
     // others
-    frBlockObjectEnum typeId() const override {
-      return drcPinFig;
-    }
 
     /* drom drConnFig
      * hasNet
@@ -101,7 +90,6 @@ namespace fr {
      * move
      * overlaps
      */
-  protected:
   };
 
 }
