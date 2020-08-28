@@ -167,10 +167,6 @@ set (FLEXROUTE_HEADER
 # include directories 
 ############################################################
 include_directories(
-  ${Boost_INCLUDE_DIR}
-  ${BOOST_INCLUDEDIR}
-  ${BOOST_ROOT}/include
-
   ${DEFLIB_HOME}/def
 
   ${LEFLIB_HOME}/lef
@@ -196,6 +192,7 @@ target_link_libraries( TritonRoute
   ${ZLIB_LIBRARIES}
   Threads::Threads
   OpenMP::OpenMP_CXX
+  Boost::boost
   )
 
 ############################################################
@@ -205,5 +202,3 @@ target_link_libraries( TritonRoute
 install(FILES ${FLEXROUTE_HEADER} DESTINATION include)
 install(TARGETS TritonRoute DESTINATION bin)
 install(TARGETS TritonRoute DESTINATION lib)
-
-
