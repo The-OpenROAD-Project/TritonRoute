@@ -37,7 +37,8 @@ namespace fr {
   public:
     // constructors
     frTrackPattern() = default;
-    frTrackPattern(const frTrackPattern& tmpTrackPattern) : 
+    frTrackPattern(const frTrackPattern& tmpTrackPattern) :
+      frBlockObject(tmpTrackPattern),
       horizontal(tmpTrackPattern.horizontal), startCoord(tmpTrackPattern.startCoord), 
       numTracks(tmpTrackPattern.numTracks), trackSpacing(tmpTrackPattern.trackSpacing), layerNum(tmpTrackPattern.layerNum) {}
     frTrackPattern(bool tmpIsH, frCoord tmpSC, frUInt4 tmpNT, frUInt4 tmpTS, frLayerNum tmpLN) :

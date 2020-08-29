@@ -2348,7 +2348,6 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
   frCoord twoCutsSpacing = -1;
   bool isSameCut = false;
   // within
-  frCoord cutWithin1 = -1;
   frCoord cutWithin2 = -1;
 
   bool isExceptSamePGNet;
@@ -2445,7 +2444,6 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
         } else if (word == string("WITHIN")) {
           streampos pos = istr.tellg();
           double tmp1;
-          double tmp2;
           if (istr >> tmp1) {
             pos = istr.tellg();
           } else {

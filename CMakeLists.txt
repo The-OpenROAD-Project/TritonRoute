@@ -202,3 +202,11 @@ target_link_libraries( TritonRoute
 install(FILES ${FLEXROUTE_HEADER} DESTINATION include)
 install(TARGETS TritonRoute DESTINATION bin)
 install(TARGETS TritonRoute DESTINATION lib)
+
+# Todo: add -Wextra and cleanup warnings
+target_compile_options( TritonRoute
+  PRIVATE
+  $<$<CXX_COMPILER_ID:GNU>:-Wall -pedantic -Wcast-qual -Wredundant-decls -Wformat-security>
+  $<$<CXX_COMPILER_ID:AppleClang>:-Wall -pedantic -Wcast-qual -Wredundant-decls -Wformat-security>
+  $<$<CXX_COMPILER_ID:Clang>:-Wall -pedantic -Wcast-qual -Wredundant-decls -Wformat-security>
+  )

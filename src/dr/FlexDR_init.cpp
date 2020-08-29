@@ -1304,8 +1304,8 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
 void FlexDRWorker::getTrackLocs(bool isHorzTracks, frLayerNum currLayerNum, frCoord low, frCoord high, std::set<frCoord> &trackLocs) {
   frPrefRoutingDirEnum currPrefRouteDir = getTech()->getLayer(currLayerNum)->getDir(); 
   for (auto &tp: design->getTopBlock()->getTrackPatterns(currLayerNum)) {
-    if (tp->isHorizontal() && currPrefRouteDir == frcVertPrefRoutingDir ||
-       !tp->isHorizontal() && currPrefRouteDir == frcHorzPrefRoutingDir) {
+    if ((tp->isHorizontal() && currPrefRouteDir == frcVertPrefRoutingDir) ||
+        (!tp->isHorizontal() && currPrefRouteDir == frcHorzPrefRoutingDir)) {
       int trackNum = (low - tp->getStartCoord()) / (int)tp->getTrackSpacing();
       if (trackNum < 0) {
         trackNum = 0;

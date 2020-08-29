@@ -435,8 +435,9 @@ void FlexRP::prep_via2viaForbiddenLen_lef58CutSpc(const frLayerNum &lNum,
     return;
   }
 
-  if (!((viaDef1->getLayer1Num() == lNum) && (viaDef2->getLayer2Num() == lNum) ||
-      (viaDef1->getLayer2Num() == lNum) && (viaDef2->getLayer1Num() == lNum))) {
+  const bool match12 = (viaDef1->getLayer1Num() == lNum) && (viaDef2->getLayer2Num() == lNum);
+  const bool match21 = (viaDef1->getLayer2Num() == lNum) && (viaDef2->getLayer1Num() == lNum);
+  if (!match12 && !match21) {
     return;
   }
 
@@ -545,8 +546,9 @@ void FlexRP::prep_via2viaForbiddenLen_minStep(const frLayerNum &lNum,
   if (lNum != 10 || !isCurrDirY) {
     return;
   }
-  if (!((viaDef1->getLayer1Num() == lNum) && (viaDef2->getLayer2Num() == lNum) ||
-      (viaDef1->getLayer2Num() == lNum) && (viaDef2->getLayer1Num() == lNum))) {
+  const bool match12 = (viaDef1->getLayer1Num() == lNum) && (viaDef2->getLayer2Num() == lNum);
+  const bool match21 = (viaDef1->getLayer2Num() == lNum) && (viaDef2->getLayer1Num() == lNum);
+  if (!match12 && !match21) {
     return;
   }
   frBox enclosureBox1, enclosureBox2;

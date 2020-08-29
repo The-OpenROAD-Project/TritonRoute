@@ -83,10 +83,10 @@ namespace fr {
     const std::vector<std::unique_ptr<frGuide> >& getGuides() const {
       return guides;
     }
-    const bool isModified() const {
+    bool isModified() const {
       return modified;
     }
-    const bool isFake() const {
+    bool isFake() const {
       return isFakeNet;
     }
 

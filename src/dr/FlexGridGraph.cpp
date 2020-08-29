@@ -368,8 +368,8 @@ void FlexGridGraph::initTracks(map<frCoord, map<frLayerNum, frTrackPattern* > > 
     for (auto &tp: getDesign()->getTopBlock()->getTrackPatterns(currLayerNum)) {
       // allow wrongway if global varialble and design rule allow
       bool flag = (USENONPREFTRACKS) ? 
-                  (tp->isHorizontal()  && currPrefRouteDir == frcVertPrefRoutingDir ||
-                  !tp->isHorizontal() && currPrefRouteDir == frcHorzPrefRoutingDir) : 
+        (tp->isHorizontal()  && currPrefRouteDir == frcVertPrefRoutingDir) ||
+        (!tp->isHorizontal() && currPrefRouteDir == frcHorzPrefRoutingDir) :
                   true;
       if (flag) {
         int trackNum = ((tp->isHorizontal() ? bbox.left() : bbox.bottom()) - tp->getStartCoord()) / (int)tp->getTrackSpacing();

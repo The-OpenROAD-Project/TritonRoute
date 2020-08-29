@@ -358,7 +358,7 @@ void defiAssertion::addNet(const char* name) {
   if (name[i-2] == ',') {
      s  = (char*)malloc(i-1);
      s1 = (char*)malloc(i-1);
-     strncpy(s1, name, i-2);
+     memcpy(s1, name, i-2);
      s1[i-2] = '\0';
      strcpy(s, defData->DEFCASE(s1));
      free(s1);

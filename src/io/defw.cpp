@@ -113,18 +113,18 @@ int endfunc(defrCallbackType_e c, void*, defiUserData ud) {
 }
 
 
-char* orientStr(int orient) {
+const char* orientStr(int orient) {
   switch (orient) {
-      case 0: return ((char*)"N");
-      case 1: return ((char*)"W");
-      case 2: return ((char*)"S");
-      case 3: return ((char*)"E");
-      case 4: return ((char*)"FN");
-      case 5: return ((char*)"FW");
-      case 6: return ((char*)"FS");
-      case 7: return ((char*)"FE");
+      case 0: return ("N");
+      case 1: return ("W");
+      case 2: return ("S");
+      case 3: return ("E");
+      case 4: return ("FN");
+      case 5: return ("FW");
+      case 6: return ("FS");
+      case 7: return ("FE");
   };
-  return ((char*)"BOGUS");
+  return "BOGUS";
 }
 
 int compMSL(defrCallbackType_e c, defiComponentMaskShiftLayer* co, defiUserData ud) {
@@ -1639,37 +1639,33 @@ int dname(defrCallbackType_e c, const char* string, defiUserData data) {
 }
 
 
-char* address(const char* in) {
-  return ((char*)in);
-}
-
 int cs(defrCallbackType_e c, int num, defiUserData ud) {
-  char* name;
+  const char* name;
 
   checkType(c);
 
   if (ud != userData) dataError();
 
   switch (c) {
-  case defrComponentStartCbkType : name = address("COMPONENTS"); break;
-  case defrNetStartCbkType : name = address("NETS"); break;
-  case defrStartPinsCbkType : name = address("PINS"); break;
-  case defrViaStartCbkType : name = address("VIAS"); break;
-  case defrRegionStartCbkType : name = address("REGIONS"); break;
-  case defrSNetStartCbkType : name = address("SPECIALNETS"); break;
-  case defrGroupsStartCbkType : name = address("GROUPS"); break;
-  case defrScanchainsStartCbkType : name = address("SCANCHAINS"); break;
-  case defrIOTimingsStartCbkType : name = address("IOTIMINGS"); break;
-  case defrFPCStartCbkType : name = address("FLOORPLANCONSTRAINTS"); break;
-  case defrTimingDisablesStartCbkType : name = address("TIMING DISABLES"); break;
-  case defrPartitionsStartCbkType : name = address("PARTITIONS"); break;
-  case defrPinPropStartCbkType : name = address("PINPROPERTIES"); break;
-  case defrBlockageStartCbkType : name = address("BLOCKAGES"); break;
-  case defrSlotStartCbkType : name = address("SLOTS"); break;
-  case defrFillStartCbkType : name = address("FILLS"); break;
-  case defrNonDefaultStartCbkType : name = address("NONDEFAULTRULES"); break;
-  case defrStylesStartCbkType : name = address("STYLES"); break;
-  default : name = address("BOGUS"); return 1;
+  case defrComponentStartCbkType : name = "COMPONENTS"; break;
+  case defrNetStartCbkType : name = "NETS"; break;
+  case defrStartPinsCbkType : name = "PINS"; break;
+  case defrViaStartCbkType : name = "VIAS"; break;
+  case defrRegionStartCbkType : name = "REGIONS"; break;
+  case defrSNetStartCbkType : name = "SPECIALNETS"; break;
+  case defrGroupsStartCbkType : name = "GROUPS"; break;
+  case defrScanchainsStartCbkType : name = "SCANCHAINS"; break;
+  case defrIOTimingsStartCbkType : name = "IOTIMINGS"; break;
+  case defrFPCStartCbkType : name = "FLOORPLANCONSTRAINTS"; break;
+  case defrTimingDisablesStartCbkType : name = "TIMING DISABLES"; break;
+  case defrPartitionsStartCbkType : name = "PARTITIONS"; break;
+  case defrPinPropStartCbkType : name = "PINPROPERTIES"; break;
+  case defrBlockageStartCbkType : name = "BLOCKAGES"; break;
+  case defrSlotStartCbkType : name = "SLOTS"; break;
+  case defrFillStartCbkType : name = "FILLS"; break;
+  case defrNonDefaultStartCbkType : name = "NONDEFAULTRULES"; break;
+  case defrStylesStartCbkType : name = "STYLES"; break;
+  default : name = "BOGUS"; return 1;
   }
   fprintf(fout, "\n%s %d ;\n", name, num);
   numObjs = num;
@@ -2935,22 +2931,22 @@ int dn(defrCallbackType_e c, const char* h, defiUserData ud) {
 
 
 int ext(defrCallbackType_e t, const char* c, defiUserData ud) {
-  char* name;
+  const char* name;
 
   checkType(t);
   if (ud != userData) dataError();
 
   switch (t) {
-  case defrNetExtCbkType : name = address("net"); break;
-  case defrComponentExtCbkType : name = address("component"); break;
-  case defrPinExtCbkType : name = address("pin"); break;
-  case defrViaExtCbkType : name = address("via"); break;
-  case defrNetConnectionExtCbkType : name = address("net connection"); break;
-  case defrGroupExtCbkType : name = address("group"); break;
-  case defrScanChainExtCbkType : name = address("scanchain"); break;
-  case defrIoTimingsExtCbkType : name = address("io timing"); break;
-  case defrPartitionsExtCbkType : name = address("partition"); break;
-  default: name = address("BOGUS"); return 1;
+  case defrNetExtCbkType : name = "net"; break;
+  case defrComponentExtCbkType : name = "component"; break;
+  case defrPinExtCbkType : name = "pin"; break;
+  case defrViaExtCbkType : name = "via"; break;
+  case defrNetConnectionExtCbkType : name = "net connection"; break;
+  case defrGroupExtCbkType : name = "group"; break;
+  case defrScanChainExtCbkType : name = "scanchain"; break;
+  case defrIoTimingsExtCbkType : name = "io timing"; break;
+  case defrPartitionsExtCbkType : name = "partition"; break;
+  default: name = "BOGUS"; return 1;
   }
   fprintf(fout, "  %s extension %s\n", name, c);
   return 0;
