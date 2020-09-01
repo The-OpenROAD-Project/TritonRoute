@@ -61,10 +61,7 @@ namespace fr {
   using frList       = std::list<T>;
   template <typename T>
   using frListIter   = typename std::list<T>::iterator;
-  //template <typename T>
-  //bool frListIterComp (const frListIter<T>& a, const frListIter<T>& b) {
-  //  return &(*a) < &(*b);
-  //};
+
   enum frOrientEnum {
       frcR0       = 0, // N
       frcR90      = 1, // W
@@ -155,11 +152,6 @@ namespace fr {
     frcPowerNet,
     frcGroundNet
   };
-  //enum class frLef58CutSpacingTableTypeEnum {
-  //  frcCenterSpacing,
-  //  frcOrthogonal,
-  //  frcOther,
-  //};
 
   enum class frConstraintTypeEnum { // check FlexDR.h fixMode
     frcShortConstraint = 0,
@@ -231,8 +223,6 @@ namespace fr {
     STEP = 2
   };
 
-  //enum class frDirEnum { UNKNOWN = 0, E = 1, S = 2, W = 3, N = 4, U = 5, D = 6 };
-  //enum class frDirEnum { UNKNOWN = 0, E = 4, S = 2, W = 3, N = 1, U = 6, D = 5 };
   #define OPPOSITEDIR 7 // used in FlexGC_main.cpp
   enum class frDirEnum { UNKNOWN = 0, D = 1, S = 2, W = 3, E = 4, N = 5, U = 6 };
 
@@ -277,43 +267,20 @@ namespace fr {
     frcEncOptAP   = 3
   };
 
-  //enum class drNetOrderingEnum {
-  //  NETDRIVEN,
-  //  MARKERDRIVEN
-  //};
-
-  //enum class gcPinTypeEnum {
-  //  FIXED,
-  //  ROUTE,
-  //  MERGED
-  //};
-
-  //enum frShapeEnum {
-  //    frcRect    = 0,
-  //    frcPolygon = 1
-  //};
   class frBlockObject;
   struct vertex_properties_t {
     frBlockObject* objPtr;
-    //int index;
-    //boost::default_color_type color;
-    //frString name;
   };
-  //class frRoute;
   class frConnFig;
   class frInstTerm;
   class frTerm;
   class frInst;
   class frBlockage;
   struct edge_properties_t {
-    //std::shared_ptr<frBlockObject> objPtr;
-    //std::shared_ptr<frRoute> objPtr;
     std::shared_ptr<frConnFig> objPtr;
-    //frString name;
   };
   // boost graph
   typedef boost::adjacency_list< boost::listS, boost::listS, boost::undirectedS, vertex_properties_t, edge_properties_t > graph_t;
-  //typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS, vertex_properties_t, edge_properties_t > graph_t;
   // descriptor
   typedef boost::graph_traits<graph_t>::vertex_descriptor   vertex_descriptor_t;
   typedef boost::graph_traits<graph_t>::edge_descriptor     edge_descriptor_t;
@@ -324,30 +291,24 @@ namespace fr {
   typedef boost::graph_traits<graph_t>::adjacency_iterator  adjacency_iterator_t;
 
   typedef std::map<vertex_descriptor_t, std::size_t>        vertex_descriptor_map_t;
-  //typedef boost::property_map<graph_t, &vertex_properties_t::objPtr>::type           tempPM;
   namespace bg  = boost::geometry;
   namespace bgi = boost::geometry::index;
 
-  //typedef bg::model::point<int, 2, bg::cs::cartesian> boostPoint;
   typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian> boostPoint;
   typedef bg::model::box<boostPoint> boostBox;
   typedef bg::model::polygon<boostPoint> boostPolygon;
   typedef bg::model::segment<boostPoint> boostSegment;
 
 
-
-  //typedef boost::geometry::model::point<frCoord, 2, boost::geometry::cs::cartesian>   point_t;
   typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian>                         point_t;
   typedef bg::model::box<point_t>                                                     box_t;
   typedef bg::model::segment<point_t>                                                 segment_t;
   class frConnFig;
   typedef std::pair<box_t, std::shared_ptr<frConnFig> >                               rtree_frConnFig_value_t;
-  //typedef std::pair<box_t, int* >                                                     rtree_test_t;
   typedef std::pair<box_t, std::shared_ptr<frInst> > rtree_frInst_value_t;
   typedef std::pair<box_t, std::shared_ptr<frTerm> > rtree_frTerm_value_t;
   typedef std::pair<box_t, std::pair<std::shared_ptr<frTerm>, std::shared_ptr<frInstTerm> > > rtree_frTerm_frInstTerm_value_t;
   typedef std::pair<box_t, std::shared_ptr<frBlockage> > rtree_frBlockage_value_t;
-  //typedef std::pair<box_t, std::string >                                              rtree_value_t;
   template <typename T>
   using rq_iter_value_t = std::pair<box_t, frListIter<T> >;
   template <typename T>
@@ -359,7 +320,6 @@ namespace fr {
 
   // KMB data types
   typedef boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS, vertex_properties_t, boost::property < boost::edge_weight_t, double > > KMBGraph; 
-  // typedef std::pair<int, int> KMBEdge;
 
   // DRC check types
   typedef std::pair<boostPoint, boostPoint> boostEdge;
