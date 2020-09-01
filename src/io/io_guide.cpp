@@ -811,7 +811,7 @@ void io::Parser::genGuides_final(frNet *net, vector<frRect> &rects, vector<bool>
     guide->setBeginLayerNum(rect.getLayerNum());
     guide->setEndLayerNum(rect.getLayerNum());
     guide->addToNet(net);
-    net->addGuide(guide);
+    net->addGuide(std::move(guide));
     //cout <<"add guide " <<begin <<" " <<end <<" " <<rect.getLayerNum() <<endl;
   }
 }

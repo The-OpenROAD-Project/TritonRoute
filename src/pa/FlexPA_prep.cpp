@@ -998,7 +998,7 @@ bool FlexPA::prepPoint_pin_helper(vector<unique_ptr<frAccessPoint> > &aps,
       exit(1);
     } else {
       for (auto &ap: aps) {
-        pin->getPinAccess(it->second)->addAccessPoint(ap);
+        pin->getPinAccess(it->second)->addAccessPoint(std::move(ap));
       }
     }
     return true;
@@ -1012,7 +1012,7 @@ bool FlexPA::prepPoint_pin_helper(vector<unique_ptr<frAccessPoint> > &aps,
       exit(1);
     } else {
       for (auto &ap: aps) {
-        pin->getPinAccess(it->second)->addAccessPoint(ap);
+        pin->getPinAccess(it->second)->addAccessPoint(std::move(ap));
       }
     }
     return true;
@@ -1020,7 +1020,7 @@ bool FlexPA::prepPoint_pin_helper(vector<unique_ptr<frAccessPoint> > &aps,
   if (isIOPin && (int)aps.size() > 0) {
     // IO term pin always only have one access
     for (auto &ap: aps) {
-      pin->getPinAccess(0)->addAccessPoint(ap);
+      pin->getPinAccess(0)->addAccessPoint(std::move(ap));
     }
     return true;
   }
@@ -1143,7 +1143,7 @@ void FlexPA::prepPoint_pin(frPin* pin, frInstTerm* instTerm) {
         //         <<ap->getCost() <<endl;
         //  }
         // }
-        pin->getPinAccess(it->second)->addAccessPoint(ap);
+        pin->getPinAccess(it->second)->addAccessPoint(std::move(ap));
       }
     }
   }

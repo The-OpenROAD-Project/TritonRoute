@@ -1812,7 +1812,7 @@ void FlexDRWorker::route_drc() {
     unique_ptr<drConnFig> tmp(std::move(tmpPWire));
     auto &workerRegionQuery = getWorkerRegionQuery();
     workerRegionQuery.add(tmp.get());
-    net->addRoute(tmp);
+    net->addRoute(std::move(tmp));
   }
 
   gcWorker.end();
@@ -2089,7 +2089,7 @@ void FlexDRWorker::route_queue() {
     unique_ptr<drConnFig> tmp(std::move(tmpPWire));
     auto &workerRegionQuery = getWorkerRegionQuery();
     workerRegionQuery.add(tmp.get());
-    net->addRoute(tmp);
+    net->addRoute(std::move(tmp));
   }
 
   gcWorker.end();
@@ -2210,7 +2210,7 @@ void FlexDRWorker::route_queue_main(deque<pair<frBlockObject*, pair<bool, int> >
           unique_ptr<drConnFig> tmp(std::move(tmpPWire));
           auto &workerRegionQuery = getWorkerRegionQuery();
           workerRegionQuery.add(tmp.get());
-          net->addRoute(tmp);
+          net->addRoute(std::move(tmp));
         }
 
         didCheck = true;
@@ -2761,7 +2761,7 @@ void FlexDRWorker::routeNet_postAstarWritePath(drNet* net, vector<FlexMazeIdx> &
       currPathSeg->setMazeIdx(start, end);
       unique_ptr<drConnFig> tmp(std::move(currPathSeg));
       workerRegionQuery.add(tmp.get());
-      net->addRoute(tmp);
+      net->addRoute(std::move(tmp));
       // if (/*startLoc.x() == 1834400 && */startLoc.y() == 2095500 && currLayerNum == 6 && net->getFrNet()->getName() == string("net74729")) {
       //   if (currStyle.getBeginStyle() == frEndStyle(frcTruncateEndStyle)) {
       //     cout << "@@@ DEBUG: begin point has 0 ext at x = " << startLoc.x() / 2000.0 << "\n";
@@ -2828,7 +2828,7 @@ void FlexDRWorker::routeNet_postAstarWritePath(drNet* net, vector<FlexMazeIdx> &
       currPathSeg->setMazeIdx(start, end);
       unique_ptr<drConnFig> tmp(std::move(currPathSeg));
       workerRegionQuery.add(tmp.get());
-      net->addRoute(tmp);
+      net->addRoute(std::move(tmp));
       // if (startLoc.x() == 127300 && currLayerNum == 2 && net->getFrNet()->getName() == string("pci_devsel_oe_o")) {
       //   if (currStyle.getBeginStyle() == frEndStyle(frcTruncateEndStyle)) {
       //     cout << "@@@ DEBUG: begin point has 0 ext at y = " << startLoc.y() / 1000.0 << "(mazeIdx (x, y) = (" << startX << "," << startY << ")\n";
@@ -2891,7 +2891,7 @@ void FlexDRWorker::routeNet_postAstarWritePath(drNet* net, vector<FlexMazeIdx> &
         currVia->setMazeIdx(FlexMazeIdx(startX, startY, currZ), FlexMazeIdx(startX, startY, currZ+1));
         unique_ptr<drConnFig> tmp(std::move(currVia));
         workerRegionQuery.add(tmp.get());
-        net->addRoute(tmp);
+        net->addRoute(std::move(tmp));
         if (gridGraph.hasDRCCost(startX, startY, currZ, frDirEnum::U)) {
           net->addMarker();
           if (TEST) {
@@ -3371,7 +3371,7 @@ void FlexDRWorker::routeNet_postAstarAddPatchMetal_addPWire(drNet* net, const Fl
   unique_ptr<drConnFig> tmp(std::move(tmpPatch));
   auto &workerRegionQuery = getWorkerRegionQuery();
   workerRegionQuery.add(tmp.get());
-  net->addRoute(tmp);
+  net->addRoute(std::move(tmp));
   //if (TEST) {
   //  double dbu = getDesign()->getTopBlock()->getDBUPerUU();
   //  cout <<"pwire@(" <<origin.x() / dbu <<", " <<origin.y() / dbu <<"), (" 

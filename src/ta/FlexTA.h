@@ -106,7 +106,7 @@ namespace fr {
     void setTAIter(int in) {
       taIter = in;
     }
-    void addIroute(std::unique_ptr<taPin> &in, bool isExt = false) {
+    void addIroute(std::unique_ptr<taPin> in, bool isExt = false) {
       in->setId(iroutes.size() + extIroutes.size());
       if (isExt) {
         extIroutes.push_back(std::move(in));

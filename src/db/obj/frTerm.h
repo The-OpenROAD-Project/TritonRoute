@@ -46,14 +46,14 @@ namespace fr {
       for (auto &uPin: in.getPins()) {
         auto pin = uPin.get();
         auto tmp = std::make_unique<frPin>(*pin);
-        addPin(tmp);
+        addPin(std::move(tmp));
       }
     }
     frTerm(const frTerm &in, const frTransform &xform): frBlockObject(), name(in.name), net(in.net), type(in.type) {
       for (auto &uPin: in.getPins()) {
         auto pin = uPin.get();
         auto tmp = std::make_unique<frPin>(*pin, xform);
-        addPin(tmp);
+        addPin(std::move(tmp));
       }
     }
     // getters
@@ -76,7 +76,7 @@ namespace fr {
     void addToNet(frNet* in) {
       net = in;
     }
-    void addPin(std::unique_ptr<frPin> &in) {
+    void addPin(std::unique_ptr<frPin> in) {
       in->setTerm(this);
       pins.push_back(std::move(in));
     }

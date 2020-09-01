@@ -402,7 +402,7 @@ void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl
   marker->addAggressor(net2->getOwner(), make_tuple(rect2->getLayerNum(), 
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -596,7 +596,7 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
   marker->addAggressor(net2->getOwner(), make_tuple(rect2->getLayerNum(), 
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -899,7 +899,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcRect* rect, 
       marker->addAggressor(rect->getNet()->getOwner(), make_tuple(rect->getLayerNum(), 
                                                        frBox(gtl::xl(*rect), gtl::yl(*rect), gtl::xh(*rect), gtl::yh(*rect)),
                                                        rect->isFixed()));
-      if (addMarker(marker)) {
+      if (addMarker(std::move(marker))) {
         if (enableOutput) {
           double dbu = getDesign()->getTopBlock()->getDBUPerUU();
           cout <<"CornerSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("
@@ -1039,7 +1039,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg
       marker->addAggressor(segNet->getOwner(), make_tuple(seg->getLayerNum(),
                                                           frBox(llx, lly, urx, ury),
                                                           seg->isFixed()));
-      if (addMarker(marker)) {
+      if (addMarker(std::move(marker))) {
         if (enableOutput) {
           double dbu = getDesign()->getTopBlock()->getDBUPerUU();
           cout <<"CornerSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("
@@ -1183,7 +1183,7 @@ void FlexGCWorker::checkMetalShape_minWidth(const gtl::rectangle_data<frCoord> &
   marker->addSrc(net->getOwner());
   marker->addVictim(net->getOwner(), make_tuple(layerNum, box, false));
   marker->addAggressor(net->getOwner(), make_tuple(layerNum, box, false));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -1269,7 +1269,7 @@ void FlexGCWorker::checkMetalShape_minStep_helper(const frBox &markerBox, frLaye
   marker->addSrc(net->getOwner());
   marker->addVictim(net->getOwner(), make_tuple(layerNum, markerBox, false));
   marker->addAggressor(net->getOwner(), make_tuple(layerNum, markerBox, false));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -1367,7 +1367,7 @@ void FlexGCWorker::checkMetalShape_minArea(gcPin* pin) {
   marker->addVictim(net->getOwner(), make_tuple(layerNum, markerBox, false));
   marker->addAggressor(net->getOwner(), make_tuple(layerNum, markerBox, false));
 
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -1475,7 +1475,7 @@ void FlexGCWorker::checkMetalShape_lef58MinStep_noBetweenEol(gcPin* pin, frLef58
     marker->addSrc(net->getOwner());
     marker->addVictim(net->getOwner(), make_tuple(layerNum, box, false));
     marker->addAggressor(net->getOwner(), make_tuple(layerNum, box, false));
-    if (addMarker(marker)) {
+    if (addMarker(std::move(marker))) {
       // true marker
       if (enableOutput) {
         double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -1682,7 +1682,7 @@ void FlexGCWorker::checkMetalShape_rectOnly(gcPin* pin) {
         marker->addSrc(net->getOwner());
         marker->addVictim(net->getOwner(), make_tuple(layerNum, box, false));
         marker->addAggressor(net->getOwner(), make_tuple(layerNum, box, false));
-        if (addMarker(marker)) {
+        if (addMarker(std::move(marker))) {
           // true marker
           if (enableOutput) {
             double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -1744,7 +1744,7 @@ void FlexGCWorker::checkMetalShape_offGrid(gcPin* pin) {
       marker->addSrc(net->getOwner());
       marker->addVictim(net->getOwner(), make_tuple(layerNum, box, false));
       marker->addAggressor(net->getOwner(), make_tuple(layerNum, box, false));
-      if (addMarker(marker)) {
+      if (addMarker(std::move(marker))) {
         if (enableOutput) {
           double dbu = getDesign()->getTopBlock()->getDBUPerUU();
           
@@ -1807,7 +1807,7 @@ void FlexGCWorker::checkMetalShape_minEnclosedArea(gcPin* pin) {
           marker->addSrc(net->getOwner());
           marker->addVictim(net->getOwner(), make_tuple(layerNum, box, false));
           marker->addAggressor(net->getOwner(), make_tuple(layerNum, box, false));
-          if (addMarker(marker)) {
+          if (addMarker(std::move(marker))) {
             if (enableOutput) {
               double dbu = getDesign()->getTopBlock()->getDBUPerUU();
               
@@ -2163,7 +2163,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSeg
   marker->addAggressor(net2->getOwner(), make_tuple(edge2->getLayerNum(), 
                                                     frBox(llx, lly, urx, ury),
                                                     edge2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -2413,7 +2413,7 @@ void FlexGCWorker::checkCutSpacing_short(gcRect* rect1, gcRect* rect2, const gtl
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
 
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -2559,7 +2559,7 @@ void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::
   marker->addAggressor(net2->getOwner(), make_tuple(rect2->getLayerNum(),
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -2664,7 +2664,7 @@ void FlexGCWorker::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2,
   marker->addAggressor(net2->getOwner(), make_tuple(rect2->getLayerNum(),
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -2979,7 +2979,7 @@ void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1,
   marker->addAggressor(net2->getOwner(), make_tuple(rect2->getLayerNum(),
                                                     frBox(gtl::xl(*rect2), gtl::yl(*rect2), gtl::xh(*rect2), gtl::yh(*rect2)),
                                                     rect2->isFixed()));
-  if (addMarker(marker)) {
+  if (addMarker(std::move(marker))) {
     // true marker
     if (enableOutput) {
       double dbu = getDesign()->getTopBlock()->getDBUPerUU();
@@ -3145,7 +3145,7 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
         marker->addAggressor(net2->getOwner(), make_tuple(secondLayerNum, 
                                                           frBox(corner->x(), corner->y(), corner->x(), corner->y()),
                                                           corner->isFixed()));
-        if (addMarker(marker)) {
+        if (addMarker(std::move(marker))) {
           if (enableOutput) {
             double dbu = getDesign()->getTopBlock()->getDBUPerUU();
             cout <<"CutSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("
@@ -3296,7 +3296,7 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
         marker->addAggressor(net2->getOwner(), make_tuple(secondLayerNum, 
                                                           frBox(corner->x(), corner->y(), corner->x(), corner->y()),
                                                           corner->isFixed()));
-        if (addMarker(marker)) {
+        if (addMarker(std::move(marker))) {
           if (enableOutput) {
             double dbu = getDesign()->getTopBlock()->getDBUPerUU();
             cout <<"CutSpc@(" <<gtl::xl(markerRect) / dbu <<", " <<gtl::yl(markerRect) / dbu <<") ("

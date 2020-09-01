@@ -199,7 +199,7 @@ namespace fr {
       return aps.size();
     }
     // setters
-    void addAccessPoint(std::unique_ptr<frAccessPoint> &in) {
+    void addAccessPoint(std::unique_ptr<frAccessPoint> in) {
       aps.push_back(std::move(in));
     }
     void addToPin(frPin* in) {

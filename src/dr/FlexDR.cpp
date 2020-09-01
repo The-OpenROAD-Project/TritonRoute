@@ -127,7 +127,7 @@ void FlexDR::initFromTA() {
           if (ep.x() - bp.x() + ep.y() - bp.y() == 1) {
             ; // skip TA dummy segment
           } else {
-            net->addShape(ps);
+            net->addShape(std::move(ps));
           }
         } else {
           cout <<"Error: initFromTA unsupported shape" <<endl;

@@ -124,12 +124,12 @@ void io::Parser::initDefaultVias() {
 
         // create via
         auto viaDef = make_unique<frViaDef>(viaDefName);
-        viaDef->addLayer1Fig(uBotFig);
-        viaDef->addLayer2Fig(uTopFig);
-        viaDef->addCutFig(uCutFig);
+        viaDef->addLayer1Fig(std::move(uBotFig));
+        viaDef->addLayer2Fig(std::move(uTopFig));
+        viaDef->addCutFig(std::move(uCutFig));
         viaDef->setAddedByRouter(true);
         tech->getLayer(layerNum)->setDefaultViaDef(viaDef.get());
-        tech->addVia(viaDef);
+        tech->addVia(std::move(viaDef));
       }
     }
   }

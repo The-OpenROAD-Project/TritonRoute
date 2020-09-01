@@ -298,31 +298,31 @@ namespace fr {
     void setName(const frString &nameIn) {
       name = nameIn;
     }
-    void addTerm(std::unique_ptr<frTerm> &in) {
+    void addTerm(std::unique_ptr<frTerm> in) {
       name2term[in->getName()] = in.get();
       terms.push_back(std::move(in));
     }
-    void addInst(std::unique_ptr<frInst> &in) {
+    void addInst(std::unique_ptr<frInst> in) {
       name2inst[in->getName()] = in.get();
       insts.push_back(std::move(in));
     }
-    void addNet(std::unique_ptr<frNet> &in) {
+    void addNet(std::unique_ptr<frNet> in) {
       name2net[in->getName()] = in.get();
       nets.push_back(std::move(in));
     }
-    void addSNet(std::unique_ptr<frNet> &in) {
+    void addSNet(std::unique_ptr<frNet> in) {
       name2snet[in->getName()] = in.get();
       snets.push_back(std::move(in));
     }
-    void setBoundaries(const std::vector<frBoundary> &in) {
+    void setBoundaries(const std::vector<frBoundary> in) {
       boundaries = in;
     }
-    void setBlockages(std::vector<std::unique_ptr<frBlockage> > &in) {
+    void setBlockages(std::vector<std::unique_ptr<frBlockage>> &in) {
       for (auto &blk : in) {
         blockages.push_back(std::move(blk));
       }
     }
-    void addBlockage(std::unique_ptr<frBlockage> &in) {
+    void addBlockage(std::unique_ptr<frBlockage> in) {
       blockages.push_back(std::move(in));
     }
     void setCMap(const frCMap &cIn) {
@@ -334,7 +334,7 @@ namespace fr {
     void setMacroClass(const MacroClassEnum &in) {
       macroClass = in;
     }
-    void addMarker(std::unique_ptr<frMarker> &in) {
+    void addMarker(std::unique_ptr<frMarker> in) {
       auto rptr = in.get();
       markers.push_back(std::move(in));
       rptr->setIter(--(markers.end()));
@@ -342,7 +342,7 @@ namespace fr {
     void removeMarker(frMarker* in) {
       markers.erase(in->getIter());
     }
-    void addFakeSNet(std::unique_ptr<frNet> &in) {
+    void addFakeSNet(std::unique_ptr<frNet> in) {
       fakeSNets.push_back(std::move(in));
     }
     // others

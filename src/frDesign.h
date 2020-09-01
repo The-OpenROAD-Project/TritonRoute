@@ -62,10 +62,10 @@ namespace fr {
       return refBlocks;
     }
     // setters
-    void setTopBlock(std::unique_ptr<frBlock> &in) {
+    void setTopBlock(std::unique_ptr<frBlock> in) {
       topBlock = std::move(in);
     }
-    void addRefBlock(std::unique_ptr<frBlock> &in) {
+    void addRefBlock(std::unique_ptr<frBlock> in) {
       name2refBlock[in->getName()] = in.get();
       refBlocks.push_back(std::move(in));
     }

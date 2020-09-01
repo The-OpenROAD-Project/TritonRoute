@@ -121,33 +121,33 @@ namespace fr {
     void setManufacturingGrid(frUInt4 in) {
       manufacturingGrid = in;
     }
-    void addLayer(std::unique_ptr<frLayer> &in) {
+    void addLayer(std::unique_ptr<frLayer> in) {
       name2layer[in->getName()] = in.get();
       layers.push_back(std::move(in));
       layer2Name2CutClass.push_back(std::map<std::string, frLef58CutClass*>());
       layerCutClass.push_back(std::vector<std::unique_ptr<frLef58CutClass> >());
     }
-    void addVia(std::unique_ptr<frViaDef> &in) {
+    void addVia(std::unique_ptr<frViaDef> in) {
       if (name2via.find(in->getName()) != name2via.end()) {
         std::cout << "Error: duplicated via definition for " << in->getName() << "\n";
       }
       name2via[in->getName()] = in.get();
       vias.push_back(std::move(in));
     }
-    void addCutClass(frLayerNum lNum, std::unique_ptr<frLef58CutClass> &in) {
+    void addCutClass(frLayerNum lNum, std::unique_ptr<frLef58CutClass> in) {
       auto rptr = in.get();
       layer2Name2CutClass[lNum][in->getName()] = rptr;
       layerCutClass[lNum].push_back(std::move(in));
       layers[lNum]->addCutClass(rptr);
     }
-    void addViaRuleGenerate(std::unique_ptr<frViaRuleGenerate> &in) {
+    void addViaRuleGenerate(std::unique_ptr<frViaRuleGenerate> in) {
       name2viaRuleGenerate[in->getName()] = in.get();
       viaRuleGenerates.push_back(std::move(in));
     }
     void addConstraint(const std::shared_ptr<frConstraint> &constraintIn) {
       constraints.push_back(constraintIn);
     }
-    void addUConstraint(std::unique_ptr<frConstraint> &in) {
+    void addUConstraint(std::unique_ptr<frConstraint> in) {
       uConstraints.push_back(std::move(in));
     }
 

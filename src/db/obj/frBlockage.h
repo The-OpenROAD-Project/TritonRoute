@@ -43,7 +43,7 @@ namespace fr {
       return pin.get();
     }
     // setters
-    void setPin(std::unique_ptr<frPin>& in) {
+    void setPin(std::unique_ptr<frPin> in) {
       pin = std::move(in);
     }
     // others

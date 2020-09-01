@@ -32,7 +32,7 @@
 using namespace std;
 using namespace fr;
 
-bool FlexGCWorker::addMarker(std::unique_ptr<frMarker> &in) {
+bool FlexGCWorker::addMarker(std::unique_ptr<frMarker> in) {
   frBox bbox;
   in->getBBox(bbox);
   auto layerNum = in->getLayerNum();

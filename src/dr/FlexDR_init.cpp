@@ -952,7 +952,7 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
             }
 
             if (!isInitDR() || (xLoc != xh(routeRect) && yLoc != yh(routeRect))) {
-              dPin->addAccessPattern(uap);
+              dPin->addAccessPattern(std::move(uap));
               break;
             }
           }
@@ -1045,7 +1045,7 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
               uap->setBeginArea(reqArea);
             }
 
-            dPin->addAccessPattern(uap);
+            dPin->addAccessPattern(std::move(uap));
             break;
           }
         } else {
@@ -1214,7 +1214,7 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
                 if (!isInitDR() || xLoc != xh(routeRect) || yLoc != yh(routeRect)) {
                   if (xLoc >= xl(routeRect) && xLoc < xh(routeRect) && yLoc >= yl(routeRect) && yLoc < yh(routeRect)) {
                     hasTempAp = true;
-                    dPin->addAccessPattern(uap);
+                    dPin->addAccessPattern(std::move(uap));
                     // if (term->getName() == string("pin128")) {
                     //   cout << "@@@ debug @@@: pin128 temp AP loc (" << xLoc / 2000.0 << ", " << yLoc / 2000.0 << ")\n";
                     // }
@@ -1286,7 +1286,7 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
                 uap->setBeginArea(reqArea);
               }
 
-              dPin->addAccessPattern(uap);
+              dPin->addAccessPattern(std::move(uap));
               break;
             }
           } else {
@@ -1422,7 +1422,7 @@ void FlexDRWorker::initNet_term_new(drNet* dNet, vector<frBlockObject*> &terms) 
                           <<bp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") skipped";
             }
           } else {
-            dPin->addAccessPattern(dAp);
+            dPin->addAccessPattern(std::move(dAp));
             if (enableOutput) {
               cout <<" (" <<bp.x() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<", "
                           <<bp.y() * 1.0 / getDesign()->getTopBlock()->getDBUPerUU() <<") added";
@@ -1489,7 +1489,7 @@ void FlexDRWorker::initNet_term_new(drNet* dNet, vector<frBlockObject*> &terms) 
     }
     dPin->setId(pinCnt);
     pinCnt++;
-    dNet->addPin(dPin);
+    dNet->addPin(std::move(dPin));
   }
 }
 
@@ -1592,15 +1592,15 @@ void FlexDRWorker::initNet_boundary(drNet* dNet,
     auto dAp  = make_unique<drAccessPattern>();
     dAp->setPoint(pt);
     dAp->setBeginLayerNum(lNum);
-    dPin->addAccessPattern(dAp);
+    dPin->addAccessPattern(std::move(dAp));
     // ap
     dPin->setId(pinCnt);
     pinCnt++;
-    dNet->addPin(dPin);
+    dNet->addPin(std::move(dPin));
   }
 }
 
-void FlexDRWorker::initNet_addNet(unique_ptr<drNet> &in) {
+void FlexDRWorker::initNet_addNet(unique_ptr<drNet> in) {
   owner2nets[in->getFrNet()].push_back(in.get());
   nets.push_back(std::move(in));
 }
@@ -1620,16 +1620,16 @@ void FlexDRWorker::initNet(frNet* net,
   initNet_boundary(dNet.get(), extObjs);
   // no ext routes in initDR to avoid weird TA shapes
   for (auto &obj: extObjs) {
-    dNet->addRoute(obj, true);
+    dNet->addRoute(std::move(obj), true);
   }
   if (getRipupMode() != 1) {
     for (auto &obj: routeObjs) {
-      dNet->addRoute(obj, false);
+      dNet->addRoute(std::move(obj), false);
     }
   }
   dNet->setOrigGuides(origGuides);
   dNet->setId(nets.size());
-  initNet_addNet(dNet);
+  initNet_addNet(std::move(dNet));
 }
 
 void FlexDRWorker::initNets_regionQuery() {

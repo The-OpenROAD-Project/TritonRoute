@@ -156,13 +156,13 @@ namespace fr{
       return (cutFigs.size() > 1) ? true : false;
     }
     // setters
-    void addLayer1Fig(std::unique_ptr<frShape> &figIn) {
+    void addLayer1Fig(std::unique_ptr<frShape> figIn) {
       layer1Figs.push_back(std::move(figIn));
     }
-    void addLayer2Fig(std::unique_ptr<frShape> &figIn) {
+    void addLayer2Fig(std::unique_ptr<frShape> figIn) {
       layer2Figs.push_back(std::move(figIn));
     }
-    void addCutFig(std::unique_ptr<frShape> &figIn) {
+    void addCutFig(std::unique_ptr<frShape> figIn) {
       cutFigs.push_back(std::move(figIn));
     }
     void setDefault(bool isDefaultIn) {

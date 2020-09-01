@@ -256,7 +256,7 @@ void FlexPA::initPinAccess() {
           }
         }
         auto pa = make_unique<frPinAccess>();
-        pin->addPinAccess(pa);
+        pin->addPinAccess(std::move(pa));
       }
     }
     inst->setPinAccessIdx(unique2paidx[inst]);
@@ -281,7 +281,7 @@ void FlexPA::initPinAccess() {
   for (auto &term: getDesign()->getTopBlock()->getTerms()) {
     for (auto &pin: term->getPins()) {
       auto pa = make_unique<frPinAccess>();
-      pin->addPinAccess(pa);
+      pin->addPinAccess(std::move(pa));
     }
   }
 }

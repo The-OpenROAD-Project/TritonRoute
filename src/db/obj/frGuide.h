@@ -70,7 +70,7 @@ namespace fr {
     void setEndLayerNum (frLayerNum numIn) {
       endLayer = numIn;
     }
-    void addRoute(std::unique_ptr<frConnFig> &cfgIn) {
+    void addRoute(std::unique_ptr<frConnFig> cfgIn) {
       routeObj.push_back(std::move(cfgIn));
     }
     void setRoutes(std::vector<std::unique_ptr<frConnFig> > &routesIn) {

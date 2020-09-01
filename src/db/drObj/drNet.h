@@ -116,12 +116,12 @@ namespace fr {
     }
 
     // setters
-    void addPin(std::unique_ptr<drPin> &pinIn) {
+    void addPin(std::unique_ptr<drPin> pinIn) {
       pinIn->setNet(this);
       //pinIn->setId(pins.size());
       pins.push_back(std::move(pinIn));
     }
-    void addRoute(std::unique_ptr<drConnFig> &in, bool isExt = false) {
+    void addRoute(std::unique_ptr<drConnFig> in, bool isExt = false) {
       in->addToNet(this);
       if (isExt) {
         extConnFigs.push_back(std::move(in));

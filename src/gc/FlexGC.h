@@ -87,7 +87,7 @@ namespace fr {
       owner2nets[owner] = net;
       return net;
     }
-    bool addMarker(std::unique_ptr<frMarker> &in);
+    bool addMarker(std::unique_ptr<frMarker> in);
     void clearMarkers() {
       mapMarkers.clear();
       markers.clear();

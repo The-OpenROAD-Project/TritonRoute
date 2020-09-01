@@ -713,7 +713,7 @@ void FlexGCWorker::initNet_pins_maxRectangles_helper(gcNet* net, gcPin* pin, con
     rectangle->setFixed(false);
     //cntRoute++;
   }
-  pin->addMaxRectangle(rectangle);
+  pin->addMaxRectangle(std::move(rectangle));
 }
 
 void FlexGCWorker::initNet_pins_maxRectangles(gcNet* net) {

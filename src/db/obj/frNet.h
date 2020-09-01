@@ -100,25 +100,25 @@ namespace fr {
     void setName(const frString &stringIn) {
       name = stringIn;
     }
-    void addShape(std::unique_ptr<frShape> &in) {
+    void addShape(std::unique_ptr<frShape> in) {
       in->addToNet(this);
       auto rptr = in.get();
       shapes.push_back(std::move(in));
       rptr->setIter(--shapes.end());
     }
-    void addVia(std::unique_ptr<frVia> &in) {
+    void addVia(std::unique_ptr<frVia> in) {
       in->addToNet(this);
       auto rptr = in.get();
       vias.push_back(std::move(in));
       rptr->setIter(--vias.end());
     }
-    void addPatchWire(std::unique_ptr<frShape> &in) {
+    void addPatchWire(std::unique_ptr<frShape> in) {
       in->addToNet(this);
       auto rptr = in.get();
       pwires.push_back(std::move(in));
       rptr->setIter(--pwires.end());
     }
-    void addGuide(std::unique_ptr<frGuide> &in) {
+    void addGuide(std::unique_ptr<frGuide> in) {
       auto rptr = in.get();
       rptr->addToNet(this);
       guides.push_back(std::move(in));

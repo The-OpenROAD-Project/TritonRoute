@@ -686,7 +686,7 @@ void FlexDR::checkConnectivity_final(frNet *net, vector<frConnFig*> &netRouteObj
     auto ps2 = uPs2.get();
     addedPS.push_back(ps2);
     unique_ptr<frShape> uShape(std::move(uPs2));
-    net->addShape(uShape);
+    net->addShape(std::move(uShape));
     // manipulate ps1
     regionQuery->removeDRObj(ps1);
     frSegStyle ps1Style;
@@ -1013,7 +1013,7 @@ void FlexDR::checkConnectivity_addMarker(frNet* net, frLayerNum lNum, const frBo
   marker->addVictim(net, make_tuple(lNum, bbox, false));
   marker->addAggressor(net, make_tuple(lNum, bbox, false));
   regionQuery->addMarker(marker.get());
-  getDesign()->getTopBlock()->addMarker(marker);
+  getDesign()->getTopBlock()->addMarker(std::move(marker));
 }
 
 // feedthrough and loop check

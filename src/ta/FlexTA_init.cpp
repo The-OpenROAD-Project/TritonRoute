@@ -436,25 +436,25 @@ void FlexTAWorker::initIroute(frGuide *guide) {
   rptr->setLayerNum(layerNum);
   rptr->setStyle(getDesign()->getTech()->getLayer(layerNum)->getDefaultSegStyle());
   // owner set when add to taPin
-  iroute->addPinFig(ps);
+  iroute->addPinFig(std::move(ps));
 
   for (auto coord: upViaCoordSet) {
     unique_ptr<taPinFig> via = make_unique<taVia>(getDesign()->getTech()->getLayer(layerNum + 1)->getDefaultViaDef());
     auto rViaPtr = static_cast<taVia*>(via.get());
     rViaPtr->setOrigin(isH ? frPoint(coord, trackLoc) : frPoint(trackLoc, coord));
-    iroute->addPinFig(via);
+    iroute->addPinFig(std::move(via));
   }
   for (auto coord: downViaCoordSet) {
     unique_ptr<taPinFig> via = make_unique<taVia>(getDesign()->getTech()->getLayer(layerNum - 1)->getDefaultViaDef());
     auto rViaPtr = static_cast<taVia*>(via.get());
     rViaPtr->setOrigin(isH ? frPoint(coord, trackLoc) : frPoint(trackLoc, coord));
-    iroute->addPinFig(via);
+    iroute->addPinFig(std::move(via));
   }
   iroute->setWlenHelper(wlen);
   if (wlen2 < std::numeric_limits<frCoord>::max()) {
     iroute->setWlenHelper2(wlen2);
   }
-  addIroute(iroute, isExt);
+  addIroute(std::move(iroute), isExt);
 }
 
 

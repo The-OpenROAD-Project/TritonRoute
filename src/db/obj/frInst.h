@@ -71,10 +71,10 @@ namespace fr {
     void setRefBlock(frBlock* in) {
       refBlock = in;
     }
-    void addInstTerm(std::unique_ptr<frInstTerm> &in) {
+    void addInstTerm(std::unique_ptr<frInstTerm> in) {
       instTerms.push_back(std::move(in));
     }
-    void addInstBlockage(std::unique_ptr<frInstBlockage> &in) {
+    void addInstBlockage(std::unique_ptr<frInstBlockage> in) {
       instBlockages.push_back(std::move(in));
     }
     void setPinAccessIdx(int in) {

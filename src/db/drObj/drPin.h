@@ -42,7 +42,7 @@ namespace fr {
     void setFrTerm(frBlockObject* in) {
       term = in;
     }
-    void addAccessPattern(std::unique_ptr<drAccessPattern> &in) {
+    void addAccessPattern(std::unique_ptr<drAccessPattern> in) {
       in->setPin(this);
       accessPatterns.push_back(std::move(in));
     }

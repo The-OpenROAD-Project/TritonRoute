@@ -74,7 +74,7 @@ namespace fr{
     void setGuide(frGuide* in) {
       guide = in;
     }
-    void addPinFig(std::unique_ptr<taPinFig> &in) {
+    void addPinFig(std::unique_ptr<taPinFig> in) {
       in->addToPin(this);
       pinFigs.push_back(std::move(in));
     }

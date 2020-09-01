@@ -51,7 +51,7 @@ namespace fr {
     void addPolygonCorners(std::vector<std::unique_ptr<gcCorner> > &in) {
       polygon_corners.push_back(std::move(in));
     }
-    void addMaxRectangle(std::unique_ptr<gcRect> &in) {
+    void addMaxRectangle(std::unique_ptr<gcRect> in) {
       max_rectangles.push_back(std::move(in));
     }
 

@@ -48,10 +48,10 @@ namespace fr {
         auto pinFig = uPinFig.get();
         if (pinFig->typeId() == frcRect) {
           std::unique_ptr<frPinFig> tmp = std::make_unique<frRect>(*static_cast<frRect*>(pinFig));
-          addPinFig(tmp);
+          addPinFig(std::move(tmp));
         } else if (pinFig->typeId() == frcPolygon) {
           std::unique_ptr<frPinFig> tmp = std::make_unique<frPolygon>(*static_cast<frPolygon*>(pinFig));
-          addPinFig(tmp);
+          addPinFig(std::move(tmp));
         } else {
           std::cout <<"Unsupported pinFig in copy constructor" <<std::endl;
           exit(1);
@@ -64,11 +64,11 @@ namespace fr {
         if (pinFig->typeId() == frcRect) {
           std::unique_ptr<frPinFig> tmp = std::make_unique<frRect>(*static_cast<frRect*>(pinFig));
           tmp->move(xform);
-          addPinFig(tmp);
+          addPinFig(std::move(tmp));
         } else if (pinFig->typeId() == frcPolygon) {
           std::unique_ptr<frPinFig> tmp = std::make_unique<frPolygon>(*static_cast<frPolygon*>(pinFig));
           tmp->move(xform);
-          addPinFig(tmp);
+          addPinFig(std::move(tmp));
         } else {
           std::cout <<"Unsupported pinFig in copy constructor" <<std::endl;
           exit(1);
@@ -102,7 +102,7 @@ namespace fr {
     void setTerm(frTerm *in) {
       term = in;
     }
-    void addPinFig(std::unique_ptr<frPinFig> &in) {
+    void addPinFig(std::unique_ptr<frPinFig> in) {
       in->addToPin(this);
       pinFigs.push_back(std::move(in));
     }
@@ -117,7 +117,7 @@ namespace fr {
     std::map< frLayerNum, PolygonSet >& getLayer2PolySet() {
       return layer2PolySet;
     }
-    void addPinAccess(std::unique_ptr<frPinAccess> &in) {
+    void addPinAccess(std::unique_ptr<frPinAccess> in) {
       in->setId(aps.size());
       aps.push_back(std::move(in));
     }

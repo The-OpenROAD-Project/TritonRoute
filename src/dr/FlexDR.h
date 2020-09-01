@@ -580,7 +580,7 @@ namespace fr {
                  std::vector<frBlockObject*> &terms);
     void initNet_term_new(drNet* dNet, std::vector<frBlockObject*> &terms);
     void initNet_termGenAp_new(drPin* dPin);
-    void initNet_addNet(std::unique_ptr<drNet> &in);
+    void initNet_addNet(std::unique_ptr<drNet> in);
     void getTrackLocs(bool isHorzTracks, frLayerNum currLayerNum, frCoord low, frCoord high, std::set<frCoord> &trackLocs);
     void initNet_boundary(drNet* net, std::vector<std::unique_ptr<drConnFig> > &extObjs);
     void initNets_regionQuery();
