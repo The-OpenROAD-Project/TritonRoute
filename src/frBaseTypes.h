@@ -35,15 +35,8 @@
 #include <string>
 #include <utility>
 
-//#include <boost/property_map/property_map.hpp>
-#include <boost/graph/adjacency_list.hpp>
-//#include <boost/graph/connected_components.hpp>
-
 #include <boost/geometry.hpp>
 #include <boost/polygon/polygon.hpp>
-//#include <boost/geometry/geometries/point.hpp>
-//#include <boost/geometry/geometries/box.hpp>
-//#include <boost/geometry/index/rtree.hpp>
 
 namespace fr {
   using frLayerNum = int;
@@ -126,14 +119,6 @@ namespace fr {
       gccRect,
       gccPolygon
   };
-  //enum class drBlockObjectEnum {
-  //  drcBlockObject = 0,
-  //  drcNet,
-  //  drcPin,
-  //  drcAccessPattern,
-  //  drcPathSeg,
-  //  drcVia
-  //};
   enum class frGuideEnum {
       frcGuideX,
       frcGuideGlobal,
@@ -267,71 +252,23 @@ namespace fr {
     frcEncOptAP   = 3
   };
 
-  class frBlockObject;
-  struct vertex_properties_t {
-    frBlockObject* objPtr;
-  };
-  class frConnFig;
-  class frInstTerm;
-  class frTerm;
-  class frInst;
-  class frBlockage;
-  struct edge_properties_t {
-    std::shared_ptr<frConnFig> objPtr;
-  };
-  // boost graph
-  typedef boost::adjacency_list< boost::listS, boost::listS, boost::undirectedS, vertex_properties_t, edge_properties_t > graph_t;
-  // descriptor
-  typedef boost::graph_traits<graph_t>::vertex_descriptor   vertex_descriptor_t;
-  typedef boost::graph_traits<graph_t>::edge_descriptor     edge_descriptor_t;
-  // iterator
-  typedef boost::graph_traits<graph_t>::vertex_iterator     vertex_iterator_t;
-  typedef boost::graph_traits<graph_t>::edge_iterator       edge_iterator_t;
-  typedef boost::graph_traits<graph_t>::out_edge_iterator   out_edge_iterator_t;
-  typedef boost::graph_traits<graph_t>::adjacency_iterator  adjacency_iterator_t;
-
-  typedef std::map<vertex_descriptor_t, std::size_t>        vertex_descriptor_map_t;
   namespace bg  = boost::geometry;
   namespace bgi = boost::geometry::index;
 
-  typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian> boostPoint;
-  typedef bg::model::box<boostPoint> boostBox;
-  typedef bg::model::polygon<boostPoint> boostPolygon;
-  typedef bg::model::segment<boostPoint> boostSegment;
+  typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian>  point_t;
+  typedef bg::model::box<point_t>                              box_t;
+  typedef bg::model::segment<point_t>                          segment_t;
 
-
-  typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian>                         point_t;
-  typedef bg::model::box<point_t>                                                     box_t;
-  typedef bg::model::segment<point_t>                                                 segment_t;
-  class frConnFig;
-  typedef std::pair<box_t, std::shared_ptr<frConnFig> >                               rtree_frConnFig_value_t;
-  typedef std::pair<box_t, std::shared_ptr<frInst> > rtree_frInst_value_t;
-  typedef std::pair<box_t, std::shared_ptr<frTerm> > rtree_frTerm_value_t;
-  typedef std::pair<box_t, std::pair<std::shared_ptr<frTerm>, std::shared_ptr<frInstTerm> > > rtree_frTerm_frInstTerm_value_t;
-  typedef std::pair<box_t, std::shared_ptr<frBlockage> > rtree_frBlockage_value_t;
-  template <typename T>
-  using rq_iter_value_t = std::pair<box_t, frListIter<T> >;
-  template <typename T>
-  using rq_ptr_value_t  = std::pair<box_t, std::shared_ptr<T> >;
   template <typename T>
   using rq_rptr_value_t = std::pair<box_t, T* >;
   template <typename T>
   using rq_generic_value_t = std::pair<box_t, T>;
 
-  // KMB data types
-  typedef boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS, vertex_properties_t, boost::property < boost::edge_weight_t, double > > KMBGraph; 
-
-  // DRC check types
-  typedef std::pair<boostPoint, boostPoint> boostEdge;
-
-
   // BoostPolygon
   typedef boost::polygon::rectangle_data<int>  Rectangle;
   typedef boost::polygon::polygon_90_data<int> Polygon;
-  typedef std::vector<boost::polygon::polygon_90_data<int> > PolygonSet;
+  typedef std::vector<boost::polygon::polygon_90_data<int>> PolygonSet;
   typedef boost::polygon::point_data<int> Point;
-  typedef boost::polygon::interval_data<int> Interval;
-  typedef boost::polygon::segment_data<int> Segment;
 }
 
 #endif
