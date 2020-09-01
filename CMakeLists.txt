@@ -79,7 +79,6 @@ set (FLEXROUTE_SRC
   ${FLEXROUTE_HOME}/src/frRegionQuery.cpp
   ${FLEXROUTE_HOME}/src/io/io_pin.cpp
   ${FLEXROUTE_HOME}/src/io/io.cpp
-  ${FLEXROUTE_HOME}/src/io/frShapeUtil.cpp
   ${FLEXROUTE_HOME}/src/io/io_guide.cpp
   ${FLEXROUTE_HOME}/src/io/io_parser_helper.cpp
   ${FLEXROUTE_HOME}/src/io/defw.cpp
@@ -158,7 +157,6 @@ set (FLEXROUTE_HEADER
   ${FLEXROUTE_HOME}/src/frRegionQuery.h
   ${FLEXROUTE_HOME}/src/global.h
   ${FLEXROUTE_HOME}/src/io/io.h
-  ${FLEXROUTE_HOME}/src/io/frShapeUtil.h
   ${FLEXROUTE_HOME}/src/pa/FlexPA.h
   ${FLEXROUTE_HOME}/src/rp/FlexRP.h
   )
