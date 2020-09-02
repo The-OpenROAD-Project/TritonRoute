@@ -1719,7 +1719,9 @@ void FlexGCWorker::checkMetalShape_rectOnly(gcPin* pin) {
 void FlexGCWorker::checkMetalShape_offGrid(gcPin* pin) {
   bool enableOutput = false;
   auto net = pin->getNet();
-  auto mGrid = getDesign()->getTech()->getManufacturingGrid();
+  // Needs to be signed to make modulo work correctly with
+  // negative coordinates
+  int mGrid = getDesign()->getTech()->getManufacturingGrid();
   for (auto &rect: pin->getMaxRectangles()) {
     auto maxRect = rect.get();
     auto layerNum = maxRect->getLayerNum();
