@@ -61,6 +61,8 @@ void frTime::print() {
   guard.restore();
 }
 
+namespace fr {
+
 std::ostream& operator<<(std::ostream& os, const frTime &t) {
   boost::io::ios_all_saver guard(std::cout);
   auto t1        = std::chrono::high_resolution_clock::now();
@@ -78,3 +80,5 @@ std::ostream& operator<<(std::ostream& os, const frTime &t) {
   guard.restore();
   return os;
 }
+
+} // end namespace fr

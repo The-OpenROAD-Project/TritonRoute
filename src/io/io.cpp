@@ -4946,7 +4946,6 @@ void io::Parser::readGuide() {
         frRect rect;
         rect.setBBox(box);
         rect.setLayerNum(layerNum);
-        //tmpGuides[netName].push_back(rect);
         tmpGuides[net].push_back(rect);
         ++numGuides;
         if (numGuides < 1000000) {

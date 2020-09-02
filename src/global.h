@@ -111,24 +111,24 @@ extern int MISALIGNMENTCOST;
 #define WAVEFRONTBUFFERHIGHMASK (111 << ((WAVEFRONTBUFFERSIZE - 1) * DIRBITSIZE))
 
 namespace fr {
-  extern frCoord getGCELLGRIDX();
-  extern frCoord getGCELLGRIDY();
-  extern frCoord getGCELLOFFSETX();
-  extern frCoord getGCELLOFFSETY();
+  frCoord getGCELLGRIDX();
+  frCoord getGCELLGRIDY();
+  frCoord getGCELLOFFSETX();
+  frCoord getGCELLOFFSETY();
+
+  // These need to be in the fr namespace to support argument-dependent
+  // lookup
+  std::ostream& operator<< (std::ostream& os, const fr::frViaDef &viaDefIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frBlock &blockIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frInst &instIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frInstTerm &instTermIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frTerm &termIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frPin &pinIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frRect &pinFig);
+  std::ostream& operator<< (std::ostream& os, const fr::frPolygon &pinFig);
+  std::ostream& operator<< (std::ostream& os, const fr::frNet &net);
+  std::ostream& operator<< (std::ostream& os, const fr::frPoint &pIn);
+  std::ostream& operator<< (std::ostream& os, const fr::frBox &box);
 }
-
-extern std::ostream& operator<< (std::ostream& os, const fr::frViaDef &viaDefIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frBlock &blockIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frInst &instIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frInstTerm &instTermIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frTerm &termIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frPin &pinIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frRect &pinFig);
-extern std::ostream& operator<< (std::ostream& os, const fr::frPolygon &pinFig);
-extern std::ostream& operator<< (std::ostream& os, const fr::frNet &net);
-//extern std::ostream& operator<< (std::ostream& os, const fr::frLayerBlockage &blk);
-
-extern std::ostream& operator<< (std::ostream& os, const fr::frPoint &pIn);
-extern std::ostream& operator<< (std::ostream& os, const fr::frBox &box);
 
 #endif

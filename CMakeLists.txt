@@ -29,7 +29,7 @@ set(LEFLIB_HOME
   ${PROJECT_SOURCE_DIR}/module/lef/5.8-p029
 )
 
-## include subdirectories 
+## include subdirectories
 add_subdirectory(${DEFLIB_HOME})
 add_subdirectory(${LEFLIB_HOME})
 
@@ -38,7 +38,7 @@ add_subdirectory(${LEFLIB_HOME})
 find_package(ZLIB REQUIRED)
 find_package(BISON REQUIRED)
 
-find_package(Boost 1.68.0 REQUIRED)
+find_package(Boost 1.68.0 REQUIRED COMPONENTS unit_test_framework)
 find_package(OpenMP REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -75,7 +75,6 @@ set (FLEXROUTE_SRC
   ${FLEXROUTE_HOME}/src/db/obj/frInst.cpp
   ${FLEXROUTE_HOME}/src/db/obj/frVia.cpp
   ${FLEXROUTE_HOME}/src/db/obj/frAccess.cpp
-  ${FLEXROUTE_HOME}/src/main.cpp
   ${FLEXROUTE_HOME}/src/frRegionQuery.cpp
   ${FLEXROUTE_HOME}/src/io/io_pin.cpp
   ${FLEXROUTE_HOME}/src/io/io.cpp
@@ -162,45 +161,54 @@ set (FLEXROUTE_HEADER
   )
 
 ############################################################
-# include directories 
+# Create a library
 ############################################################
-include_directories(
-  ${DEFLIB_HOME}/def
+add_library( flexroutelib
+  ${FLEXROUTE_SRC}
+)
 
-  ${LEFLIB_HOME}/lef
+set_target_properties( flexroutelib
+  PROPERTIES OUTPUT_NAME "flexroute"
+)
 
+target_include_directories( flexroutelib
+  PUBLIC
   ${FLEXROUTE_HOME}/src
+)
+
+target_link_libraries( flexroutelib
+  def
+  lef
+
+  Threads::Threads
+  OpenMP::OpenMP_CXX
+  Boost::boost
+  ZLIB::ZLIB
 )
 
 ############################################################
 # Create an executable
 ############################################################
-add_executable( TritonRoute 
-  ${FLEXROUTE_SRC}
+add_executable( TritonRoute
+  ${FLEXROUTE_HOME}/src/main.cpp
 )
 
-add_dependencies( TritonRoute def )
-add_dependencies( TritonRoute lef )
-
-target_link_libraries( TritonRoute 
+target_link_libraries( TritonRoute
   PUBLIC
-  def
-  lef
-
-  ${ZLIB_LIBRARIES}
-  Threads::Threads
-  OpenMP::OpenMP_CXX
-  Boost::boost
+  flexroutelib
   )
 
 ############################################################
-# Install  
+# Install
 ############################################################
 
 install(FILES ${FLEXROUTE_HEADER} DESTINATION include)
 install(TARGETS TritonRoute DESTINATION bin)
 install(TARGETS TritonRoute DESTINATION lib)
 
+############################################################
+# Compiler flags
+############################################################
 # Todo: add -Wextra and cleanup warnings
 target_compile_options( TritonRoute
   PRIVATE
@@ -208,3 +216,20 @@ target_compile_options( TritonRoute
   $<$<CXX_COMPILER_ID:AppleClang>:-Wall -pedantic -Wcast-qual -Wredundant-decls -Wformat-security>
   $<$<CXX_COMPILER_ID:Clang>:-Wall -pedantic -Wcast-qual -Wredundant-decls -Wformat-security>
   )
+
+############################################################
+# Unit testing
+############################################################
+enable_testing()
+
+add_executable(tr_test
+  ${FLEXROUTE_HOME}/test/gc_test.cpp
+  )
+
+target_link_libraries(tr_test
+  flexroutelib
+  Boost::unit_test_framework
+  )
+
+add_test(NAME tr_test
+         COMMAND tr_test)

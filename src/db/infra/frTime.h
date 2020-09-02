@@ -53,7 +53,8 @@ namespace fr {
     std::chrono::high_resolution_clock::time_point t0;
     clock_t t;
   };
+
+  std::ostream& operator<<(std::ostream& os, const frTime &t);
 }
 
-extern std::ostream& operator<<(std::ostream& os, const fr::frTime &t);
 #endif

@@ -100,6 +100,8 @@ float   MARKERDECAY     = 0.8;
 float   SHAPEBLOATWIDTH = 3;
 int     MISALIGNMENTCOST = 8;
 
+namespace fr {
+
 ostream& operator<< (ostream& os, const frPoint &pIn) {
   os <<"( " <<pIn.x() <<" " <<pIn.y() <<" )";
   return os;
@@ -240,3 +242,4 @@ ostream& operator<< (ostream& os, const frBox &box) {
   return os;
 }
 
+} // end namespace fr
