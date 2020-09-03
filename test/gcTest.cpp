@@ -27,8 +27,15 @@
  */
 
 #define BOOST_TEST_MODULE gc
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+
+#ifdef HAS_BOOST_UNIT_TEST_LIBRARY
+  // Shared library version
+  #define BOOST_TEST_DYN_LINK
+  #include <boost/test/unit_test.hpp>
+#else
+  // Header only version
+  #include <boost/test/included/unit_test.hpp>
+#endif
 
 #include "fixture.h"
 #include "frDesign.h"

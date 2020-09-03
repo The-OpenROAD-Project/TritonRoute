@@ -38,7 +38,7 @@ add_subdirectory(${LEFLIB_HOME})
 find_package(ZLIB REQUIRED)
 find_package(BISON REQUIRED)
 
-find_package(Boost 1.68.0 REQUIRED COMPONENTS unit_test_framework)
+find_package(Boost 1.68.0 COMPONENTS unit_test_framework)
 find_package(OpenMP REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -225,12 +225,23 @@ enable_testing()
 add_executable(trTest
   ${FLEXROUTE_HOME}/test/gcTest.cpp
   ${FLEXROUTE_HOME}/test/fixture.cpp
-  )
+)
 
 target_link_libraries(trTest
   flexroutelib
-  Boost::unit_test_framework
-  )
+)
 
-add_test(NAME trTest
-         COMMAND trTest)
+# Use the shared library if found.  We need to pass this info to
+# the code to select the corresponding include.  Using the shared
+# library speeds up compilation.
+if (Boost_unit_test_framework_FOUND)
+  target_link_libraries(trTest
+    Boost::unit_test_framework
+  )
+  target_compile_definitions(trTest
+    PRIVATE
+    HAS_BOOST_UNIT_TEST_LIBRARY
+  )
+endif()
+
+add_test(NAME trTest COMMAND trTest)
