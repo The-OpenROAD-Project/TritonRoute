@@ -51,7 +51,7 @@ namespace fr {
     bool operator<(const frBlockObject &rhs) const {
       return id < rhs.id;
     }
-  protected:
+  private:
     int id;
   };
   struct frBlockObjectComp {

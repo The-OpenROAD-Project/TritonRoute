@@ -226,7 +226,7 @@ namespace fr {
     }
 
     bool operator< (const drNet &b) const {
-      return (numMarkers == b.numMarkers) ? (id < b.id) : (numMarkers > b.numMarkers);
+      return (numMarkers == b.numMarkers) ? (getId() < b.getId()) : (numMarkers > b.numMarkers);
     }
 
   protected:
