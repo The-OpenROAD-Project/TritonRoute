@@ -222,14 +222,14 @@ target_compile_options( TritonRoute
 ############################################################
 enable_testing()
 
-add_executable(tr_test
-  ${FLEXROUTE_HOME}/test/gc_test.cpp
+add_executable(trTest
+  ${FLEXROUTE_HOME}/test/gcTest.cpp
   )
 
-target_link_libraries(tr_test
+target_link_libraries(trTest
   flexroutelib
   Boost::unit_test_framework
   )
 
-add_test(NAME tr_test
-         COMMAND tr_test)
+add_test(NAME trTest
+         COMMAND trTest)
