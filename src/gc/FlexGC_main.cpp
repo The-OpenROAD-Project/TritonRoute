@@ -2730,19 +2730,7 @@ void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect1, gcRect* rect2, frLef
   }
 
   gtl::rectangle_data<frCoord> markerRect(*rect1);
-  auto distX = gtl::euclidean_distance(markerRect, *rect2, gtl::HORIZONTAL);
-  auto distY = gtl::euclidean_distance(markerRect, *rect2, gtl::VERTICAL);
-
   gtl::generalized_intersect(markerRect, *rect2);
-  auto prlX = gtl::delta(markerRect, gtl::HORIZONTAL);
-  auto prlY = gtl::delta(markerRect, gtl::VERTICAL);
-
-  if (distX) {
-    prlX = -prlX;
-  }
-  if (distY) {
-    prlY = -prlY;
-  }
 
   if (con->hasSecondLayer()) {
     checkLef58CutSpacing_spc_layer(rect1, rect2, markerRect, con);
