@@ -104,4 +104,23 @@ BOOST_AUTO_TEST_CASE(metal_short)
              frBox(500, -50, 500, 50));
 }
 
+BOOST_AUTO_TEST_CASE(min_width)
+{
+  // Setup
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0}, 60);
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(markers.size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcMinWidthConstraint,
+             frBox(0, -30, 500, 30));
+}
+
 BOOST_AUTO_TEST_SUITE_END();
