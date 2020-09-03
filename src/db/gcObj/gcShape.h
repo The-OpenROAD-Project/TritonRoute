@@ -52,14 +52,15 @@ namespace fr {
   //class gcEdge;
   class gcShape: public gcPinFig {
   public:
-    // constructors
-    gcShape(): gcPinFig() {}
-    gcShape(const gcShape &in): gcPinFig(in) {}
     // setters
     virtual void setLayerNum (frLayerNum tmpLayerNum) = 0;
     // getters
     virtual frLayerNum getLayerNum() const = 0;
     // others
+  protected:
+    // constructors
+    gcShape(): gcPinFig() {}
+    gcShape(const gcShape &in): gcPinFig(in) {}
   };
 
   class gcCorner: public gtl::point_data<frCoord> {

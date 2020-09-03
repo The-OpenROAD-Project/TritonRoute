@@ -39,8 +39,6 @@ namespace fr {
   class frPathSeg;
   class taShape: public taPinFig {
   public:
-    // constructors
-    taShape(): taPinFig() {}
     // setters
     virtual void setLayerNum (frLayerNum tmpLayerNum) = 0;
     // getters
@@ -67,6 +65,8 @@ namespace fr {
      * overlaps
      */
   protected:
+    // constructors
+    taShape(): taPinFig() {}
   };
 
   class taPathSeg: public taShape {

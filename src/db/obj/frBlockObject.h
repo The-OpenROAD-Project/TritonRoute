@@ -34,9 +34,6 @@
 namespace fr {
   class frBlockObject {
   public:
-    // constructors
-    frBlockObject(): id(-1) {}
-    frBlockObject(const frBlockObject &in): id(in.id) {}
     virtual ~frBlockObject() {}
     // getters
     int getId() const {
@@ -51,6 +48,10 @@ namespace fr {
     bool operator<(const frBlockObject &rhs) const {
       return id < rhs.id;
     }
+  protected:
+    // constructors
+    frBlockObject(): id(-1) {}
+    frBlockObject(const frBlockObject &in): id(in.id) {}
   private:
     int id;
   };

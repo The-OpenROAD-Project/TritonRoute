@@ -35,13 +35,14 @@
 namespace fr {
   class gcBlockObject: public frBlockObject {
   public:
-    // constructors
-    gcBlockObject(): frBlockObject() {}
-    gcBlockObject(const gcBlockObject &in): frBlockObject(in) {}
     virtual ~gcBlockObject() {}
     // getters
     // setters
     // others
+  protected:
+    // constructors
+    gcBlockObject(): frBlockObject() {}
+    gcBlockObject(const gcBlockObject &in): frBlockObject(in) {}
   };
 }
 

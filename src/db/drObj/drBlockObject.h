@@ -35,12 +35,13 @@
 namespace fr {
   class drBlockObject: public frBlockObject {
   public:
-    // constructors
-    drBlockObject() {}
     virtual ~drBlockObject() {}
     // getters
     // setters
     // others
+  protected:
+    // constructors
+    drBlockObject() {}
   };
 }
 

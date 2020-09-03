@@ -37,19 +37,18 @@
 namespace fr {
   class drFig: public drBlockObject {
   public:
-    // constructors
-    drFig(): drBlockObject() {}
     // getters
     virtual void getBBox(frBox &box) const = 0;
     // setters
     // others
+  protected:
+    // constructors
+    drFig(): drBlockObject() {}
   };
 
   class drNet;
   class drConnFig: public drFig {
   public:
-    // constructors
-    drConnFig(): drFig() {}
     // getters
     virtual bool hasNet() const = 0;
     virtual drNet* getNet() const = 0;
@@ -63,12 +62,14 @@ namespace fr {
      * move
      * overlaps
      */
+  protected:
+    // constructors
+    drConnFig(): drFig() {}
   };
 
   class drPin;
   class drPinFig: public drConnFig {
   public:
-    drPinFig(): drConnFig() {}
     // getters
     virtual bool hasPin() const = 0;
     virtual drPin* getPin() const = 0;
@@ -89,6 +90,8 @@ namespace fr {
      * move
      * overlaps
      */
+  protected:
+    drPinFig(): drConnFig() {}
   };
 
 }

@@ -37,20 +37,18 @@
 namespace fr {
   class gcFig: public gcBlockObject {
   public:
-    // constructors
-    gcFig(): gcBlockObject() {}
-    gcFig(const gcFig& in): gcBlockObject(in) {}
     // getters
     // setters
     // others
+  protected:
+    // constructors
+    gcFig(): gcBlockObject() {}
+    gcFig(const gcFig& in): gcBlockObject(in) {}
   };
 
   class gcNet;
   class gcConnFig: public gcFig {
   public:
-    // constructors
-    gcConnFig(): gcFig() {}
-    gcConnFig(const gcConnFig &in): gcFig(in) {}
     // getters
     virtual bool hasNet() const = 0;
     virtual gcNet* getNet() const = 0;
@@ -65,13 +63,14 @@ namespace fr {
      * overlaps
      */
   protected:
+    // constructors
+    gcConnFig(): gcFig() {}
+    gcConnFig(const gcConnFig &in): gcFig(in) {}
   };
 
   class gcPin;
   class gcPinFig: public gcConnFig {
   public:
-    gcPinFig(): gcConnFig() {}
-    gcPinFig(const gcPinFig& in): gcConnFig(in) {}
     // getters
     virtual bool hasPin() const = 0;
     virtual gcPin* getPin() const = 0;
@@ -93,6 +92,8 @@ namespace fr {
      * overlaps
      */
   protected:
+    gcPinFig(): gcConnFig() {}
+    gcPinFig(const gcPinFig& in): gcConnFig(in) {}
   };
 
 }

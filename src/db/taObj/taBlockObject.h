@@ -35,13 +35,14 @@
 namespace fr {
   class taBlockObject: public frBlockObject {
   public:
-    // constructors
-    taBlockObject() {}
-    taBlockObject(const taBlockObject &in): frBlockObject(in) {}
     virtual ~taBlockObject() {}
     // getters
     // setters
     // others
+  protected:
+    // constructors
+    taBlockObject() {}
+    taBlockObject(const taBlockObject &in): frBlockObject(in) {}
   };
 }
 

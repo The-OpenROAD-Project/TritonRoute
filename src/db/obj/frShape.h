@@ -41,8 +41,6 @@ namespace fr {
   class drPatchWire;
   class frShape: public frPinFig {
   public:
-    // constructors
-    frShape(): frPinFig() {}
     // setters
     virtual void setLayerNum (frLayerNum tmpLayerNum) = 0;
     // getters
@@ -72,6 +70,8 @@ namespace fr {
     virtual void setIter(frListIter<std::unique_ptr<frShape> > &in) = 0;
     virtual frListIter<std::unique_ptr<frShape> > getIter() const = 0;
   protected:
+    // constructors
+    frShape(): frPinFig() {}
   };
 
   class frRect: public frShape {

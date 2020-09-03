@@ -37,8 +37,6 @@
 namespace fr {
   class taFig: public taBlockObject {
   public:
-    // constructors
-    taFig(): taBlockObject() {}
     // getters
     virtual void getBBox(frBox &box) const = 0;
     // setters
@@ -46,13 +44,13 @@ namespace fr {
     virtual void move(const frTransform &xform) = 0;
     virtual bool overlaps(const frBox &box) const = 0;
   protected:
+    // constructors
+    taFig(): taBlockObject() {}
   };
 
   class frNet;
   class taConnFig: public taFig {
   public:
-    // constructors
-    taConnFig(): taFig() {}
     // getters
     virtual bool hasNet() const = 0;
     virtual frNet* getNet() const = 0;
@@ -67,12 +65,13 @@ namespace fr {
      * overlaps
      */
   protected:
+    // constructors
+    taConnFig(): taFig() {}
   };
 
   class taPin;
   class taPinFig: public taConnFig {
   public:
-    taPinFig(): taConnFig() {}
     // getters
     virtual bool hasPin() const = 0;
     virtual taPin* getPin() const = 0;
@@ -94,6 +93,7 @@ namespace fr {
      * overlaps
      */
   protected:
+    taPinFig(): taConnFig() {}
   };
 
 }

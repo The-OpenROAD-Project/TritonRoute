@@ -35,8 +35,6 @@
 namespace fr {
   class frRef: public frPinFig {
   public:
-    // constructors
-    frRef(): frPinFig() {}
     // getters
     virtual frOrient getOrient() const = 0;
     virtual void getOrigin(frPoint &tmpOrigin) const = 0;
@@ -46,6 +44,8 @@ namespace fr {
     virtual void setOrigin(const frPoint &tmpPoint) = 0;
     virtual void setTransform(const frTransform &xform) = 0;
   protected:
+    // constructors
+    frRef(): frPinFig() {}
   };
 }
 

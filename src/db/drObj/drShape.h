@@ -41,9 +41,6 @@ namespace fr {
   class frPatchWire;
   class drShape: public drPinFig {
   public:
-    // constructors
-    drShape(): drPinFig() {}
-    drShape(const drShape &in): drPinFig(in) {}
     // setters
     virtual void setLayerNum (frLayerNum tmpLayerNum) = 0;
     // getters
@@ -69,6 +66,10 @@ namespace fr {
      * move
      * overlaps
      */
+  protected:
+    // constructors
+    drShape(): drPinFig() {}
+    drShape(const drShape &in): drPinFig(in) {}
   };
 
   class drPathSeg: public drShape {

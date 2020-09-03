@@ -48,10 +48,10 @@ namespace fr {
   // base type for design rule
   class frConstraint {
   public:
-    frConstraint() {}
     virtual ~frConstraint() {}
     virtual frConstraintTypeEnum typeId() const = 0;    
   protected:
+    frConstraint() {}
   };
 
   namespace io {
