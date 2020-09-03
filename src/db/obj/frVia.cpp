@@ -32,7 +32,9 @@
 using namespace std;
 using namespace fr;
 
-frVia::frVia(const drVia &in) {
+frVia::frVia(const drVia &in)
+    : owner(nullptr)
+{
   in.getOrigin(origin);
   viaDef = in.getViaDef();
 }
