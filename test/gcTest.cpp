@@ -104,6 +104,7 @@ BOOST_AUTO_TEST_CASE(metal_short)
              frBox(500, -50, 500, 50));
 }
 
+// Path seg less than min width flags a violation
 BOOST_AUTO_TEST_CASE(min_width)
 {
   // Setup
@@ -121,6 +122,22 @@ BOOST_AUTO_TEST_CASE(min_width)
              2,
              frConstraintTypeEnum::frcMinWidthConstraint,
              frBox(0, -30, 500, 30));
+}
+
+// Abutting Path seg less than min width don't flag a violation
+// as their combined width is ok
+BOOST_AUTO_TEST_CASE(min_width_combines_shapes)
+{
+  // Setup
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0}, 60);
+  makePathseg(n1, 2, {0, 60}, {500, 60}, 60);
+
+  runGC();
+
+  // Test the results
+  BOOST_TEST(worker.getMarkers().size() == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
