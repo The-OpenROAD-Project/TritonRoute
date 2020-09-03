@@ -224,6 +224,7 @@ enable_testing()
 
 add_executable(trTest
   ${FLEXROUTE_HOME}/test/gcTest.cpp
+  ${FLEXROUTE_HOME}/test/fixture.cpp
   )
 
 target_link_libraries(trTest

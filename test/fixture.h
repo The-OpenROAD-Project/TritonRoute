@@ -26,75 +26,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define BOOST_TEST_MODULE gc
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-
-#include "fixture.h"
 #include "frDesign.h"
-#include "gc/FlexGC.h"
 
-using namespace fr;
-
-// Fixture for GC tests
-struct GCFixture : public Fixture
+// General Fixture for tests using db objects.
+class Fixture
 {
-  GCFixture() : worker(design.get()) {}
+ public:
+  Fixture();
+  virtual ~Fixture() = default;
 
-  void testMarker(frMarker* marker,
-                  frLayerNum layer_num,
-                  frConstraintTypeEnum type,
-                  const frBox& expected_bbox)
-  {
-    frBox bbox;
-    marker->getBBox(bbox);
+  void addLayer(fr::frTechObject* tech,
+                const char* name,
+                fr::frLayerTypeEnum type,
+                fr::frPrefRoutingDirEnum dir = fr::frcNonePrefRoutingDir);
 
-    BOOST_TEST(marker->getLayerNum() == layer_num);
-    BOOST_TEST(marker->getConstraint());
-    TEST_ENUM_EQUAL(marker->getConstraint()->typeId(), type);
-    BOOST_TEST(bbox == expected_bbox);
-  }
+  void setupTech(fr::frTechObject* tech);
 
-  void runGC()
-  {
-    // Needs to be run after all the objects are created but before gc
-    initRegionQuery();
+  void makeDesign();
 
-    // Run the GC engine
-    const frBox work(0, 0, 2000, 2000);
-    worker.setExtBox(work);
-    worker.setDrcBox(work);
+  fr::frNet* makeNet(const char* name);
 
-    worker.init();
-    worker.main();
-    worker.end();
-  }
+  void makePathseg(fr::frNet* net,
+                   fr::frLayerNum layer_num,
+                   const fr::frPoint& begin,
+                   const fr::frPoint& end,
+                   fr::frUInt4 width = 100,
+                   fr::frEndStyleEnum begin_style = fr::frcTruncateEndStyle,
+                   fr::frEndStyleEnum end_style = fr::frcTruncateEndStyle);
 
-  FlexGCWorker worker;
+  void initRegionQuery();
+
+  // Public data members are accessible from inside the test function
+  std::unique_ptr<fr::frDesign> design;
 };
 
-BOOST_FIXTURE_TEST_SUITE(gc, GCFixture);
-
-// Two touching metal shape from different nets generate a short
-BOOST_AUTO_TEST_CASE(metal_short)
-{
-  // Setup
-  frNet* n1 = makeNet("n1");
-  frNet* n2 = makeNet("n2");
-
-  makePathseg(n1, 2, {0, 0}, {500, 0});
-  makePathseg(n2, 2, {500, 0}, {1000, 0});
-
-  runGC();
-
-  // Test the results
-  auto& markers = worker.getMarkers();
-
-  BOOST_TEST(markers.size() == 1);
-  testMarker(markers[0].get(),
-             2,
-             frConstraintTypeEnum::frcShortConstraint,
-             frBox(500, -50, 500, 50));
-}
-
-BOOST_AUTO_TEST_SUITE_END();
+// BOOST_TEST wants an operator<< for any type it compares.  We
+// don't have those for enums and they are tedious to write.
+// Just compare them as integers to avoid this requirement.
+#define TEST_ENUM_EQUAL(L, R) \
+  BOOST_TEST(static_cast<int>(L) == static_cast<int>(R))
