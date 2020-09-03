@@ -34,10 +34,6 @@
 #include <boost/icl/interval_set.hpp>
 #include "frDesign.h"
 
-#include "defrReader.hpp"
-#include "defwWriter.hpp"
-#include "lefrReader.hpp"
-
 namespace fr {
   namespace io {
     // not default via, upperWidth, lowerWidth, not align upper, upperArea, lowerArea, not align lower
@@ -84,27 +80,7 @@ namespace fr {
       int numBlockages; // including instBlockage and blockage
 
       // LEF/DEF parser helper
-      static int getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserData data);
-      static int getDefTracks(defrCallbackType_e type, defiTrack* track, defiUserData data);
-      static int getDefVias(defrCallbackType_e type, defiVia* comp, defiUserData data);
-      static int getDefComponents(defrCallbackType_e type, defiComponent* comp, defiUserData data);
-      static int getDefTerminals(defrCallbackType_e type, defiPin* term, defiUserData data);
-      static int getDefNets(defrCallbackType_e type, defiNet* net, defiUserData data);
-      static int getDefInteger(defrCallbackType_e type, int number, defiUserData data);
-      static int getDefString(defrCallbackType_e type, const char* str, defiUserData data);
-      static int getDefVoid(defrCallbackType_e type, void* variable, defiUserData data);
-      static int getDefUnits(defrCallbackType_e type, double number, defiUserData data);
-      static int getDefBlockages(defrCallbackType_e type, defiBlockage* blockage, defiUserData data);
-      static int getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data);
-      static int getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData data);
-      static int getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUserData data);
-      static int getLefString(lefrCallbackType_e type, const char* string, lefiUserData data);
-      static int getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserData data);
-      static int getLefManufacturingGrid(lefrCallbackType_e type, double number, lefiUserData data);
-      static int getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUserData data);
-      static int getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData data);
-      static int getLefViaRules(lefrCallbackType_e type, lefiViaRule* via, lefiUserData data);
-      static int getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* spacing, lefiUserData data);
+      class Callbacks;
       static int getLef58CornerSpacing(void *data, frLayer* tmpLayer, const std::string &sIn);
       static int getLef58SpacingTable(void *data, frLayer* tmpLayer, const std::string &sIn);
       static int getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpLayer, const std::string &sIn);

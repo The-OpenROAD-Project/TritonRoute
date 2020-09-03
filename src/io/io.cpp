@@ -35,10 +35,40 @@
 #include "io/io.h"
 #include "db/tech/frConstraint.h"
 
+#include "defrReader.hpp"
+#include "lefrReader.hpp"
+
 using namespace std;
 using namespace fr;
 
-int io::Parser::getDefBlockages(defrCallbackType_e type, defiBlockage* blockage, defiUserData data) {
+// This class hides the dependency on the Si2 parsing libraries from clients
+class io::Parser::Callbacks
+{
+public:
+      static int getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserData data);
+      static int getDefTracks(defrCallbackType_e type, defiTrack* track, defiUserData data);
+      static int getDefVias(defrCallbackType_e type, defiVia* comp, defiUserData data);
+      static int getDefComponents(defrCallbackType_e type, defiComponent* comp, defiUserData data);
+      static int getDefTerminals(defrCallbackType_e type, defiPin* term, defiUserData data);
+      static int getDefNets(defrCallbackType_e type, defiNet* net, defiUserData data);
+      static int getDefInteger(defrCallbackType_e type, int number, defiUserData data);
+      static int getDefString(defrCallbackType_e type, const char* str, defiUserData data);
+      static int getDefVoid(defrCallbackType_e type, void* variable, defiUserData data);
+      static int getDefUnits(defrCallbackType_e type, double number, defiUserData data);
+      static int getDefBlockages(defrCallbackType_e type, defiBlockage* blockage, defiUserData data);
+      static int getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data);
+      static int getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData data);
+      static int getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUserData data);
+      static int getLefString(lefrCallbackType_e type, const char* string, lefiUserData data);
+      static int getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserData data);
+      static int getLefManufacturingGrid(lefrCallbackType_e type, double number, lefiUserData data);
+      static int getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUserData data);
+      static int getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData data);
+      static int getLefViaRules(lefrCallbackType_e type, lefiViaRule* via, lefiUserData data);
+      static int getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* spacing, lefiUserData data);
+};
+
+int io::Parser::Callbacks::getDefBlockages(defrCallbackType_e type, defiBlockage* blockage, defiUserData data) {
   // bool enableOutput = true;
   bool enableOutput = false;
   if ((type != defrBlockageCbkType)) {
@@ -138,7 +168,7 @@ int io::Parser::getDefBlockages(defrCallbackType_e type, defiBlockage* blockage,
 
 }
 
-int io::Parser::getDefVias(defrCallbackType_e type, defiVia* via, defiUserData data) {
+int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type != defrViaCbkType)) {
@@ -383,7 +413,7 @@ int io::Parser::getDefVias(defrCallbackType_e type, defiVia* via, defiUserData d
   return 0;
 }
 
-int io::Parser::getDefComponents(defrCallbackType_e type, defiComponent* comp, defiUserData data) {
+int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiComponent* comp, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type != defrComponentCbkType)) {
@@ -453,7 +483,7 @@ int io::Parser::getDefComponents(defrCallbackType_e type, defiComponent* comp, d
   return 0;
 }
 
-int io::Parser::getDefString(defrCallbackType_e type, const char* str, defiUserData data) {
+int io::Parser::Callbacks::getDefString(defrCallbackType_e type, const char* str, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type == defrDesignStartCbkType)) {
@@ -469,7 +499,7 @@ int io::Parser::getDefString(defrCallbackType_e type, const char* str, defiUserD
   return 0;
 }
 
-int io::Parser::getDefVoid(defrCallbackType_e type, void* variable, defiUserData data) {
+int io::Parser::Callbacks::getDefVoid(defrCallbackType_e type, void* variable, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type == defrDesignEndCbkType)) {
@@ -483,7 +513,7 @@ int io::Parser::getDefVoid(defrCallbackType_e type, void* variable, defiUserData
   return 0;
 }
 
-int io::Parser::getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserData data) {
+int io::Parser::Callbacks::getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type != defrDieAreaCbkType)) {
@@ -506,7 +536,7 @@ int io::Parser::getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserDat
   return 0;
 }
 
-int io::Parser::getDefNets(defrCallbackType_e type, defiNet* net, defiUserData data) {
+int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, defiUserData data) {
   bool enableOutput = false;
   // bool enableOutput = true;
   bool isSNet = false;
@@ -871,7 +901,7 @@ int io::Parser::getDefNets(defrCallbackType_e type, defiNet* net, defiUserData d
   return 0;
 }
 
-int io::Parser::getDefTerminals(defrCallbackType_e type, defiPin* term, defiUserData data) {
+int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* term, defiUserData data) {
   bool enableOutput = false;
   //bool enableOutput = true;
   if (type != defrPinCbkType) {
@@ -1003,7 +1033,7 @@ int io::Parser::getDefTerminals(defrCallbackType_e type, defiPin* term, defiUser
 
 }
 
-int io::Parser::getDefTracks(defrCallbackType_e type, defiTrack* track, defiUserData data) {
+int io::Parser::Callbacks::getDefTracks(defrCallbackType_e type, defiTrack* track, defiUserData data) {
   bool enableOutput = false;
   //bool enableOutput = true;
   if ((type != defrTrackCbkType)) {
@@ -1040,7 +1070,7 @@ int io::Parser::getDefTracks(defrCallbackType_e type, defiTrack* track, defiUser
   return 0;
 }
 
-int io::Parser::getDefUnits(defrCallbackType_e type, double number, defiUserData data) {
+int io::Parser::Callbacks::getDefUnits(defrCallbackType_e type, double number, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   ((io::Parser*)data)->tmpBlock->setDBUPerUU(static_cast<frUInt4>(number));
@@ -1061,18 +1091,18 @@ void io::Parser::readDef() {
   
   defrSetUserData((defiUserData)this);
 
-  defrSetDesignCbk(getDefString);
-  defrSetDesignEndCbk(getDefVoid);
-  defrSetDieAreaCbk(getDefDieArea);
-  defrSetUnitsCbk(getDefUnits);
-  defrSetTrackCbk(getDefTracks);
-  defrSetComponentCbk(getDefComponents);
-  defrSetPinCbk(getDefTerminals);
-  defrSetSNetCbk(getDefNets);
-  defrSetNetCbk(getDefNets);
+  defrSetDesignCbk(Callbacks::getDefString);
+  defrSetDesignEndCbk(Callbacks::getDefVoid);
+  defrSetDieAreaCbk(Callbacks::getDefDieArea);
+  defrSetUnitsCbk(Callbacks::getDefUnits);
+  defrSetTrackCbk(Callbacks::getDefTracks);
+  defrSetComponentCbk(Callbacks::getDefComponents);
+  defrSetPinCbk(Callbacks::getDefTerminals);
+  defrSetSNetCbk(Callbacks::getDefNets);
+  defrSetNetCbk(Callbacks::getDefNets);
   defrSetAddPathToNet();
-  defrSetViaCbk(getDefVias);
-  defrSetBlockageCbk(getDefBlockages);
+  defrSetViaCbk(Callbacks::getDefVias);
+  defrSetBlockageCbk(Callbacks::getDefBlockages);
 
   if ((f = fopen(DEF_FILE.c_str(),"r")) == 0) {
     cout <<"Couldn't open def file" <<endl;
@@ -3470,7 +3500,7 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
   return 0;
 }
 
-int io::Parser::getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUserData data) {
+int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUserData data) {
   // bool enableOutput = true;
   bool enableOutput = false;
   //bool enableDoubleCheck = true;
@@ -4067,7 +4097,7 @@ int io::Parser::getLefLayers(lefrCallbackType_e type, lefiLayer* layer, lefiUser
   return 0;
 }
 
-int io::Parser::getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data) {
+int io::Parser::Callbacks::getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if ((type != lefrMacroCbkType)) {
@@ -4140,7 +4170,7 @@ int io::Parser::getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUser
   return 0;
 }
 
-int io::Parser::getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData data) {
+int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData data) {
   bool enableOutput = false;
   //bool enableOutput = true;
   if (type != lefrPinCbkType) {
@@ -4310,7 +4340,7 @@ int io::Parser::getLefPins(lefrCallbackType_e type, lefiPin* pin, lefiUserData d
 }
 
 
-int io::Parser::getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUserData data) {
+int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
 
@@ -4444,7 +4474,7 @@ int io::Parser::getLefObs(lefrCallbackType_e type, lefiObstruction* obs, lefiUse
   return 0;
 }
 
-int io::Parser::getLefString(lefrCallbackType_e type, const char* str, lefiUserData data) {
+int io::Parser::Callbacks::getLefString(lefrCallbackType_e type, const char* str, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   if (type == lefrMacroBeginCbkType) {
@@ -4471,7 +4501,7 @@ int io::Parser::getLefString(lefrCallbackType_e type, const char* str, lefiUserD
   return 0;
 }
 
-int io::Parser::getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserData data) {
+int io::Parser::Callbacks::getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   ((io::Parser*)data)->tech->setDBUPerUU(frUInt4(units->databaseNumber()));
@@ -4481,7 +4511,7 @@ int io::Parser::getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserD
   return 0;
 }
 
-int io::Parser::getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* spacing, lefiUserData data) {
+int io::Parser::Callbacks::getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* spacing, lefiUserData data) {
   bool enableOutput = true;
   if (!strcmp(spacing->lefiUseMinSpacing::name(), "OBS")) {
     if (enableOutput) {
@@ -4505,7 +4535,7 @@ int io::Parser::getLefUseMinSpacing(lefrCallbackType_e type, lefiUseMinSpacing* 
   return 0;
 }
 
-int io::Parser::getLefManufacturingGrid(lefrCallbackType_e type, double number, lefiUserData data) {
+int io::Parser::Callbacks::getLefManufacturingGrid(lefrCallbackType_e type, double number, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
   ((io::Parser*)data)->tech->setManufacturingGrid(frUInt4(round(number * ((io::Parser*)data)->tech->getDBUPerUU())));
@@ -4515,7 +4545,7 @@ int io::Parser::getLefManufacturingGrid(lefrCallbackType_e type, double number, 
   return 0;
 }
 
-int io::Parser::getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData data) {
+int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData data) {
   bool enableOutput = false;
   // bool enableOutput = true;
   if (type != lefrViaCbkType) {
@@ -4660,7 +4690,7 @@ int io::Parser::getLefVias(lefrCallbackType_e type, lefiVia* via, lefiUserData d
   return 0;
 }
 
-int io::Parser::getLefViaRules(lefrCallbackType_e type, lefiViaRule* viaRule, lefiUserData data) {
+int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* viaRule, lefiUserData data) {
   bool enableOutput = false;
   //bool enableOutput = true;
   if (type != lefrViaRuleCbkType) {
@@ -4796,17 +4826,17 @@ void io::Parser::readLef() {
 
   lefrSetUserData ((lefiUserData)this);
 
-  lefrSetMacroCbk(getLefMacros);
-  lefrSetMacroBeginCbk(getLefString);
-  lefrSetMacroEndCbk(getLefString);
-  lefrSetUnitsCbk(getLefUnits);
-  lefrSetManufacturingCbk(getLefManufacturingGrid);
-  lefrSetUseMinSpacingCbk(getLefUseMinSpacing);
-  lefrSetPinCbk(getLefPins);
-  lefrSetObstructionCbk(getLefObs);
-  lefrSetLayerCbk(getLefLayers);
-  lefrSetViaCbk(getLefVias);
-  lefrSetViaRuleCbk(getLefViaRules);
+  lefrSetMacroCbk(Callbacks::getLefMacros);
+  lefrSetMacroBeginCbk(Callbacks::getLefString);
+  lefrSetMacroEndCbk(Callbacks::getLefString);
+  lefrSetUnitsCbk(Callbacks::getLefUnits);
+  lefrSetManufacturingCbk(Callbacks::getLefManufacturingGrid);
+  lefrSetUseMinSpacingCbk(Callbacks::getLefUseMinSpacing);
+  lefrSetPinCbk(Callbacks::getLefPins);
+  lefrSetObstructionCbk(Callbacks::getLefObs);
+  lefrSetLayerCbk(Callbacks::getLefLayers);
+  lefrSetViaCbk(Callbacks::getLefVias);
+  lefrSetViaRuleCbk(Callbacks::getLefViaRules);
 
   if ((f = fopen(LEF_FILE.c_str(),"r")) == 0) {
     cout <<"Couldn't open lef file" <<endl;

@@ -35,7 +35,7 @@
 #   include <unistd.h>
 #endif /* not WIN32 */
 #include "defrReader.hpp"
-#include "defwWriterCalls.hpp"
+#include "defwWriter.hpp"
 #include "defiAlias.hpp"
 #include "io/io.h"
 #include "global.h"
@@ -3046,7 +3046,7 @@ int io::Writer::writeDef(bool isTA, const std::string &str) {
     defrSetWarningLogFunction(printWarning);
 
 
-    defrSetUserData((lefiUserData)this);
+    defrSetUserData((defiUserData)this);
     defrSetDesignCbk(dname);
     defrSetTechnologyCbk(tname);
     defrSetExtensionCbk(extension);
