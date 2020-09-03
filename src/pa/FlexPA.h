@@ -42,7 +42,7 @@ namespace fr {
   public:
     // constructor
     FlexPA(frDesign* in): design(in), stdCellPinGenApCnt(0), stdCellPinValidPlanarApCnt(0), stdCellPinValidViaApCnt(0), stdCellPinNoApCnt(0),
-                          macroCellPinGenApCnt(0), macroCellPinValidPlanarApCnt(0), macroCellPinValidViaApCnt(0), macroCellPinNoApCnt(0) {}
+                          macroCellPinGenApCnt(0), macroCellPinValidPlanarApCnt(0), macroCellPinValidViaApCnt(0), macroCellPinNoApCnt(0), maxAccessPatternSize(0) {}
     // getters
     frDesign* getDesign() const {
       return design;

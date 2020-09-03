@@ -65,9 +65,8 @@ namespace fr {
   class gcCorner: public gtl::point_data<frCoord> {
   public:
     // constructors
-    gcCorner(): prevCorner(nullptr), nextCorner(nullptr), cornerType(frCornerTypeEnum::UNKNOWN) {}
-    gcCorner(const gcCorner &in): prevCorner(in.prevCorner), nextCorner(in.nextCorner), cornerType(in.cornerType),
-                                  cornerDir(frCornerDirEnum::UNKNOWN), fixed(false) {}
+    gcCorner(): prevCorner(nullptr), nextCorner(nullptr), prevEdge(nullptr), nextEdge(nullptr), cornerType(frCornerTypeEnum::UNKNOWN), cornerDir(frCornerDirEnum::UNKNOWN), fixed(false) {}
+    gcCorner(const gcCorner &in) = default;
 
     // getters
     gcCorner* getPrevCorner() const {
@@ -264,7 +263,7 @@ namespace fr {
   class gcRect: public gtl::rectangle_data<frCoord>, public gcShape {
   public:
     // constructors
-    gcRect() : gtl::rectangle_data<frCoord>(), gcShape(), layer(-1), pin(nullptr), net(nullptr) {}
+    gcRect() : gtl::rectangle_data<frCoord>(), gcShape(), layer(-1), pin(nullptr), net(nullptr), fixed(false) {}
     gcRect(const gcRect& in): gtl::rectangle_data<frCoord>(in), gcShape(in), layer(in.layer), pin(in.pin), net(in.net), fixed(in.fixed) {}
     gcRect(const gtl::rectangle_data<frCoord> &shapeIn, frLayerNum layerIn, gcPin* pinIn, gcNet* netIn, bool fixedIn):
       gtl::rectangle_data<frCoord>(shapeIn), layer(layerIn), pin(pinIn), net(netIn), fixed(fixedIn) {}

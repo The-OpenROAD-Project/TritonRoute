@@ -43,7 +43,7 @@ namespace fr {
   public:
     friend class io::Parser;
     // constructor
-    frLayer(): pitch(0), width(0), defaultViaDef(nullptr), minSpc(nullptr), spacingSamenet(nullptr), 
+    frLayer(): type(frLayerTypeEnum::IMPLANT), layerNum(0), pitch(0), width(0), minWidth(0), defaultViaDef(nullptr), minSpc(nullptr), spacingSamenet(nullptr),
                eols(), cutConstraints(), cutSpacingSamenetConstraints(),
                interLayerCutSpacingConstraints(), interLayerCutSpacingSamenetConstraints(),
                interLayerCutSpacingConstraintsMap(), interLayerCutSpacingSamenetConstraintsMap(),
@@ -52,13 +52,13 @@ namespace fr {
                nonSufficientMetalConstraint(nullptr), areaConstraint(nullptr), 
                minStepConstraint(nullptr), lef58MinStepConstraints(), minWidthConstraint(nullptr),
                minimumcutConstraints(), lef58RectOnlyConstraint(nullptr), lef58RightWayOnGridOnlyConstraint(nullptr) {}
-    frLayer(frLayerNum layerNumIn, const frString &nameIn): layerNum(layerNumIn), name(nameIn), pitch(0), width(0), minWidth(-1), defaultViaDef(nullptr),
+    frLayer(frLayerNum layerNumIn, const frString &nameIn): type(frLayerTypeEnum::IMPLANT), layerNum(layerNumIn), name(nameIn), pitch(0), width(0), minWidth(-1), defaultViaDef(nullptr),
                                                             minSpc(nullptr), spacingSamenet(nullptr), eols(),
                                                             cutConstraints(), cutSpacingSamenetConstraints(),
                                                             interLayerCutSpacingConstraints(), interLayerCutSpacingSamenetConstraints(),
                                                             interLayerCutSpacingConstraintsMap(), interLayerCutSpacingSamenetConstraintsMap(),
                                                             lef58CutSpacingConstraints(), lef58CutSpacingSamenetConstraints(),
-                                                            recheckConstraint(nullptr), shortConstraint(nullptr), nonSufficientMetalConstraint(nullptr),
+                                                            recheckConstraint(nullptr), shortConstraint(nullptr), offGridConstraint(nullptr), nonSufficientMetalConstraint(nullptr),
                                                             areaConstraint(nullptr), minStepConstraint(nullptr), lef58MinStepConstraints(),
                                                             minWidthConstraint(nullptr), minimumcutConstraints(),
                                                             lef58RectOnlyConstraint(nullptr), lef58RightWayOnGridOnlyConstraint(nullptr) {}

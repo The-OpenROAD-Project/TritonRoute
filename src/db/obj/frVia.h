@@ -40,7 +40,7 @@ namespace fr {
   class frVia: public frRef {
   public:
     // constructors
-    frVia(): frRef() {}
+    frVia(): viaDef(nullptr), owner(nullptr) {}
     frVia(frViaDef* in): frRef(), origin(), viaDef(in), owner(nullptr) {}
     frVia(const frVia &in): frRef(in), origin(in.origin), viaDef(in.viaDef), owner(in.owner) {}
     frVia(const drVia &in);

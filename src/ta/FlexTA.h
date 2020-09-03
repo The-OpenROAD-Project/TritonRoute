@@ -92,7 +92,9 @@ namespace fr {
   class FlexTAWorker {
   public:
     // constructors
-    FlexTAWorker(frDesign* designIn): design(designIn), rq(this), numAssigned(0), totCost(0), maxRetry(1) {};
+    FlexTAWorker(frDesign* designIn): tech(nullptr), design(designIn),
+                                      dir(frPrefRoutingDirEnum::frcNotApplicablePrefRoutingDir), taIter(0),
+                                      rq(this), numAssigned(0), totCost(0), maxRetry(1) {};
     // setters
     void setRouteBox(const frBox &boxIn) {
       routeBox.set(boxIn);

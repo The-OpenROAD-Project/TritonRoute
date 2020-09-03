@@ -184,7 +184,7 @@ namespace fr {
 
   class frPinAccess: public frBlockObject {
   public:
-    frPinAccess(): frBlockObject(), aps() {}
+    frPinAccess(): frBlockObject(), aps(), pin(nullptr) {}
     // getters
     const std::vector<std::unique_ptr<frAccessPoint> >& getAccessPoints() const {
       return aps;

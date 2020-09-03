@@ -54,7 +54,7 @@ namespace fr {
   class taVia: public taRef {
   public:
     // constructors
-    taVia(): taRef() {}
+    taVia(): viaDef(nullptr), owner(nullptr) {}
     taVia(frViaDef* in): taRef(), origin(), viaDef(in), owner(nullptr) {}
     // getters
     frViaDef* getViaDef() const {

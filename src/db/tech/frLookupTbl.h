@@ -153,7 +153,14 @@ namespace fr {
   public:
     friend class frLef58SpacingTableConstraint;
     // constructor
-    fr2DLookupTbl() {}
+    fr2DLookupTbl()
+        : interpolateTypeRow(frInterpolateType::frcSnapDown),
+          interpolateTypeCol(frInterpolateType::frcSnapDown),
+          extrapolateTypeRowLower(frExtrapolateType::frcSnapDown),
+          extrapolateTypeRowUpper(frExtrapolateType::frcSnapDown),
+          extrapolateTypeColLower(frExtrapolateType::frcSnapDown),
+          extrapolateTypeColUpper(frExtrapolateType::frcSnapDown)
+      {}
     fr2DLookupTbl(const fr2DLookupTbl &in): rows(in.rows), cols(in.cols), vals(in.vals),
                                             rowName(in.rowName), colName(in.colName),
                                             interpolateTypeRow(in.interpolateTypeRow),

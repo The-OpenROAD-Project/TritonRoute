@@ -35,7 +35,7 @@ namespace fr {
   class frGCellPattern: public frBlockObject {
   public:
     // constructors
-    frGCellPattern(): frBlockObject() {}
+    frGCellPattern(): horizontal(false), startCoord(0), spacing(0), count(0) {}
     // getters
     bool isHorizontal() const {
       return horizontal;

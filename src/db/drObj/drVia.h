@@ -40,7 +40,7 @@ namespace fr {
   class drVia: public drRef {
   public:
     // constructors
-    drVia(): drRef() {}
+    drVia(): viaDef(nullptr), owner(nullptr) {}
     drVia(frViaDef* in): drRef(), origin(), viaDef(in), owner(nullptr), beginMazeIdx(), endMazeIdx() {}
     drVia(const drVia &in): drRef(in), origin(in.origin), viaDef(in.viaDef), owner(in.owner), 
                             beginMazeIdx(in.beginMazeIdx), endMazeIdx(in.endMazeIdx) {}

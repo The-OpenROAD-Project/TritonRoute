@@ -218,7 +218,7 @@ namespace fr {
   class FlexDRMinAreaVio {
   public:
     // constructors
-    FlexDRMinAreaVio() {}
+    FlexDRMinAreaVio() : net(nullptr), gapArea(0) {}
     FlexDRMinAreaVio(drNet* netIn, FlexMazeIdx bpIn, FlexMazeIdx epIn, frCoord gapAreaIn): net(netIn), 
                                                                                            bp(bpIn),
                                                                                            ep(epIn),

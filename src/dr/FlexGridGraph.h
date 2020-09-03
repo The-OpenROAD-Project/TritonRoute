@@ -47,8 +47,11 @@ namespace fr {
     // constructors
     //FlexGridGraph() {}
     FlexGridGraph(frDesign* designIn, FlexDRWorker* workerIn): 
-                  design(designIn), drWorker(workerIn)/*, routeBox()*/, bits(), /*mazeMarkers(),*/
-                  xCoords(), yCoords(), zCoords(), zHeights() {}
+                  design(designIn), drWorker(workerIn),
+                  xCoords(), yCoords(), zCoords(), zHeights(),
+                  ggDRCCost(0), ggMarkerCost(0), halfViaEncArea(nullptr),
+                  via2viaMinLen(nullptr), via2viaMinLenNew(nullptr),
+                  via2turnMinLen(nullptr) {}
     // getters
     frTechObject* getTech() const {
       return design->getTech();
