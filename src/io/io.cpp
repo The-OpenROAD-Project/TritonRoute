@@ -93,7 +93,6 @@ int io::Parser::Callbacks::getDefBlockages(defrCallbackType_e type, defiBlockage
     } else {
         cout << "Warning: DEF OBS on layer " << layerName <<" is skipped..." << endl; 
       // }
-      layerNum = -1;
       return 0;
     }
     if (blockage->hasComponent()) {
@@ -486,7 +485,7 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
 int io::Parser::Callbacks::getDefString(defrCallbackType_e type, const char* str, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  if ((type == defrDesignStartCbkType)) {
+  if (type == defrDesignStartCbkType) {
     auto &tmpBlock = ((io::Parser*)data)->tmpBlock;
     tmpBlock = make_unique<frBlock>();
     tmpBlock->setName(string(str));
@@ -502,7 +501,7 @@ int io::Parser::Callbacks::getDefString(defrCallbackType_e type, const char* str
 int io::Parser::Callbacks::getDefVoid(defrCallbackType_e type, void* variable, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  if ((type == defrDesignEndCbkType)) {
+  if (type == defrDesignEndCbkType) {
     ((io::Parser*)data)->tmpBlock->setId(0);
     ((io::Parser*)data)->design->setTopBlock(
                      std::move(((io::Parser*)data)->tmpBlock));
@@ -516,7 +515,7 @@ int io::Parser::Callbacks::getDefVoid(defrCallbackType_e type, void* variable, d
 int io::Parser::Callbacks::getDefDieArea(defrCallbackType_e type, defiBox* box, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  if ((type != defrDieAreaCbkType)) {
+  if (type != defrDieAreaCbkType) {
     cout <<"Type is not defrDieAreaCbkType!" <<endl;
     exit(1);
   }
@@ -1036,7 +1035,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
 int io::Parser::Callbacks::getDefTracks(defrCallbackType_e type, defiTrack* track, defiUserData data) {
   bool enableOutput = false;
   //bool enableOutput = true;
-  if ((type != defrTrackCbkType)) {
+  if (type != defrTrackCbkType) {
     cout <<"Type is not defrTrackCbkType!" <<endl;
     exit(1);
   }
@@ -4100,7 +4099,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
 int io::Parser::Callbacks::getLefMacros(lefrCallbackType_e type, lefiMacro* macro, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  if ((type != lefrMacroCbkType)) {
+  if (type != lefrMacroCbkType) {
     cout <<"Type is not lefrMacroCbkType!" <<endl;
     exit(2);
   }

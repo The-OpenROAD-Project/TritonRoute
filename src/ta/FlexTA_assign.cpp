@@ -168,7 +168,7 @@ void FlexTAWorker::modMinSpacingCostVia(const frBox &box, frLayerNum lNum, taPin
   frCoord length2 = viaBox.length();
 
   bool isH = (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-  frLayerNum followTrackLNum = (int)getDesign()->getTech()->getBottomLayerNum() - 1;
+  frLayerNum followTrackLNum;
   if (cutLNum - 1 >= getDesign()->getTech()->getBottomLayerNum() && 
       getDesign()->getTech()->getLayer(cutLNum - 1)->getType() == frLayerTypeEnum::ROUTING &&
       getDesign()->getTech()->getLayer(cutLNum - 1)->getDir() == getDir()) {
@@ -339,7 +339,7 @@ void FlexTAWorker::modCutSpacingCost(const frBox &box, frLayerNum lNum, taPinFig
   via.getCutBBox(viaBox);
 
   bool isH = (getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir);
-  frLayerNum followTrackLNum = (int)getDesign()->getTech()->getBottomLayerNum() - 1;
+  frLayerNum followTrackLNum;
   if (lNum - 1 >= getDesign()->getTech()->getBottomLayerNum() && 
       getDesign()->getTech()->getLayer(lNum - 1)->getType() == frLayerTypeEnum::ROUTING &&
       getDesign()->getTech()->getLayer(lNum - 1)->getDir() == getDir()) {
