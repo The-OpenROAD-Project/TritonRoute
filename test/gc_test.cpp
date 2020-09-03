@@ -144,6 +144,7 @@ void test_marker(frMarker* marker,
 
 BOOST_AUTO_TEST_SUITE(gc);
 
+// Two touching metal shape from different nets generate a short
 BOOST_AUTO_TEST_CASE(metal_short)
 {
   // Setup
@@ -154,8 +155,8 @@ BOOST_AUTO_TEST_CASE(metal_short)
   frNet* n1 = make_net(block, "n1");
   frNet* n2 = make_net(block, "n2");
 
-  make_pathseg(n1, 2, {0, 0}, {1000, 0});
-  make_pathseg(n2, 2, {0, 0}, {1000, 0});
+  make_pathseg(n1, 2, {0, 0}, {500, 0});
+  make_pathseg(n2, 2, {500, 0}, {1000, 0});
 
   init_region_query(design.get());
 
@@ -177,7 +178,7 @@ BOOST_AUTO_TEST_CASE(metal_short)
   test_marker(markers[0].get(),
               2,
               frConstraintTypeEnum::frcShortConstraint,
-              frBox(0, -50, 1000, 50));
+              frBox(500, -50, 500, 50));
 }
 
 BOOST_AUTO_TEST_SUITE_END();
