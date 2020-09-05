@@ -119,12 +119,6 @@ namespace fr {
     const std::vector< std::unique_ptr<frBlockage> >& getBlockages() const {
       return blockages;
     }
-    const frCMap& getCMap() const {
-      return cMap;
-    }
-    frCMap& getCMap() {
-      return cMap;
-    }
     const std::vector<frGCellPattern>& getGCellPatterns() const {
       return gCellPatterns;
     }
@@ -322,9 +316,6 @@ namespace fr {
     void addBlockage(std::unique_ptr<frBlockage> in) {
       blockages.push_back(std::move(in));
     }
-    void setCMap(const frCMap &cIn) {
-      cMap = cIn;
-    }
     void setGCellPatterns(const std::vector<frGCellPattern> &gpIn) {
       gCellPatterns = gpIn;
     }
@@ -370,7 +361,6 @@ namespace fr {
     
     std::vector<frBoundary>                                       boundaries;
     std::vector<std::vector<std::unique_ptr<frTrackPattern> > >   trackPatterns;
-    frCMap                                                        cMap;
     std::vector<frGCellPattern>                                   gCellPatterns;
 
     frList<std::unique_ptr<frMarker> >                            markers;

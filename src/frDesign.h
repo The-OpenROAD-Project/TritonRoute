@@ -73,7 +73,6 @@ namespace fr {
     void printAllMacros();
     void printAllComps();
     void printAllTerms();
-    void printCMap();
     friend class io::Parser;
   protected:
     std::unique_ptr<frBlock>                      topBlock;

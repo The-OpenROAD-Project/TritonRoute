@@ -110,7 +110,6 @@ namespace fr {
       static int getLef58MinStep(void *data, frLayer* tmpLayer, const std::string &sIn);
 
       // postProcess functions
-      void buildCMap();
       void buildGCellPatterns();
       void buildGCellPatterns_helper(frCoord &GCELLGRIDX, frCoord &GCELLGRIDY, frCoord &GCELLOFFSETX, frCoord &GCELLOFFSETY);
       void buildGCellPatterns_getWidth(frCoord &GCELLGRIDX, frCoord &GCELLGRIDY);

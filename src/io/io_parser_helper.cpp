@@ -713,8 +713,6 @@ void io::Parser::postProcessGuide() {
     }
   }
 
-  buildCMap();
-  
   cout <<endl <<"init guide query ..." <<endl;
   design->getRegionQuery()->initGuide(design->getTech()->getLayers().size());
   design->getRegionQuery()->printGuide();
@@ -898,9 +896,6 @@ void io::Parser::buildGCellPatterns() {
 
   design->getTopBlock()->setGCellPatterns({xgp, ygp});
 
-  auto &cmap = design->getTopBlock()->getCMap();
-  cmap.init(xgp.getCount(), ygp.getCount(), tech->layers.size());
-
   for (int layerNum = 0; layerNum <= (int)tech->getLayers().size(); layerNum += 2) {
     for (int i = 0; i < (int)xgp.getCount(); i++) {
       for (int j = 0; j < (int)ygp.getCount(); j++) {
@@ -928,78 +923,9 @@ void io::Parser::buildGCellPatterns() {
 
           }
         }
-        cmap.setSupply(i,j,layerNum, trackCnt);
       }
     }
   }
-}
-
-void io::Parser::buildCMap() {
-  //bool enableOutput = true;
-  bool enableOutput = false;
-  if (VERBOSE > 0) {
-    cout <<endl <<"building cmap ... " <<endl;
-  }
-
-  auto guides = design->getTopBlock()->getGuides();
-  if (enableOutput) {
-    cout <<"all guides = " <<guides.size() <<endl;
-  }
-  auto &cmap = design->getTopBlock()->getCMap();
-
-  frPoint begin, end;
-  frUInt4 xIndex1   = 0;
-  frUInt4 yIndex1   = 0;
-  frUInt4 layerNum1 = 0;
-  frUInt4 xIndex2   = 0;
-  frUInt4 yIndex2   = 0;
-  frUInt4 layerNum2 = 0;
-  for (auto &guide: guides) {
-    guide->getPoints(begin, end);
-    frPoint idx;
-    design->getTopBlock()->getGCellIdx(begin, idx);
-    xIndex1 = idx.x();
-    yIndex1 = idx.y();
-    design->getTopBlock()->getGCellIdx(end, idx);
-    xIndex2 = idx.x();
-    yIndex2 = idx.y();
-
-    layerNum1 = guide->getBeginLayerNum();
-    layerNum2 = guide->getEndLayerNum();
-    bool isHLine = (xIndex1 == xIndex2) ? false : true;
-    bool isVia   = (layerNum1 == layerNum2) ? false : true;
-    bool isLocal = (xIndex1 == xIndex2 && yIndex1 == yIndex2) ? true : false;
-
-    if (isVia) {
-      cmap.setUpDemand(xIndex1, yIndex1, layerNum1, cmap.getUpDemand(xIndex1, yIndex1, layerNum1) + 1);
-    } else {
-      if (isLocal) {
-        cmap.setLocalDemand(xIndex1, yIndex1, layerNum1, cmap.getLocalDemand(xIndex1, yIndex1, layerNum1) + 1);
-      } else {
-        cmap.setEdge2Demand(xIndex1, yIndex1, layerNum1, cmap.getEdge2Demand(xIndex1, yIndex1, layerNum1) + 1);
-        cmap.setEdge1Demand(xIndex2, yIndex2, layerNum2, cmap.getEdge1Demand(xIndex2, yIndex2, layerNum2) + 1);
-        if (isHLine) {
-          for (auto i = xIndex1 + 1; i < xIndex2; i++) {
-            cmap.setThroughDemand(i, yIndex1, layerNum1, cmap.getThroughDemand(i, yIndex1, layerNum1) + 1);
-          }
-        } else {
-          for (auto i = yIndex1 + 1; i < yIndex2; i++) {
-            cmap.setThroughDemand(xIndex1, i, layerNum1, cmap.getThroughDemand(xIndex1, i, layerNum1) + 1);
-          }
-        }
-      }
-    }
-  }
-
-  
-  //if (VERBOSE > 0) {
-  //  cout <<endl <<"end building cmap" <<endl;
-  //}
-
-  if (enableOutput) {
-    design->printCMap();
-  }
-
 }
 
 void io::Parser::writeGuideFile() {

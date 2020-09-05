@@ -63,38 +63,3 @@ void frTechObject::printAllVias() {
   }
 }
 
-void frDesign::printCMap() {
-  cout <<endl <<"print cmap: ";
-  int xCnt = 0;
-  int yCnt = 0;
-  for (auto &gcp: topBlock->getGCellPatterns()) {
-    if (gcp.isHorizontal()) {
-      yCnt = gcp.getCount();
-    } else {
-      xCnt = gcp.getCount();
-    }
-  }
-  cout <<"x/y = " <<xCnt <<" " <<yCnt <<endl;
-  auto &cmap = topBlock->getCMap();
-  for (int lNum = 0; lNum <= (int)getTech()->getLayers().size(); lNum += 2) {
-    for (int i = 0; i < xCnt; i++) {
-      for (int j = 0; j < yCnt; j++) {
-        cout <<"x/y/z/s/t/l/e1/e2/u = " 
-             <<i <<" " <<j <<" " <<lNum <<" "
-             <<cmap.getSupply(i,j,lNum) <<" "
-             <<cmap.getThroughDemand(i,j,lNum) <<" "
-             <<cmap.getLocalDemand(i,j,lNum) <<" "
-             <<cmap.getEdge1Demand(i,j,lNum) <<" "
-             <<cmap.getEdge2Demand(i,j,lNum) <<" "
-             <<cmap.getUpDemand(i,j,lNum) <<" ";
-        if (cmap.getThroughDemand(i,j,lNum) + cmap.getLocalDemand(i,j,lNum) +
-            cmap.getEdge1Demand(i,j,lNum)   > cmap.getSupply(i,j,lNum) ||
-            cmap.getThroughDemand(i,j,lNum) + cmap.getLocalDemand(i,j,lNum) +
-            cmap.getEdge2Demand(i,j,lNum)   > cmap.getSupply(i,j,lNum)) {
-          cout <<"GCell overflow";
-        }
-        cout <<endl;
-      }
-    }
-  }
-}
