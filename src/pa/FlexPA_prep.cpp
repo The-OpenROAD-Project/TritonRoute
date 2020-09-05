@@ -670,40 +670,8 @@ void FlexPA::prepPoint_pin_checkPoint_planar(frAccessPoint* ap,
   int typeGC  = 0;
   if (gcWorker.getMarkers().empty()) {
     ap->setAccess(dir, true);
-    // if (instTerm->getInst()->getRefBlock()->getName() == string("gf14_1rw_d128_w116_m2_bit_mod") && pin->getTerm()->getName() == string("EMAS")) {
-    //     cout << " @@@ debug @@@ here1" << endl;
-    //     cout << " bp (" << bp.x() / 2000.0 << ", " << bp.y() / 2000.0 << ")\n";
-    //     cout << " ep (" << ep.x() / 2000.0 << ", " << ep.y() / 2000.0 << ")\n";
-    // }
-    // if (instTerm->getInst()->getRefBlock()->getName() == string("gf14_1rw_d128_w116_m2_bit_mod") && pin->getTerm()->getName() == string("CEN")) {
-    //     cout << " @@@ debug @@@ here1 CEN" << endl;
-    //     cout << " bp (" << bp.x() / 2000.0 << ", " << bp.y() / 2000.0 << ")\n";
-    //     cout << " ep (" << ep.x() / 2000.0 << ", " << ep.y() / 2000.0 << ")\n";
-    // }
     typeGC = 1;
   } else {
-    // if (instTerm->getInst()->getRefBlock()->getName() == string("gf14_1rw_d128_w116_m2_bit_mod") && pin->getTerm()->getName() == string("EMAS")) {
-    //   cout << "inst: " << instTerm->getInst()->getName() << ", isStdCellPin = " << isStdCellPin << endl;
-    //   cout << " bp (" << bp.x() / 2000.0 << ", " << bp.y() / 2000.0 << ")\n";
-    //   cout << " ep (" << ep.x() / 2000.0 << ", " << ep.y() / 2000.0 << ")\n";
-    //   for (auto &marker: gcWorker.getMarkers()) {
-    //     cout << " @@@ debug @@@ " << (int)marker->getConstraint()->typeId() << endl;
-    //     frBox bbox;
-    //     marker->getBBox(bbox);
-    //     cout << "    (" << bbox.left() / 2000.0 << ", " << bbox.bottom() / 2000.0 << ") - ("
-    //          << bbox.right() / 2000.0 << ", " << bbox.top() / 2000.0 << ")\n";
-    //     for (auto src: marker->getSrcs()) {
-    //       if (src) {
-    //         cout << "      " << (int)src->typeId() << endl;
-    //         if (src->typeId() == frcNet) {
-    //           cout << "        " << static_cast<frNet*>(src)->getName() << endl;
-    //         }
-    //       } else {
-    //         cout << "      nullptr\n";
-    //       }
-    //     }
-    //   }
-    // }
     ap->setAccess(dir, false);
     typeGC = 2;
   }
