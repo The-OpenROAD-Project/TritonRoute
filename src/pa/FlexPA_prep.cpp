@@ -156,9 +156,7 @@ void FlexPA::prepPoint_pin_genPoints_rect_ap_helper(vector<unique_ptr<frAccessPo
   if (apset.find(make_pair(fpt, layerNum)) != apset.end()) {
     return;
   }
-  auto ap = make_unique<frAccessPoint>();
-  ap->setPoint(fpt);
-  ap->setLayerNum(layerNum);
+  auto ap = make_unique<frAccessPoint>(fpt, layerNum);
   if (allowPlanar) {
     auto lowerLayer = getDesign()->getTech()->getLayer(layerNum);
     ap->setAccess(frDirEnum::W, true);

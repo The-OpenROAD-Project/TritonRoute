@@ -39,7 +39,8 @@ namespace fr {
   class frAccessPoint: public frBlockObject {
   public:
     // constructors
-    frAccessPoint(): frBlockObject(), point(), layerNum(-1), accesses(std::vector<bool>(6, false)),
+    frAccessPoint(const frPoint& point, frLayerNum layerNum): frBlockObject(),
+                    point(point), layerNum(layerNum), accesses(std::vector<bool>(6, false)),
                      viaDefs(), typeL(frAccessPointEnum::frcOnGridAP), 
                      typeH(frAccessPointEnum::frcOnGridAP), aps(nullptr) {}
     // getters
@@ -129,9 +130,6 @@ namespace fr {
     // setters
     void setPoint(const frPoint &in) {
       point.set(in);
-    }
-    void setLayerNum(frLayerNum in) {
-      layerNum = in;
     }
     void setAccess(const frDirEnum &dir, bool isValid = true) {
       switch (dir) {
