@@ -76,20 +76,21 @@ int io::Parser::Callbacks::getDefBlockages(defrCallbackType_e type, defiBlockage
     exit(1);
   }
 
+  io::Parser* parser = (io::Parser*) data;
   frLayerNum layerNum = -1;
   string layerName;
   // blockage
   auto blkIn = make_unique<frBlockage>();
-  blkIn->setId(((io::Parser*)data)->numBlockages);
-  ((io::Parser*)data)->numBlockages++;
+  blkIn->setId(parser->numBlockages);
+  parser->numBlockages++;
   // pin
   auto pinIn = make_unique<frPin>();
   pinIn->setId(0);
 
   if (blockage->hasLayer()) {
     layerName = blockage->layerName();
-    if (((io::Parser*)data)->tech->name2layer.find(layerName) != ((io::Parser*)data)->tech->name2layer.end()) {
-      layerNum = ((io::Parser*)data)->tech->name2layer[layerName]->getLayerNum();
+    if (parser->tech->name2layer.find(layerName) != parser->tech->name2layer.end()) {
+      layerNum = parser->tech->name2layer[layerName]->getLayerNum();
     } else {
         cout << "Warning: DEF OBS on layer " << layerName <<" is skipped..." << endl; 
       // }
@@ -161,7 +162,7 @@ int io::Parser::Callbacks::getDefBlockages(defrCallbackType_e type, defiBlockage
   }
 
   blkIn->setPin(std::move(pinIn));
-  ((io::Parser*)data)->tmpBlock->addBlockage(std::move(blkIn));
+  parser->tmpBlock->addBlockage(std::move(blkIn));
 
   return 0;
 
@@ -179,6 +180,8 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
     cout <<"- " <<via->name() <<endl;
     //cout <<"  numLayers = " <<via->numLayers() <<endl;
   }
+  io::Parser* parser = (io::Parser*) data;
+
   // viaRule defined via
   if (via->hasViaRule()) {
     char* viaRuleName;
@@ -207,8 +210,8 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
     }
     if (enableOutput) {
       cout <<" + VIARULE "    <<viaRuleName <<endl;
-      //cout <<" + CUTSIZE " <<xSize * 1.0 / ((io::Parser*)data)->tmpBlock->getDBUPerUU() <<" " 
-      //                     <<ySize * 1.0 / ((io::Parser*)data)->tmpBlock->getDBUPerUU() <<endl;
+      //cout <<" + CUTSIZE " <<xSize * 1.0 / parser->tmpBlock->getDBUPerUU() <<" " 
+      //                     <<ySize * 1.0 / parser->tmpBlock->getDBUPerUU() <<endl;
       cout <<" + CUTSIZE "    <<xSize       <<" " <<ySize       <<endl;
       cout <<" + LAYERS "     <<botLayer    <<" " <<cutLayer    <<" "   <<topLayer <<endl;
       cout <<" + CUTSPACING " <<xCutSpacing <<" " <<yCutSpacing <<endl;
@@ -229,26 +232,26 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
 
     // create cut figs
     frLayerNum cutLayerNum = 0;
-    if (((io::Parser*)data)->tech->name2layer.find(cutLayer) == ((io::Parser*)data)->tech->name2layer.end()) {
+    if (parser->tech->name2layer.find(cutLayer) == parser->tech->name2layer.end()) {
       cout <<"Error: cannot find cut layer" <<endl;
       exit(1);
     } else {
-      cutLayerNum = ((io::Parser*)data)->tech->name2layer.find(cutLayer)->second->getLayerNum();
+      cutLayerNum = parser->tech->name2layer.find(cutLayer)->second->getLayerNum();
     }
     frLayerNum botLayerNum = 0;
-    if (((io::Parser*)data)->tech->name2layer.find(botLayer) == ((io::Parser*)data)->tech->name2layer.end()) {
+    if (parser->tech->name2layer.find(botLayer) == parser->tech->name2layer.end()) {
       cout <<"Error: cannot find bot layer" <<endl;
       exit(1);
     } else {
-      botLayerNum = ((io::Parser*)data)->tech->name2layer.find(botLayer)->second->getLayerNum();
+      botLayerNum = parser->tech->name2layer.find(botLayer)->second->getLayerNum();
     }
     // create cut figs
     frLayerNum topLayerNum = 0;
-    if (((io::Parser*)data)->tech->name2layer.find(topLayer) == ((io::Parser*)data)->tech->name2layer.end()) {
+    if (parser->tech->name2layer.find(topLayer) == parser->tech->name2layer.end()) {
       cout <<"Error: cannot find top layer" <<endl;
       exit(1);
     } else {
-      topLayerNum = ((io::Parser*)data)->tech->name2layer.find(topLayer)->second->getLayerNum();
+      topLayerNum = parser->tech->name2layer.find(topLayer)->second->getLayerNum();
     }
 
     frCoord currX = 0;
@@ -307,7 +310,7 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
     for (auto &uShape: cutFigs) {
       viaDef->addCutFig(std::move(uShape));
     }
-    ((io::Parser*)data)->tech->addVia(std::move(viaDef));
+    parser->tech->addVia(std::move(viaDef));
   // RECT defined via
   } else {
     if (via->numPolygons()) {
@@ -322,13 +325,13 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
     map<frLayerNum, set<int> > lNum2Int;
     for (int i = 0; i < via->numLayers(); ++i) {
       via->layer(i, &layerName, &xl, &yl, &xh, &yh);
-      if (((io::Parser*)data)->tech->name2layer.find(layerName) == ((io::Parser*)data)->tech->name2layer.end()) {
+      if (parser->tech->name2layer.find(layerName) == parser->tech->name2layer.end()) {
         if (VERBOSE > -1) {
           cout <<"Warning: layer " <<layerName <<" is skipiped for " <<via->name() <<endl;
         }
         return 0;
       }
-      auto layerNum = ((io::Parser*)data)->tech->name2layer.at(layerName)->getLayerNum();
+      auto layerNum = parser->tech->name2layer.at(layerName)->getLayerNum();
       lNum2Int[layerNum].insert(i);
       //cout <<"layerNum " <<layerNum <<" i " <<i <<endl;
     }
@@ -374,12 +377,12 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
       //  }
       //  vector<frPoint> tmpPoints;
       //  for (int k = 0; k < via->getPolygon(i, j).numPoints; k++) {
-      //    frCoord x = round(via->getPolygon(i, j).x[k] * ((io::Parser*)data)->tech->getDBUPerUU());
-      //    frCoord y = round(via->getPolygon(i, j).y[k] * ((io::Parser*)data)->tech->getDBUPerUU());
+      //    frCoord x = round(via->getPolygon(i, j).x[k] * parser->tech->getDBUPerUU());
+      //    frCoord y = round(via->getPolygon(i, j).y[k] * parser->tech->getDBUPerUU());
       //    tmpPoints.push_back(frPoint(x, y));
       //    if (enableOutput) {
-      //       cout <<" " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-      //                  <<y * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      //       cout <<" " <<x * 1.0 / parser->tech->getDBUPerUU() <<" " 
+      //                  <<y * 1.0 / parser->tech->getDBUPerUU();
       //    }
       //  }
       //  unique_ptr<frPolygon> pinFig = make_unique<frPolygon>();
@@ -406,7 +409,7 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
     if (enableOutput) {
       cout <<" ;" <<endl;
     }
-    ((io::Parser*)data)->tech->addVia(std::move(viaDef));
+    parser->tech->addVia(std::move(viaDef));
   }
 
   return 0;
@@ -420,7 +423,8 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
     exit(1);
   }
 
-  if (((io::Parser*)data)->design->name2refBlock.find(comp->name()) == ((io::Parser*)data)->design->name2refBlock.end()) {
+  io::Parser* parser = (io::Parser*) data;
+  if (parser->design->name2refBlock.find(comp->name()) == parser->design->name2refBlock.end()) {
     if (VERBOSE > -1) {
       cout <<"Error: library cell not found!" <<endl;
     }
@@ -435,17 +439,16 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
   
   auto uInst = make_unique<frInst>();
   auto tmpInst = uInst.get();
-  tmpInst->setId(((io::Parser*)data)->numInsts);
-  ((io::Parser*)data)->numInsts++;
+  tmpInst->setId(parser->numInsts);
+  parser->numInsts++;
   tmpInst->setName(comp->id());
   tmpInst->setOrigin(frPoint(comp->placementX(), comp->placementY()));
   tmpInst->setOrient(frOrientEnum(comp->placementOrient()));
-  tmpInst->setRefBlock(((io::Parser*)data)->design->name2refBlock.at(comp->name()));
   for (auto &uTerm: tmpInst->getRefBlock()->getTerms()) {
     auto term = uTerm.get();
     unique_ptr<frInstTerm> instTerm = make_unique<frInstTerm>();
-    instTerm->setId(((io::Parser*)data)->numTerms);
-    ((io::Parser*)data)->numTerms++;
+    instTerm->setId(parser->numTerms);
+    parser->numTerms++;
     instTerm->addToInst(tmpInst);
     instTerm->addTerm(term);
     int pinCnt = term->getPins().size();
@@ -455,27 +458,27 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
   for (auto &uBlk: tmpInst->getRefBlock()->getBlockages()) {
     auto blk = uBlk.get();
     unique_ptr<frInstBlockage> instBlk = make_unique<frInstBlockage>();
-    instBlk->setId(((io::Parser*)data)->numBlockages);
-    ((io::Parser*)data)->numBlockages++;
+    instBlk->setId(parser->numBlockages);
+    parser->numBlockages++;
     instBlk->addToInst(tmpInst);
     instBlk->addBlockage(blk);
     tmpInst->addInstBlockage(std::move(instBlk));
   }
 
-  if (((io::Parser*)data)->tmpBlock->name2inst.find(comp->id()) != ((io::Parser*)data)->tmpBlock->name2inst.end()) {
+  if (parser->tmpBlock->name2inst.find(comp->id()) != parser->tmpBlock->name2inst.end()) {
     if (VERBOSE > -1) {
       cout <<"Error: same cell name!" <<endl;
     }
     exit(1);
   }
-  ((io::Parser*)data)->tmpBlock->addInst(std::move(uInst));
-  if (((io::Parser*)data)->tmpBlock->insts.size() < 100000) {
-    if (((io::Parser*)data)->tmpBlock->insts.size() % 10000 == 0) {
-      cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->insts.size() <<" components" <<endl;
+  parser->tmpBlock->addInst(std::move(uInst));
+  if (parser->tmpBlock->insts.size() < 100000) {
+    if (parser->tmpBlock->insts.size() % 10000 == 0) {
+      cout <<"defIn read " <<parser->tmpBlock->insts.size() <<" components" <<endl;
     }
   } else {
-    if (((io::Parser*)data)->tmpBlock->insts.size() % 100000 == 0) {
-      cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->insts.size() <<" components" <<endl;
+    if (parser->tmpBlock->insts.size() % 100000 == 0) {
+      cout <<"defIn read " <<parser->tmpBlock->insts.size() <<" components" <<endl;
     }
   }
 
@@ -486,11 +489,12 @@ int io::Parser::Callbacks::getDefString(defrCallbackType_e type, const char* str
   //bool enableOutput = true;
   bool enableOutput = false;
   if (type == defrDesignStartCbkType) {
-    auto &tmpBlock = ((io::Parser*)data)->tmpBlock;
+    io::Parser* parser = (io::Parser*) data;
+    auto &tmpBlock = parser->tmpBlock;
     tmpBlock = make_unique<frBlock>();
     tmpBlock->setName(string(str));
     tmpBlock->trackPatterns.clear();
-    tmpBlock->trackPatterns.resize(((io::Parser*)data)->tech->layers.size());
+    tmpBlock->trackPatterns.resize(parser->tech->layers.size());
     if (enableOutput) {
       cout <<"DESIGN " <<tmpBlock->getName() <<" ;" <<endl;
     }
@@ -502,9 +506,10 @@ int io::Parser::Callbacks::getDefVoid(defrCallbackType_e type, void* variable, d
   //bool enableOutput = true;
   bool enableOutput = false;
   if (type == defrDesignEndCbkType) {
-    ((io::Parser*)data)->tmpBlock->setId(0);
-    ((io::Parser*)data)->design->setTopBlock(
-                     std::move(((io::Parser*)data)->tmpBlock));
+    io::Parser* parser = (io::Parser*) data;
+    parser->tmpBlock->setId(0);
+    parser->design->setTopBlock(
+                     std::move(parser->tmpBlock));
     if (enableOutput) {
       cout <<"END DESIGN" <<endl;
     }
@@ -528,7 +533,8 @@ int io::Parser::Callbacks::getDefDieArea(defrCallbackType_e type, defiBox* box, 
   points.push_back(frPoint(box->xl(), box->yh()));
   bound.setPoints(points);
   bounds.push_back(bound);
-  ((io::Parser*)data)->tmpBlock->setBoundaries(bounds);
+  io::Parser* parser = (io::Parser*) data;
+  parser->tmpBlock->setBoundaries(bounds);
   if (enableOutput) {
     cout <<"DIEAREA ( " <<box->xl() <<" " <<box->yl() <<" ) ( " <<box->xh() <<" " <<box->yh() <<" ) ;" <<endl;
   }
@@ -551,10 +557,11 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
     isSNet = true;
   }
 
+  io::Parser* parser = (io::Parser*) data;
   unique_ptr<frNet> uNetIn = make_unique<frNet>(net->name());
   auto netIn = uNetIn.get();
-  netIn->setId(((io::Parser*)data)->numNets);
-  ((io::Parser*)data)->numNets++;
+  netIn->setId(parser->numNets);
+  parser->numNets++;
   if (enableOutput) {
     cout <<"- " <<net->name();
   }
@@ -568,19 +575,19 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
     
     if (!strcmp(net->instance(i), "PIN")) {
       // IOs
-      if (((io::Parser*)data)->tmpBlock->name2term.find(net->pin(i)) == ((io::Parser*)data)->tmpBlock->name2term.end()) {
+      if (parser->tmpBlock->name2term.find(net->pin(i)) == parser->tmpBlock->name2term.end()) {
         if (VERBOSE > -1) {
           cout <<"Error: term not found!" <<endl;
         }
         exit(1);
       }
-      auto term = ((io::Parser*)data)->tmpBlock->name2term[net->pin(i)]; // frTerm*
+      auto term = parser->tmpBlock->name2term[net->pin(i)]; // frTerm*
       term->addToNet(netIn);
       netIn->addTerm(term);
     } else {
       // Instances
       if (!strcmp(net->instance(i), "*")) {
-        for (auto &inst: ((io::Parser*)data)->tmpBlock->getInsts()) {
+        for (auto &inst: parser->tmpBlock->getInsts()) {
           for (auto &uInstTerm: inst->getInstTerms()) {
             auto instTerm = uInstTerm.get();
             auto name = instTerm->getTerm()->getName();
@@ -592,13 +599,13 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
           }
         }
       } else {
-        if (((io::Parser*)data)->tmpBlock->name2inst.find(net->instance(i)) == ((io::Parser*)data)->tmpBlock->name2inst.end()) {
+        if (parser->tmpBlock->name2inst.find(net->instance(i)) == parser->tmpBlock->name2inst.end()) {
           if (VERBOSE > -1) {
             cout <<"Error: component not found!" <<endl;
           }
           exit(1);
         }
-        auto inst = ((io::Parser*)data)->tmpBlock->name2inst[net->instance(i)]; //frInst*
+        auto inst = parser->tmpBlock->name2inst[net->instance(i)]; //frInst*
         bool flag =   false;
         for (auto &uInstTerm: inst->getInstTerms()) {
           auto instTerm = uInstTerm.get();
@@ -681,7 +688,7 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
         switch(pathId) {
           case DEFIPATH_LAYER:
             layerName = string(path->getLayer());
-            if (((io::Parser*)data)->tech->name2layer.find(layerName) == ((io::Parser*)data)->tech->name2layer.end()) {
+            if (parser->tech->name2layer.find(layerName) == parser->tech->name2layer.end()) {
               if (VERBOSE > -1) {
                 cout <<"Error: unsupported layer: " <<layerName <<endl;
               }
@@ -772,7 +779,7 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
       }
 
 
-      auto layerNum = ((io::Parser*)data)->tech->name2layer[layerName]->getLayerNum();
+      auto layerNum = parser->tech->name2layer[layerName]->getLayerNum();
       // add rect
       if (hasRect) {
         continue;
@@ -793,7 +800,7 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
         tmpP->addToNet(netIn);
         tmpP->setLayerNum(layerNum);
 
-        width = (width) ? width : ((io::Parser*)data)->tech->name2layer[layerName]->getWidth();
+        width = (width) ? width : parser->tech->name2layer[layerName]->getWidth();
         auto defaultBeginExt = width / 2;
         auto defaultEndExt   = width / 2;
 
@@ -827,7 +834,7 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
 
       // add via
       if (viaName != "") {
-        if (((io::Parser*)data)->tech->name2via.find(viaName) == ((io::Parser*)data)->tech->name2via.end()) {
+        if (parser->tech->name2via.find(viaName) == parser->tech->name2via.end()) {
           if (VERBOSE > -1) {
             cout <<"Error: unsupported via: " <<viaName <<endl;
           }
@@ -838,7 +845,7 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
           } else {
             p.set(beginX, beginY);
           }
-          auto viaDef = ((io::Parser*)data)->tech->name2via[viaName];
+          auto viaDef = parser->tech->name2via[viaName];
           auto tmpP = make_unique<frVia>(viaDef);
           tmpP->setOrigin(p);
           tmpP->addToNet(netIn);
@@ -874,25 +881,25 @@ int io::Parser::Callbacks::getDefNets(defrCallbackType_e type, defiNet* net, def
   }
 
   if (isSNet) {
-    ((io::Parser*)data)->tmpBlock->addSNet(std::move(uNetIn)); 
-    if (((io::Parser*)data)->tmpBlock->snets.size() < 100000) {
-      if (((io::Parser*)data)->tmpBlock->snets.size() % 10000 == 0) {
-        cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->snets.size() <<" snets" <<endl;
+    parser->tmpBlock->addSNet(std::move(uNetIn)); 
+    if (parser->tmpBlock->snets.size() < 100000) {
+      if (parser->tmpBlock->snets.size() % 10000 == 0) {
+        cout <<"defIn read " <<parser->tmpBlock->snets.size() <<" snets" <<endl;
       }
     } else {
-      if (((io::Parser*)data)->tmpBlock->snets.size() % 10000 == 0) {
-        cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->snets.size() <<" snets" <<endl;
+      if (parser->tmpBlock->snets.size() % 10000 == 0) {
+        cout <<"defIn read " <<parser->tmpBlock->snets.size() <<" snets" <<endl;
       }
     }
   } else {
-    ((io::Parser*)data)->tmpBlock->addNet(std::move(uNetIn)); 
-    if (((io::Parser*)data)->tmpBlock->nets.size() < 100000) {
-      if (((io::Parser*)data)->tmpBlock->nets.size() % 10000 == 0) {
-        cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->nets.size() <<" nets" <<endl;
+    parser->tmpBlock->addNet(std::move(uNetIn)); 
+    if (parser->tmpBlock->nets.size() < 100000) {
+      if (parser->tmpBlock->nets.size() % 10000 == 0) {
+        cout <<"defIn read " <<parser->tmpBlock->nets.size() <<" nets" <<endl;
       }
     } else {
-      if (((io::Parser*)data)->tmpBlock->nets.size() % 100000 == 0) {
-        cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->nets.size() <<" nets" <<endl;
+      if (parser->tmpBlock->nets.size() % 100000 == 0) {
+        cout <<"defIn read " <<parser->tmpBlock->nets.size() <<" nets" <<endl;
       }
     }
   }
@@ -929,6 +936,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
     }
   }
 
+  io::Parser* parser = (io::Parser*) data;
   if (term->hasPort()) {
     cout <<"Error: multiple pin ports existing in DEF" <<endl;
     exit(1);
@@ -936,8 +944,8 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
     // term
     auto uTermIn = make_unique<frTerm>(term->pinName());
     auto termIn = uTermIn.get();
-    termIn->setId(((io::Parser*)data)->numTerms);
-    ((io::Parser*)data)->numTerms++;
+    termIn->setId(parser->numTerms);
+    parser->numTerms++;
     termIn->setType(termType);
     // term should add pin
     // pin
@@ -946,7 +954,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
     for (int i = 0; i < term->numLayer(); ++i) {
       //cout <<"  layerName= " <<term->layer(i) <<endl;
       string layer = term->layer(i);
-      if (((io::Parser*)data)->tech->name2layer.find(layer) == ((io::Parser*)data)->tech->name2layer.end()) {
+      if (parser->tech->name2layer.find(layer) == parser->tech->name2layer.end()) {
         if (VERBOSE > -1) {
           cout <<"Error: unsupported layer: " <<layer <<endl;
         }
@@ -954,7 +962,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
         exit(1);
       }
 
-      frLayerNum layerNum = ((io::Parser*)data)->tech->name2layer[layer]->getLayerNum();
+      frLayerNum layerNum = parser->tech->name2layer[layer]->getLayerNum();
       frCoord xl = 0;
       frCoord yl = 0;
       frCoord xh = 0;
@@ -982,7 +990,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
     for (int i = 0; i < term->numPolygons(); ++i) {
       //cout <<"  polyName= " <<term->polygonName(i) <<endl;
       string layer = term->polygonName(i);
-      if (((io::Parser*)data)->tech->name2layer.find(layer) == ((io::Parser*)data)->tech->name2layer.end()) {
+      if (parser->tech->name2layer.find(layer) == parser->tech->name2layer.end()) {
         if (VERBOSE > -1) {
           cout <<"Error: unsupported layer: " <<layer <<endl;
         }
@@ -990,7 +998,7 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
         exit(1);
       }
 
-      frLayerNum layerNum = ((io::Parser*)data)->tech->name2layer[layer]->getLayerNum();
+      frLayerNum layerNum = parser->tech->name2layer[layer]->getLayerNum();
       auto polyPoints = term->getPolygon(i);
       frCollection<frPoint> tmpPoints;
       for (int j = 0; j < polyPoints.numPoints; j++) {
@@ -1021,11 +1029,11 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
     }
     termIn->addPin(std::move(pinIn));
     //cout <<"  placeXY  = (" <<term->placementX() <<"," <<term->placementY() <<")" <<endl;
-    ((io::Parser*)data)->tmpBlock->addTerm(std::move(uTermIn));
+    parser->tmpBlock->addTerm(std::move(uTermIn));
   }
 
-  if (((io::Parser*)data)->tmpBlock->terms.size() % 1000 == 0) {
-    cout <<"defIn read " <<((io::Parser*)data)->tmpBlock->terms.size() <<" pins" <<endl;
+  if (parser->tmpBlock->terms.size() % 1000 == 0) {
+    cout <<"defIn read " <<parser->tmpBlock->terms.size() <<" pins" <<endl;
   }
 
   return 0;
@@ -1046,12 +1054,13 @@ int io::Parser::Callbacks::getDefTracks(defrCallbackType_e type, defiTrack* trac
          <<" LAYER " <<track->layer(0) <<endl;
   }
 
+  io::Parser* parser = (io::Parser*) data;
   unique_ptr<frTrackPattern> tmpTrackPattern = make_unique<frTrackPattern>();
-  if (((io::Parser*)data)->tech->name2layer.find(track->layer(0)) == ((io::Parser*)data)->tech->name2layer.end()) {
+  if (parser->tech->name2layer.find(track->layer(0)) == parser->tech->name2layer.end()) {
     cout <<"Error: cannot find layer: " <<track->layer(0) <<endl;
     exit(2);
   }
-  tmpTrackPattern->setLayerNum(((io::Parser*)data)->tech->name2layer.at(track->layer(0))->getLayerNum());
+  tmpTrackPattern->setLayerNum(parser->tech->name2layer.at(track->layer(0))->getLayerNum());
   if (!strcmp(track->macro(), "X")) {
     tmpTrackPattern->setHorizontal(true);
   } else if (!strcmp(track->macro(), "Y")) {
@@ -1063,7 +1072,7 @@ int io::Parser::Callbacks::getDefTracks(defrCallbackType_e type, defiTrack* trac
   tmpTrackPattern->setStartCoord(track->x());
   tmpTrackPattern->setNumTracks(track->xNum());
   tmpTrackPattern->setTrackSpacing(track->xStep());
-  ((io::Parser*)data)->tmpBlock->trackPatterns.at(tmpTrackPattern->getLayerNum()).push_back(std::move(tmpTrackPattern));
+  parser->tmpBlock->trackPatterns.at(tmpTrackPattern->getLayerNum()).push_back(std::move(tmpTrackPattern));
   //cout <<"here" <<endl;
 
   return 0;
@@ -1072,9 +1081,10 @@ int io::Parser::Callbacks::getDefTracks(defrCallbackType_e type, defiTrack* trac
 int io::Parser::Callbacks::getDefUnits(defrCallbackType_e type, double number, defiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  ((io::Parser*)data)->tmpBlock->setDBUPerUU(static_cast<frUInt4>(number));
+  io::Parser* parser = (io::Parser*) data;
+  parser->tmpBlock->setDBUPerUU(static_cast<frUInt4>(number));
   if (enableOutput) {
-    cout <<"UNITS DISTANCE MICRONS " <<((io::Parser*)data)->tmpBlock->getDBUPerUU() <<" ;" <<endl;
+    cout <<"UNITS DISTANCE MICRONS " <<parser->tmpBlock->getDBUPerUU() <<" ;" <<endl;
   }
   return 0;
 }
@@ -1160,6 +1170,7 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
   map<frCoord, pair<frCoord, frCoord> > ewVals;
 
   int stage = 0;
+  io::Parser* parser = (io::Parser*) data;
 
   istringstream istr(sIn);
   string word;
@@ -1189,7 +1200,7 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
       }
       double tmp;
       if (istr >> tmp) {
-        lowExcludeSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        lowExcludeSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" " <<tmp;
         }
@@ -1197,7 +1208,7 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
         cout <<"Error: getLef58SpacingTable_parallelRunLength" <<endl;
       }
       if (istr >> tmp) {
-        highExcludeSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        highExcludeSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" " <<tmp;
         }
@@ -1213,7 +1224,7 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
       stage = 1;
       double tmp;
       if (istr >> tmp) {
-        rowVals.push_back(frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU())));
+        rowVals.push_back(frCoord(round(tmp * parser->tech->getDBUPerUU())));
         if (enableOutput) {
           cout <<endl <<"  WIDTH " <<tmp;
         }
@@ -1231,13 +1242,13 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
     } else {
       // get length
       if (stage == 0) {
-        colVals.push_back(frCoord(round(stod(word) * ((io::Parser*)data)->tech->getDBUPerUU())));
+        colVals.push_back(frCoord(round(stod(word) * parser->tech->getDBUPerUU())));
         if (enableOutput) {
           cout <<" " <<word;
         }
       }
       if (stage == 1) {
-        tblRowVals.push_back(frCoord(round(stod(word) * ((io::Parser*)data)->tech->getDBUPerUU())));
+        tblRowVals.push_back(frCoord(round(stod(word) * parser->tech->getDBUPerUU())));
         if (enableOutput) {
           cout <<" " <<word;
         }
@@ -1256,7 +1267,7 @@ int io::Parser::getLef58SpacingTable_parallelRunLength(void *data, frLayer* tmpL
     spacingTableConstraint->setEolWidth(eolWidth);
   }
   
-  ((io::Parser*)data)->tech->addConstraint(spacingTableConstraint);
+  parser->tech->addConstraint(spacingTableConstraint);
   tmpLayer->addConstraint(spacingTableConstraint);
 
   return 0;
@@ -1355,7 +1366,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
   bool    hasParallelSameMask      = false;
 
   bool    skip = false;
-  //string stage = "";
+  io::Parser* parser = (io::Parser*) data;
 
   istringstream istr(sIn);
   string word;
@@ -1364,7 +1375,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
     if (word == string("SPACING")) {
       double tmp;
       if (istr >> tmp) {
-        eolSpace = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        eolSpace = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<endl <<"  SPACING " <<tmp;
         }
@@ -1375,7 +1386,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
     } else if (word == string("ENDOFLINE")) {
       double tmp;
       if (istr >> tmp) {
-        eolWidth = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        eolWidth = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" ENDOFLINE " <<tmp;
         }
@@ -1393,7 +1404,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       hasWrongDirSpacing = true;
       double tmp;
       if (istr >> tmp) {
-        wrongDirSpace = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        wrongDirSpace = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" WRONGDIRSPACING " <<tmp;
         }
@@ -1405,7 +1416,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       hasOppositeWidth = true;
       double tmp;
       if (istr >> tmp) {
-        oppositeWidth = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        oppositeWidth = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" OPPOSITEWIDTH " <<tmp;
         }
@@ -1416,7 +1427,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
     } else if (word == string("WITHIN")) {
       double tmp;
       if (istr >> tmp) {
-        eolWithin = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        eolWithin = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" WITHIN " <<tmp;
         }
@@ -1457,7 +1468,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       hasEndToEnd = true;
       double tmp;
       if (istr >> tmp) {
-        endToEndSpace = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        endToEndSpace = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" ENDTOEND " <<tmp;
         }
@@ -1470,7 +1481,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       isMax     = true;
       double tmp;
       if (istr >> tmp) {
-        length = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        length = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" MAXLENGTH " <<tmp;
         }
@@ -1483,7 +1494,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       isMax     = false;
       double tmp;
       if (istr >> tmp) {
-        length = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        length = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" MINLENGTH " <<tmp;
         }
@@ -1512,7 +1523,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           hasSubtractEolWidth = true;
           double tmp2;
           if (istr >> tmp2) {
-            parSpace = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            parSpace = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" PARALLELEDGE SUBTRACTEOLWIDTH " <<tmp2;
             }
@@ -1520,7 +1531,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
             cout <<"Error: getLef58Spacing_eolSpace" <<endl;
           }
         } else {
-          parSpace = frCoord(round(stod(tmp) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          parSpace = frCoord(round(stod(tmp) * parser->tech->getDBUPerUU()));
           if (enableOutput) {
             cout <<" PARALLELEDGE " <<tmp;
           }
@@ -1533,7 +1544,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
         if (tmp == string("WITHIN")) {
           double tmp2;
           if (istr >> tmp2) {
-            parWithin = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            parWithin = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" (PE)WITHIN " <<tmp2;
             }
@@ -1561,7 +1572,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       if (stage == 1) {
         hasWrongDirWithin = true;
         cout <<flush;
-        wrongDirWithin = frCoord(round(stod(word) * ((io::Parser*)data)->tech->getDBUPerUU()));
+        wrongDirWithin = frCoord(round(stod(word) * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" " <<word;
         }
@@ -1573,7 +1584,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           hasExtension = true;
           double tmp2;
           if (istr >> tmp2) {
-            extension = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            extension = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" EXTENSION " <<tmp2;
             }
@@ -1585,7 +1596,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           hasOtherEndWidth = true;
           double tmp2;
           if (istr >> tmp2) {
-            otherEndWidth = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            otherEndWidth = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" OTHERENDWIDTH " <<tmp2;
             }
@@ -1594,13 +1605,13 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           }
         } else {
           hasCutSpace = true;
-          oneCutSpace = frCoord(round(stod(tmp) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          oneCutSpace = frCoord(round(stod(tmp) * parser->tech->getDBUPerUU()));
           if (enableOutput) {
             cout <<" " <<tmp;
           }
           double tmp2;
           if (istr >> tmp2) {
-            twoCutSpace = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            twoCutSpace = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" " <<tmp2;
             }
@@ -1611,7 +1622,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       // stage = 20, read end to end wrongDirExtension
       } else if (stage == 20) {
         hasWrongDirExtension = true;
-        wrongDirExtension = frCoord(round(stod(word) * ((io::Parser*)data)->tech->getDBUPerUU()));
+        wrongDirExtension = frCoord(round(stod(word) * parser->tech->getDBUPerUU()));
         if (enableOutput) {
           cout <<" " <<word;
         }
@@ -1622,7 +1633,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           hasPrl = true;
           double tmp2;
           if (istr >> tmp2) {
-            prl = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            prl = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" PRL " <<tmp2;
             }
@@ -1633,7 +1644,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
           hasParallelEdgeMinLength = true;
           double tmp2;
           if (istr >> tmp2) {
-            parallelEdgeMinLength = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            parallelEdgeMinLength = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
             if (enableOutput) {
               cout <<" (PE)MINLENGTH " <<tmp2;
             }
@@ -1728,7 +1739,7 @@ int io::Parser::getLef58Spacing_endOfLineWithin(void *data, frLayer* tmpLayer, c
       len->setLength(isMax, length, hasTwoSides);
     }
 
-    ((io::Parser*)data)->tech->addConstraint(con);
+    parser->tech->addConstraint(con);
     tmpLayer->lef58SpacingEndOfLineConstraints.push_back(con);
   }
 
@@ -1825,13 +1836,14 @@ int io::Parser::getLef58MinStep(void *data, frLayer* tmpLayer, const string &sIn
   int maxEdges = -1;
   frCoord minAdjLength = -1;
   frCoord eolWidth = -1;
+  io::Parser* parser = (io::Parser*) data;
 
   while (istr >> word) {
     if (word == string("MINSTEP")) {
       isSkip = false;
       double tmp;
       if (istr >> tmp) {
-        minStepLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        minStepLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         isSkip = true;
       }
@@ -1845,14 +1857,14 @@ int io::Parser::getLef58MinStep(void *data, frLayer* tmpLayer, const string &sIn
     } else if (word == string("MINADJACENTLENGTH")) {
       double tmp;
       if (istr >> tmp) {
-        minAdjLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        minAdjLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         isSkip = true;
       }
     } else if (word == string("NOBETWEENEOL")) {
       double tmp;
       if (istr >> tmp) {
-        eolWidth = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        eolWidth = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         isSkip = true;
       }
@@ -1864,7 +1876,7 @@ int io::Parser::getLef58MinStep(void *data, frLayer* tmpLayer, const string &sIn
         con->setMinAdjacentLength(minAdjLength);
         con->setEolWidth(eolWidth);
         tmpLayer->addLef58MinStepConstraint(con.get());
-        ((io::Parser*)data)->tech->addUConstraint(std::move(con));
+        parser->tech->addUConstraint(std::move(con));
         // cout << "Adding lef58MinStep con for layer " << tmpLayer->getName() << "\n";
       } else {
         cout << "Warning: unsupported LEF58_MINSTEP rule branch...\n";
@@ -1894,6 +1906,7 @@ int io::Parser::getLef58CutClass(void *data, frLayer* tmpLayer, const string &sI
   frCoord viaLength  = 0;
   bool    hNumCut    = false;
   frUInt4 numCut     = 0;
+  io::Parser* parser = (io::Parser*) data;
 
   while (istr >> word) {
     if (word == string("CUTCLASS")) {
@@ -1915,7 +1928,7 @@ int io::Parser::getLef58CutClass(void *data, frLayer* tmpLayer, const string &sI
     } else if (word == "WIDTH") {
       double tmp;
       if (istr >> tmp) {
-        viaWidth = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        viaWidth = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         cout <<"Error: getLef58CutClass" <<endl;
       }
@@ -1926,7 +1939,7 @@ int io::Parser::getLef58CutClass(void *data, frLayer* tmpLayer, const string &sI
       double tmp;
       if (istr >> tmp) {
         hViaLength = true;
-        viaLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        viaLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         cout <<"Error: getLef58CutClass" <<endl;
       }
@@ -1960,7 +1973,7 @@ int io::Parser::getLef58CutClass(void *data, frLayer* tmpLayer, const string &sI
       } else {
         cutClass->setNumCut(1);
       }
-      ((io::Parser*)data)->tech->addCutClass(tmpLayer->getLayerNum(), std::move((cutClass)));
+      parser->tech->addCutClass(tmpLayer->getLayerNum(), std::move((cutClass)));
     }
   }
   if (enableOutput) {
@@ -2086,6 +2099,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
   string word;
 
   string keyword = "";
+  io::Parser* parser = (io::Parser*) data;
 
   auto con = make_unique<frLef58CutSpacingConstraint>();
 
@@ -2093,7 +2107,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
     if (word == string("SPACING")) {
       double tmp;
       if (istr >> tmp) {
-        cutSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        cutSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         con->setCutSpacing(cutSpacing);
       } else {
         isSkip = true;
@@ -2129,7 +2143,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
         } else if (word == string("ORTHOGONALSPACING")) {
           double tmp;
           if (istr >> tmp) {
-            orthogonalSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+            orthogonalSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
             con->setOrthogonalSpacing(orthogonalSpacing);
           } else {
             isSkip = true;
@@ -2159,7 +2173,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                 if (word == string("PRL")) {
                   double tmp;
                   if (istr >> tmp) {
-                    prl = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                    prl = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                     con->setPrl(prl);
                   } else {
                     isSkip = true;
@@ -2176,17 +2190,17 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                 if (word == string("WIDTH")) {
                   double tmp;
                   if (istr >> tmp) {
-                    width = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                    width = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                     con->setWidth(width);
                     if (istr >> word) {
                       if (word == string("ENCLOSURE")) {
                         if (istr >> tmp) {
-                          enclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                          enclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                           con->setEnclosure(enclosure);
                           if (istr >> word) {
                             if (word == string("EDGELENGTH")) {
                               if (istr >> tmp) {
-                                edgeLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                                edgeLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                                 con->setEdgeLength(edgeLength);
                               } else {
                                 isSkip = true;
@@ -2212,17 +2226,17 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                 } else if (word == string("PARALLEL")) {
                   double tmp;
                   if (istr >> tmp) {
-                    parLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                    parLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                     con->setParLength(parLength);
                     if (istr >> word) {
                       if (word == string("WITHIN")) {
                         if (istr >> tmp) {
-                          parWithin = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                          parWithin = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                           con->setParWithin(parWithin);
                           if (istr >> word) {
                             if (word == string("ENCLOSURE")) {
                               if (istr >> tmp) {
-                                enclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                                enclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                                 con->setEnclosure(enclosure);
                               } else {
                                 isSkip = true;
@@ -2248,15 +2262,15 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                 } else if (word == string("EDGELENGTH")) {
                   double tmp;
                   if (istr >> tmp) {
-                    edgeLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                    edgeLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                     con->setEdgeLength(edgeLength);
                     if (istr >> word) {
                       if (word == string("ENCLOSURE")) {
                         if (istr >> tmp) {
-                          edgeEnclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                          edgeEnclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                           con->setEdgeEnclosure(edgeEnclosure);
                           if (istr >> tmp) {
-                            adjEnclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                            adjEnclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                             con->setAdjEnclosure(adjEnclosure);
                           } else {
                             isSkip = true;
@@ -2280,7 +2294,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
             } else if (word == string("EXTENSION")) {
               double tmp;
               if (istr >> tmp) {
-                extension = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                extension = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                 con->setExtension(extension);
               } else {
                 isSkip = true;
@@ -2291,7 +2305,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                 if (enableOutput) {
                   cout << " NONEOLCONVEXCORNER " << tmp;
                 }
-                eolWidth = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                eolWidth = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                 con->setEolWidth(eolWidth);
                 if (istr >> word) {
                   if (word == string("MINLENGTH")) {
@@ -2299,7 +2313,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
                       if (enableOutput) {
                         cout << " MINLENGTH " << tmp;
                       }
-                      minLength = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                      minLength = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                       con->setMinLength(minLength);
                     } else {
                       isSkip = true;
@@ -2312,12 +2326,12 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
             } else if (word == string("ABOVEWIDTH")) {
               double tmp;
               if (istr >> tmp) {
-                width = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                width = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                 con->setWidth(width);
                 if (istr >> word) {
                   if (word == string("ENCLOSURE")) {
                     if (istr >> tmp) {
-                      enclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                      enclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                       con->setEnclosure(enclosure);
                     } else {
                       isSkip = true;
@@ -2350,7 +2364,7 @@ int io::Parser::getLef58CutSpacing_layer(void *data, frLayer* tmpLayer, const st
   } else {
     // cout << "addLef58CutSpacingConstraint\n";
     tmpLayer->addLef58CutSpacingConstraint(con.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(con));
+    parser->tech->addUConstraint(std::move(con));
 
   }
   return 0;
@@ -2393,6 +2407,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
   string word;
 
   string keyword = "";
+  io::Parser* parser = (io::Parser*) data;
 
   auto con = make_unique<frLef58CutSpacingConstraint>();
 
@@ -2400,7 +2415,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
     if (word == string("SPACING")) {
       double tmp;
       if (istr >> tmp) {
-        cutSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        cutSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
         con->setCutSpacing(cutSpacing);
       } else {
         isSkip = true;
@@ -2449,7 +2464,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
                 if (word == string("TWOCUTSSPACING")) {
                   double tmp;
                   if (istr >> tmp) {
-                    twoCutsSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+                    twoCutsSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
                     con->setTwoCutsSpacing(twoCutsSpacing);
                     pos = istr.tellg();
                   } else {
@@ -2478,13 +2493,13 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
           }
           // TODO: bring this back after figure out how to correctly use seekg / tellg
           // if (istr >> tmp2) {
-          //   cutWithin1 = frCoord(round(tmp1 * ((io::Parser*)data)->tech->getDBUPerUU()));
-          //   cutWithin2 = frCoord(round(tmp2 * ((io::Parser*)data)->tech->getDBUPerUU()));
+          //   cutWithin1 = frCoord(round(tmp1 * parser->tech->getDBUPerUU()));
+          //   cutWithin2 = frCoord(round(tmp2 * parser->tech->getDBUPerUU()));
           //   con->setCutWithin1(cutWithin1);
           //   con->setCutWithin2(cutWithin2);
           //   pos = istr.tellg();
           // } else {
-            cutWithin2 = frCoord(round(tmp1 * ((io::Parser*)data)->tech->getDBUPerUU()));
+            cutWithin2 = frCoord(round(tmp1 * parser->tech->getDBUPerUU()));
             con->setCutWithin(cutWithin2);
             // istr.seekg(pos);
             if (enableOutput) {
@@ -2497,7 +2512,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
         } else if (word == string("EXCEPTALLWITHIN")) {
           double tmp;
           if (istr >> tmp) {
-            exceptAllWithin = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+            exceptAllWithin = frCoord(round(tmp * parser->tech->getDBUPerUU()));
             con->setExceptAllWithin(exceptAllWithin);
           } else {
             isSkip = true;
@@ -2517,7 +2532,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
           }
           double tmp;
           if (istr >> tmp) {
-            enclosure = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+            enclosure = frCoord(round(tmp * parser->tech->getDBUPerUU()));
             con->setEnclosure(enclosure);
           } else {
             isSkip = true;
@@ -2573,7 +2588,7 @@ int io::Parser::getLef58CutSpacing_adjacentCuts(void *data, frLayer* tmpLayer, c
   } else {
     // cout << "addLef58CutSpacingConstraint\n";
     tmpLayer->addLef58CutSpacingConstraint(con.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(con));
+    parser->tech->addUConstraint(std::move(con));
   }
   return 0;
 }
@@ -2667,12 +2682,13 @@ int io::Parser::getLef58CutSpacingTable_default(void *data, frLayer* tmpLayer, c
 
   istringstream istr(sIn);
   string word;
+  io::Parser* parser = (io::Parser*) data;
 
   while (istr >> word) {
     if (word == string("DEFAULT")) {
       double tmp;
       if (istr >> tmp) {
-        defaultCutSpacing = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        defaultCutSpacing = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         cout <<"Error: getLef58CutSpacingTable_default" <<endl;
       }
@@ -2701,12 +2717,13 @@ int io::Parser::getLef58CutSpacingTable_prl(void *data, frLayer* tmpLayer, const
 
   istringstream istr(sIn);
   string word;
+  io::Parser* parser = (io::Parser*) data;
 
   while (istr >> word) {
     if (word == string("PRL")) {
       double tmp;
       if (istr >> tmp) {
-        prl = frCoord(round(tmp * ((io::Parser*)data)->tech->getDBUPerUU()));
+        prl = frCoord(round(tmp * parser->tech->getDBUPerUU()));
       } else {
         cout <<"Error: getLef58CutSpacingTable_prl" <<endl;
       }
@@ -2775,9 +2792,10 @@ int io::Parser::getLef58CutSpacingTable_layer(void *data, frLayer* tmpLayer, con
     }
   }
 
+  io::Parser* parser = (io::Parser*) data;
   auto ptr = make_shared<frLef58CutSpacingTableLayerConstraint>();
   //cout <<secondLayerName <<endl <<flush;
-  secondLayerNum = ((io::Parser*)data)->tech->name2layer.at(secondLayerName)->getLayerNum();
+  secondLayerNum = parser->tech->name2layer.at(secondLayerName)->getLayerNum();
   ptr->setSecondLayerNum(secondLayerNum);
   ptr->setNonZeroEnc(isNonZeroEnclosure);
   con->setLayerConstraint(ptr);
@@ -2837,6 +2855,7 @@ int io::Parser::getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, 
   vector<vector<pair<frCoord, frCoord> > > tmpTbl;
   vector<pair<frCoord, frCoord> > tmpTblRow;
   
+  io::Parser* parser = (io::Parser*) data;
   istringstream istr2(sIn);
   word = "";
   int stage = 0; // 0 = read columns; 1 = read rows
@@ -2847,7 +2866,7 @@ int io::Parser::getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, 
     //  cout <<"found ;" <<endl;
     //}
     if (word == "-") {
-      word = to_string(defaultCutSpacing * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU());
+      word = to_string(defaultCutSpacing * 1.0 / parser->tech->getDBUPerUU());
     }
     if (word == "CUTCLASS") {
       if (enableOutput) {
@@ -2903,7 +2922,7 @@ int io::Parser::getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, 
         //cout <<"test: " <<word <<endl;
         // number
         if (ss >> firstNum) {
-          frCoord val1 = frCoord(round(firstNum * ((io::Parser*)data)->tech->getDBUPerUU()));
+          frCoord val1 = frCoord(round(firstNum * parser->tech->getDBUPerUU()));
           string tmpS;
           if (istr2 >> tmpS) {
             ;
@@ -2913,7 +2932,7 @@ int io::Parser::getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, 
           stringstream tmpSS(tmpS);
           double secondNum;
           if (tmpSS >> secondNum) {
-            frCoord val2 = frCoord(round(secondNum * ((io::Parser*)data)->tech->getDBUPerUU()));
+            frCoord val2 = frCoord(round(secondNum * parser->tech->getDBUPerUU()));
             tmpTblRow.push_back(make_pair(val1, val2));
             if (enableOutput) {
               cout <<" " <<firstNum <<" " <<secondNum;
@@ -2923,7 +2942,7 @@ int io::Parser::getLef58CutSpacingTable_cutClass(void *data, frLayer* tmpLayer, 
             frCoord val2 = defaultCutSpacing;
             tmpTblRow.push_back(make_pair(val1, val2));
             if (enableOutput) {
-              cout <<" " <<firstNum <<" " <<defaultCutSpacing * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+              cout <<" " <<firstNum <<" " <<defaultCutSpacing * 1.0 / parser->tech->getDBUPerUU();
             }
           }
           readNum += 1;
@@ -3161,7 +3180,8 @@ int io::Parser::getLef58CutSpacingTable_others(void *data, frLayer* tmpLayer, co
     ;
   } else {
     tmpLayer->lef58CutSpacingTableConstraints.push_back(con);
-    ((io::Parser*)data)->tech->addConstraint(con);
+    io::Parser* parser = (io::Parser*) data;
+    parser->tech->addConstraint(con);
   }
 
   return 0;
@@ -3197,7 +3217,8 @@ int io::Parser::getLef58RightWayOnGridOnly(void *data, frLayer* tmpLayer, const 
   }
   auto rightWayOnGridOnlyConstraint = make_unique<frLef58RightWayOnGridOnlyConstraint>(checkMask);
   tmpLayer->setLef58RightWayOnGridOnlyConstraint(rightWayOnGridOnlyConstraint.get());
-  ((io::Parser*)data)->tech->addUConstraint(std::move(rightWayOnGridOnlyConstraint));
+  io::Parser* parser = (io::Parser*) data;
+  parser->tech->addUConstraint(std::move(rightWayOnGridOnlyConstraint));
   return 0;
 }
 
@@ -3231,7 +3252,8 @@ int io::Parser::getLef58RectOnly(void *data, frLayer* tmpLayer, const string &sI
   }
   auto rectOnlyConstraint = make_unique<frLef58RectOnlyConstraint>(exceptNonCorePins);
   tmpLayer->setLef58RectOnlyConstraint(rectOnlyConstraint.get());
-  ((io::Parser*)data)->tech->addUConstraint(std::move(rectOnlyConstraint));
+  io::Parser* parser = (io::Parser*) data;
+  parser->tech->addUConstraint(std::move(rectOnlyConstraint));
   return 0;
 }
 
@@ -3270,6 +3292,7 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
   bool doConvexCorner  = false;
   bool doConcaveCorner = false;
   bool doWidthSpacing  = false;
+  io::Parser* parser = (io::Parser*) data;
   
   // check whether has notchLength specified
   istringstream testIstr(stringIn);
@@ -3368,24 +3391,24 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
       hasCornerOnly = true;
       double tmpWithin;
       istr >> tmpWithin;
-      within = round(tmpWithin * ((io::Parser*)data)->tech->getDBUPerUU());
-      // cout <<endl <<"    CORNERONLY " <<within * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      within = round(tmpWithin * parser->tech->getDBUPerUU());
+      // cout <<endl <<"    CORNERONLY " <<within * 1.0 / parser->tech->getDBUPerUU();
     }
 
     if (doConvexCorner && word == "EXCEPTEOL") {
       hasExceptEol = true;
       double tmpEolWidth;
       istr >> tmpEolWidth;
-      eolWidth = round(tmpEolWidth * ((io::Parser*)data)->tech->getDBUPerUU());
-      // cout <<endl <<"    EXCEPTEOL " <<eolWidth * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      eolWidth = round(tmpEolWidth * parser->tech->getDBUPerUU());
+      // cout <<endl <<"    EXCEPTEOL " <<eolWidth * 1.0 / parser->tech->getDBUPerUU();
     }
 
     if (doConcaveCorner && hasExceptEol && word == "EXCEPTJOGLENGTH") {
       hasExceptJogLength = true;
       double tmpLength;
       istr >> tmpLength;
-      length = round(tmpLength * ((io::Parser*)data)->tech->getDBUPerUU());
-      // cout << " EXCEPTJOGLENGTH " << length * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      length = round(tmpLength * parser->tech->getDBUPerUU());
+      // cout << " EXCEPTJOGLENGTH " << length * 1.0 / parser->tech->getDBUPerUU();
     }
 
     if (doConcaveCorner && hasExceptEol && hasExceptJogLength && word == "EDGELENGTH") {
@@ -3402,16 +3425,16 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
       hasMinLength = true;
       double tmpMinLength;
       istr >> tmpMinLength;
-      minLength = round(tmpMinLength * ((io::Parser*)data)->tech->getDBUPerUU());
-      // cout <<endl <<"    MINLENGTH " <<minLength * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      minLength = round(tmpMinLength * parser->tech->getDBUPerUU());
+      // cout <<endl <<"    MINLENGTH " <<minLength * 1.0 / parser->tech->getDBUPerUU();
     }
     if (doConcaveCorner && word == "EXCEPTNOTCH") {
       hasExceptNotch = true;
       if (hasExceptNotchLength) {
         double tmpNotchLength;
         istr >> tmpNotchLength;
-        notchLength = round(tmpNotchLength * ((io::Parser*)data)->tech->getDBUPerUU());
-        // cout <<endl <<"    EXCEPTNOTCH " <<notchLength * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+        notchLength = round(tmpNotchLength * parser->tech->getDBUPerUU());
+        // cout <<endl <<"    EXCEPTNOTCH " <<notchLength * 1.0 / parser->tech->getDBUPerUU();
       } else {
         // cout <<endl <<"    EXCEPTNOTCH ";
       }
@@ -3423,9 +3446,9 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
     }
  
     if (doWidthSpacing &&  word != "SPACING") {
-      frUInt4 tmp = round(stod(word) * ((io::Parser*)data)->tech->getDBUPerUU());
+      frUInt4 tmp = round(stod(word) * parser->tech->getDBUPerUU());
       tmpWidthSpacing.push_back(tmp);
-      // cout <<" " <<tmp * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+      // cout <<" " <<tmp * 1.0 / parser->tech->getDBUPerUU();
       continue;
     }
  
@@ -3493,7 +3516,7 @@ int io::Parser::getLef58CornerSpacing(void *data, frLayer *tmpLayer, const strin
     return 1;
   }
   
-  ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+  parser->tech->addUConstraint(std::move(uCon));
   tmpLayer->addLef58CornerSpacingConstraint(rptr);
 
   return 0;
@@ -3512,15 +3535,16 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
   }
   unique_ptr<frLayer> uLayer = make_unique<frLayer>();
   auto tmpLayer = uLayer.get();
+  io::Parser* parser = (io::Parser*) data;
 
   if (!strcmp(layer->type(), "ROUTING")) {
     // add default masterslice and via layers if LEF does not have one
-    if (((io::Parser*)data)->readLayerCnt == 0) {
+    if (parser->readLayerCnt == 0) {
       unique_ptr<frLayer> uMSLayer = make_unique<frLayer>();
       auto tmpMSLayer = uMSLayer.get();
-      tmpMSLayer->setLayerNum(((io::Parser*)data)->readLayerCnt++);
+      tmpMSLayer->setLayerNum(parser->readLayerCnt++);
       tmpMSLayer->setName(masterSliceLayerName);
-      ((io::Parser*)data)->tech->addLayer(std::move(uMSLayer));
+      parser->tech->addLayer(std::move(uMSLayer));
       tmpMSLayer->setType(frLayerTypeEnum::MASTERSLICE);
       if (enableOutput) {
         cout <<"\n";
@@ -3531,9 +3555,9 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
 
       unique_ptr<frLayer> uCutLayer = make_unique<frLayer>();
       auto tmpCutLayer = uCutLayer.get();
-      tmpCutLayer->setLayerNum(((io::Parser*)data)->readLayerCnt++);
+      tmpCutLayer->setLayerNum(parser->readLayerCnt++);
       tmpCutLayer->setName(viaLayerName);
-      ((io::Parser*)data)->tech->addLayer(std::move(uCutLayer));
+      parser->tech->addLayer(std::move(uCutLayer));
       tmpCutLayer->setType(frLayerTypeEnum::CUT);
       if (enableOutput) {
         cout <<"\n";
@@ -3550,15 +3574,15 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
       //cout <<"  MINWIDTH  " <<layer->minwidth() <<endl;
       cout <<"  AREA      " <<layer->area() <<endl;
       cout <<"  WIDTH     " <<layer->width() <<endl;
-      cout <<"  layerNum  " <<((io::Parser*)data)->readLayerCnt <<endl;
+      cout <<"  layerNum  " <<parser->readLayerCnt <<endl;
     }
-    tmpLayer->setLayerNum(((io::Parser*)data)->readLayerCnt++);
+    tmpLayer->setLayerNum(parser->readLayerCnt++);
     tmpLayer->setName(layer->name());
-    ((io::Parser*)data)->tech->addLayer(std::move(uLayer));
+    parser->tech->addLayer(std::move(uLayer));
 
-    tmpLayer->setWidth(round(layer->width() * ((io::Parser*)data)->tech->getDBUPerUU()));
+    tmpLayer->setWidth(round(layer->width() * parser->tech->getDBUPerUU()));
     if (layer->hasMinwidth()) {
-      tmpLayer->setMinWidth(round(layer->minwidth() * ((io::Parser*)data)->tech->getDBUPerUU()));
+      tmpLayer->setMinWidth(round(layer->minwidth() * parser->tech->getDBUPerUU()));
       if (tmpLayer->getMinWidth() > tmpLayer->getWidth()) {
         cout << "Warning: minWidth on layer " << layer->name() << " is larger than width, setting minWidth to width\n";
         tmpLayer->setMinWidth(tmpLayer->getWidth());
@@ -3569,7 +3593,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
     // add minWidth constraint
     auto minWidthConstraint = make_unique<frMinWidthConstraint>(tmpLayer->getMinWidth());
     tmpLayer->setMinWidthConstraint(minWidthConstraint.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(minWidthConstraint));
+    parser->tech->addUConstraint(std::move(minWidthConstraint));
 
     tmpLayer->setType(frLayerTypeEnum::ROUTING);
     if (!strcmp(layer->direction(), "HORIZONTAL")) {
@@ -3577,28 +3601,28 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
     } else if (!strcmp(layer->direction(), "VERTICAL")) {
       tmpLayer->setDir(frcVertPrefRoutingDir);
     }
-    tmpLayer->setPitch(round(layer->pitch() * ((io::Parser*)data)->tech->getDBUPerUU()));
+    tmpLayer->setPitch(round(layer->pitch() * parser->tech->getDBUPerUU()));
 
     // Add off grid rule for every layer
     auto recheckConstraint = make_unique<frRecheckConstraint>();
     tmpLayer->setRecheckConstraint(recheckConstraint.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(recheckConstraint));
+    parser->tech->addUConstraint(std::move(recheckConstraint));
 
     // Add short rule for every layer
     auto shortConstraint = make_unique<frShortConstraint>();
     tmpLayer->setShortConstraint(shortConstraint.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(shortConstraint));
+    parser->tech->addUConstraint(std::move(shortConstraint));
 
     // Add off grid rule for every layer
     auto offGridConstraint = make_unique<frOffGridConstraint>();
     tmpLayer->setOffGridConstraint(offGridConstraint.get());
-    ((io::Parser*)data)->tech->addUConstraint(std::move(offGridConstraint));
+    parser->tech->addUConstraint(std::move(offGridConstraint));
     
     // Add nsmetal rule for every layer
     auto nsmetalConstraint = make_unique<frNonSufficientMetalConstraint>();
     tmpLayer->setNonSufficientMetalConstraint(nsmetalConstraint.get());
 
-    ((io::Parser*)data)->tech->addUConstraint(std::move(nsmetalConstraint));
+    parser->tech->addUConstraint(std::move(nsmetalConstraint));
 
     //cout <<"number of props " <<layer->numProps() <<endl;
     for (int i = 0; i < layer->numProps(); i++) {
@@ -3649,10 +3673,10 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
 
     // read minArea rule
     if (layer->hasArea()) {
-      frCoord minArea = frCoord(round(layer->area() * ((io::Parser*)data)->tech->getDBUPerUU() * ((io::Parser*)data)->tech->getDBUPerUU()));
+      frCoord minArea = frCoord(round(layer->area() * parser->tech->getDBUPerUU() * parser->tech->getDBUPerUU()));
       unique_ptr<frConstraint> uCon = make_unique<frAreaConstraint>(minArea);
       auto rptr = static_cast<frAreaConstraint*>(uCon.get());
-      ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+      parser->tech->addUConstraint(std::move(uCon));
       //std::cout << "Add minArea constraint to " << tmpLayer->getName() << "\n";
       tmpLayer->setAreaConstraint(rptr);
     }
@@ -3685,7 +3709,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
            rptr->setMinstepType(frMinstepTypeEnum::OUTSIDECORNER);
         }
         if (layer->hasMinstepLengthsum(i)) {
-          rptr->setMaxLength(frCoord(layer->minstepLengthsum(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          rptr->setMaxLength(frCoord(layer->minstepLengthsum(i) * parser->tech->getDBUPerUU()));
         }
         if (layer->hasMinstepMaxedges(i)) {
           rptr->setMaxEdges(layer->minstepMaxedges(i));
@@ -3694,8 +3718,8 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
           rptr->setStep(true);
           rptr->setMinstepType(frMinstepTypeEnum::UNKNOWN);
         }
-        rptr->setMinStepLength(layer->minstep(i) * ((io::Parser*)data)->tech->getDBUPerUU());
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        rptr->setMinStepLength(layer->minstep(i) * parser->tech->getDBUPerUU());
+        parser->tech->addUConstraint(std::move(uCon));
         //std::cout << "Add minStep constraint to " << tmpLayer->getName() << "\n";
         tmpLayer->setMinStepConstraint(rptr);
       }
@@ -3703,10 +3727,10 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
 
     // read minHole rule
     for (int i = 0; i < layer->numMinenclosedarea(); ++i) {
-      frCoord minEnclosedArea = frCoord(round(layer->minenclosedarea(i) * ((io::Parser*)data)->tech->getDBUPerUU() * ((io::Parser*)data)->tech->getDBUPerUU()));
+      frCoord minEnclosedArea = frCoord(round(layer->minenclosedarea(i) * parser->tech->getDBUPerUU() * parser->tech->getDBUPerUU()));
       frCoord minEnclosedWidth = -1;
       if (layer->hasMinenclosedareaWidth(i)) {
-        minEnclosedWidth = frCoord(round(layer->minenclosedareaWidth(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+        minEnclosedWidth = frCoord(round(layer->minenclosedareaWidth(i) * parser->tech->getDBUPerUU()));
         cout << "Warning: minEnclosedArea constraint with width is not supported, skipped\n";
         continue;
       }
@@ -3715,13 +3739,13 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         minEnclosedAreaConstraint->setWidth(minEnclosedWidth);
       }
       tmpLayer->addMinEnclosedAreaConstraint(minEnclosedAreaConstraint.get());
-      ((io::Parser*)data)->tech->addUConstraint(std::move(minEnclosedAreaConstraint));
+      parser->tech->addUConstraint(std::move(minEnclosedAreaConstraint));
     }
 
     // read spacing rule
     for (int i = 0; i < layer->numSpacing(); ++i) {
       //std::shared_ptr<frSpacingConstraint> minSpacingCosntraint;
-      frCoord minSpacing = frCoord(round(layer->spacing(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+      frCoord minSpacing = frCoord(round(layer->spacing(i) * parser->tech->getDBUPerUU()));
       if (layer->hasSpacingRange(i)) {
         cout <<" WARNING: hasSpacing Range unsupported" <<endl;
       } else if (layer->hasSpacingLengthThreshold(i)) {
@@ -3734,8 +3758,8 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
           cout <<"  SPACING " <<layer->spacing(i) <<" ENDOFLINE " <<layer->spacingEolWidth(i)
                <<" WITHIN " <<layer->spacingEolWithin(i);
         }
-        frCoord eolWidth = frCoord(round(layer->spacingEolWidth(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
-        frCoord eolWithin = frCoord(round(layer->spacingEolWithin(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+        frCoord eolWidth = frCoord(round(layer->spacingEolWidth(i) * parser->tech->getDBUPerUU()));
+        frCoord eolWithin = frCoord(round(layer->spacingEolWithin(i) * parser->tech->getDBUPerUU()));
         rptr->setMinSpacing(minSpacing);
         rptr->setEolWidth(eolWidth);
         rptr->setEolWithin(eolWithin);
@@ -3746,8 +3770,8 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
               cout <<" TWOEDGES";
             }
           }
-          frCoord parSpace = frCoord(round(layer->spacingParSpace(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
-          frCoord parWithin = frCoord(round(layer->spacingParWithin(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          frCoord parSpace = frCoord(round(layer->spacingParSpace(i) * parser->tech->getDBUPerUU()));
+          frCoord parWithin = frCoord(round(layer->spacingParWithin(i) * parser->tech->getDBUPerUU()));
           rptr->setParSpace(parSpace);
           rptr->setParWithin(parWithin);
           rptr->setTwoEdges(layer->hasSpacingTwoEdges(i));
@@ -3755,7 +3779,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         if (enableOutput) {
           cout <<" ;" <<endl;
         }
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        parser->tech->addUConstraint(std::move(uCon));
         tmpLayer->addEolSpacing(rptr);
       } else if (layer->hasSpacingSamenet(i)) {
         bool pgOnly = layer->hasSpacingSamenetPGonly(i);
@@ -3768,7 +3792,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         }
         unique_ptr<frConstraint> uCon = make_unique<frSpacingSamenetConstraint>(minSpacing, pgOnly);
         auto rptr = uCon.get();
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        parser->tech->addUConstraint(std::move(uCon));
         if (tmpLayer->hasSpacingSamenet()) {
           cout <<"Warning: new SPACING SAMENET overrides old SPACING SAMENET rule" <<endl;
         }
@@ -3787,7 +3811,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         frString rowName("WIDTH"), colName("PARALLELRUNLENGTH");
         unique_ptr<frConstraint> uCon = make_unique<frSpacingTablePrlConstraint>(fr2DLookupTbl(rowName, rowVals, colName, colVals, tblVals));
         auto rptr = static_cast<frSpacingTablePrlConstraint*>(uCon.get());
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        parser->tech->addUConstraint(std::move(uCon));
         if (tmpLayer->getMinSpacing()) {
           cout <<"Warning: new SPACING overrides old SPACING rule" <<endl;
         }
@@ -3815,24 +3839,24 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
           cout <<"  PARALLELRUNLENGTH";
         }
         for (int j = 0; j < parallel->numLength(); ++j) {
-          frCoord prl = frCoord(round(parallel->length(j) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          frCoord prl = frCoord(round(parallel->length(j) * parser->tech->getDBUPerUU()));
           if (enableOutput) {
-            cout <<" " <<prl * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+            cout <<" " <<prl * 1.0 / parser->tech->getDBUPerUU();
           }
           colVals.push_back(prl);
         }
         for (int j = 0; j < parallel->numWidth(); ++j) {
-          frCoord width = frCoord(round(parallel->width(j) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          frCoord width = frCoord(round(parallel->width(j) * parser->tech->getDBUPerUU()));
           rowVals.push_back(width);
           if (enableOutput) {
-            cout <<endl <<"  WIDTH " <<width * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+            cout <<endl <<"  WIDTH " <<width * 1.0 / parser->tech->getDBUPerUU();
           }
           tblRowVals.clear();
           for (int k = 0; k < parallel->numLength(); ++k) {
-            frCoord spacing = frCoord(round(parallel->widthSpacing(j, k) * ((io::Parser*)data)->tech->getDBUPerUU()));
+            frCoord spacing = frCoord(round(parallel->widthSpacing(j, k) * parser->tech->getDBUPerUU()));
             tblRowVals.push_back(spacing);
             if (enableOutput) {
-              cout <<" " <<spacing * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+              cout <<" " <<spacing * 1.0 / parser->tech->getDBUPerUU();
             }
           }
           tblVals.push_back(tblRowVals);
@@ -3843,20 +3867,20 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         // old
         prlTbl = make_shared<fr2DLookupTbl<frCoord, frCoord, frCoord> >(rowName, rowVals, colName, colVals, tblVals);
         spacingTableConstraint = make_shared<frSpacingTableConstraint>(prlTbl);
-        ((io::Parser*)data)->tech->addConstraint(spacingTableConstraint);
+        parser->tech->addConstraint(spacingTableConstraint);
         tmpLayer->addConstraint(spacingTableConstraint);
 
         // new
         unique_ptr<frConstraint> uCon = make_unique<frSpacingTablePrlConstraint>(fr2DLookupTbl(rowName, rowVals, colName, colVals, tblVals));
         auto rptr = static_cast<frSpacingTablePrlConstraint*>(uCon.get());
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        parser->tech->addUConstraint(std::move(uCon));
         if (tmpLayer->getMinSpacing()) {
           cout <<"Warning: new SPACINGTABLE PARALLELRUNLENGTH overrides old SPACING rule" <<endl;
         }
         tmpLayer->setMinSpacing(rptr);
       } else { // two width spacing rule
         auto tw = spTable->twoWidths();
-        frCoord defaultPrl = -abs(frCoord(round(tw->widthSpacing(0,0) * ((io::Parser*)data)->tech->getDBUPerUU())));
+        frCoord defaultPrl = -abs(frCoord(round(tw->widthSpacing(0,0) * parser->tech->getDBUPerUU())));
         //cout <<"default prl: " <<defaultPrl <<endl;
         frCollection<frSpacingTableTwRowType> rowVals, colVals;
         frCollection<frCollection<frCoord> > tblVals;
@@ -3866,7 +3890,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
           cout <<"  SPACINGTABLE TWOWIDTHS";
         }
         for (int j = 0; j < tw->numWidth(); ++j) {
-          frCoord width = frCoord(round(tw->width(j) * ((io::Parser*)data)->tech->getDBUPerUU()));
+          frCoord width = frCoord(round(tw->width(j) * parser->tech->getDBUPerUU()));
           frCoord prl   = defaultPrl;
           if (enableOutput) {
             cout <<endl <<"    WIDTH " <<tw->width(j);
@@ -3875,12 +3899,12 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
             if (enableOutput) {
               cout <<" PRL " <<tw->widthPRL(j);
             }
-            prl = frCoord(round(tw->widthPRL(j) * ((io::Parser*)data)->tech->getDBUPerUU()));
+            prl = frCoord(round(tw->widthPRL(j) * parser->tech->getDBUPerUU()));
             defaultPrl = prl;
             //hasPrl = true;
           } else {
             //if (!hasPrl) {
-            //  defaultPrl = -abs(frCoord(round(tw->widthSpacing(j,0) * ((io::Parser*)data)->tech->getDBUPerUU())));
+            //  defaultPrl = -abs(frCoord(round(tw->widthSpacing(j,0) * parser->tech->getDBUPerUU())));
             //  prl = defaultPrl;
             //}
           }
@@ -3891,7 +3915,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
             if (enableOutput) {
               cout <<" " <<tw->widthSpacing(j, k);
             }
-            frCoord spacing = frCoord(round(tw->widthSpacing(j, k) * ((io::Parser*)data)->tech->getDBUPerUU()));
+            frCoord spacing = frCoord(round(tw->widthSpacing(j, k) * parser->tech->getDBUPerUU()));
             tblRowVals.push_back(spacing);
           }
           tblVals.push_back(tblRowVals);
@@ -3901,7 +3925,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         }
         unique_ptr<frConstraint> uCon = make_unique<frSpacingTableTwConstraint>(fr2DLookupTbl(rowName, rowVals, colName, colVals, tblVals));
         auto rptr = static_cast<frSpacingTableTwConstraint*>(uCon.get());
-        ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+        parser->tech->addUConstraint(std::move(uCon));
         if (tmpLayer->getMinSpacing()) {
           cout <<"Warning: new SPACINGTABLE TWOWIDTHS overrides old SPACING rule" <<endl;
         }
@@ -3910,7 +3934,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
     }
 
     for (int i = 0; i < layer->numMinimumcut(); i++) {
-      double dbu = ((io::Parser*)data)->tech->getDBUPerUU();
+      double dbu = parser->tech->getDBUPerUU();
       unique_ptr<frConstraint> uCon = make_unique<frMinimumcutConstraint>();
       auto rptr = static_cast<frMinimumcutConstraint*>(uCon.get());
       
@@ -3949,7 +3973,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
         rptr->setLength(frCoord(round(layer->minimumcutLength(i) * dbu)), frCoord(round(layer->minimumcutDistance(i) * dbu)));
       }
 
-      ((io::Parser*)data)->tech->addUConstraint(std::move(uCon));
+      parser->tech->addUConstraint(std::move(uCon));
       tmpLayer->addMinimumcutConstraint(rptr);
       //if (enableOutput) {
       //  cout <<" ;" <<endl;
@@ -3979,12 +4003,12 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
     }
   } else if (strcmp(layer->type(), "CUT") == 0) {
     // add default masterslice layer if LEF does not have one
-    if (((io::Parser*)data)->readLayerCnt == 0) {
+    if (parser->readLayerCnt == 0) {
       unique_ptr<frLayer> uMSLayer = make_unique<frLayer>();
       auto tmpMSLayer = uMSLayer.get();
-      tmpMSLayer->setLayerNum(((io::Parser*)data)->readLayerCnt++);
+      tmpMSLayer->setLayerNum(parser->readLayerCnt++);
       tmpMSLayer->setName(masterSliceLayerName);
-      ((io::Parser*)data)->tech->addLayer(std::move(uMSLayer));
+      parser->tech->addLayer(std::move(uMSLayer));
       tmpMSLayer->setType(frLayerTypeEnum::MASTERSLICE);
       if (enableOutput) {
         cout <<"\n";
@@ -3997,24 +4021,24 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
       cout <<"\n";
       cout <<"LAYER "       <<layer->name() <<endl;
       cout <<"  TYPE      " <<layer->type() <<endl;
-      cout <<"  layerNum  " <<((io::Parser*)data)->readLayerCnt <<endl;
+      cout <<"  layerNum  " <<parser->readLayerCnt <<endl;
     }
-    tmpLayer->setLayerNum(((io::Parser*)data)->readLayerCnt++);
+    tmpLayer->setLayerNum(parser->readLayerCnt++);
     tmpLayer->setName(layer->name());
     tmpLayer->setType(frLayerTypeEnum::CUT);
-    ((io::Parser*)data)->tech->addLayer(std::move(uLayer));
+    parser->tech->addLayer(std::move(uLayer));
 
     auto shortConstraint = make_shared<frShortConstraint>();
     // std::cout << "add shortConstraint to layer " <<tmpLayer->getName() << "\n";
-    ((io::Parser*)data)->tech->addConstraint(shortConstraint);
+    parser->tech->addConstraint(shortConstraint);
     tmpLayer->addConstraint(shortConstraint);
     tmpLayer->setShortConstraint(shortConstraint.get());
 
     // read spacing constraint
     for (int i = 0; i < layer->numSpacing(); ++i) {
       std::shared_ptr<frCutSpacingConstraint> cutSpacingConstraint;
-      frCoord cutArea = frCoord(round(layer->spacingArea(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
-      frCoord cutSpacing = frCoord(round(layer->spacing(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+      frCoord cutArea = frCoord(round(layer->spacingArea(i) * parser->tech->getDBUPerUU()));
+      frCoord cutSpacing = frCoord(round(layer->spacing(i) * parser->tech->getDBUPerUU()));
       bool centerToCenter = layer->hasSpacingCenterToCenter(i);
       bool sameNet = layer->hasSpacingSamenet(i);
       bool stack = layer->hasSpacingLayerStack(i);
@@ -4022,7 +4046,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
       bool parallelOverlap = layer->hasSpacingParallelOverlap(i);
       frString secondLayerName = layer->hasSpacingName(i) ? string(layer->spacingName(i)) : string("");
       int adjacentCuts = layer->spacingAdjacentCuts(i);
-      frCoord cutWithin = frCoord(round(layer->spacingAdjacentWithin(i) * ((io::Parser*)data)->tech->getDBUPerUU()));
+      frCoord cutWithin = frCoord(round(layer->spacingAdjacentWithin(i) * parser->tech->getDBUPerUU()));
 
       // std::cout << cutSpacing << " " << centerToCenter << " " << sameNet << " " << stack << " " << exceptSamePGNet 
       //           << " " << parallelOverlap << " " << secondLayerName << " " << adjacentCuts << " " << cutWithin << "\n";
@@ -4051,7 +4075,7 @@ int io::Parser::Callbacks::getLefLayers(lefrCallbackType_e type, lefiLayer* laye
                                                               parallelOverlap,
                                                               cutArea);
 
-      ((io::Parser*)data)->tech->addConstraint(cutSpacingConstraint);
+      parser->tech->addConstraint(cutSpacingConstraint);
       tmpLayer->addConstraint(cutSpacingConstraint);
       tmpLayer->addCutSpacingConstraint(cutSpacingConstraint.get());
 
@@ -4104,15 +4128,16 @@ int io::Parser::Callbacks::getLefMacros(lefrCallbackType_e type, lefiMacro* macr
     exit(2);
   }
 
-  frCoord originX = round(macro->originX() * ((io::Parser*)data)->tech->getDBUPerUU()); 
-  frCoord originY = round(macro->originY() * ((io::Parser*)data)->tech->getDBUPerUU());
-  frCoord sizeX   = round(macro->sizeX()   * ((io::Parser*)data)->tech->getDBUPerUU());
-  frCoord sizeY   = round(macro->sizeY()   * ((io::Parser*)data)->tech->getDBUPerUU());
+  io::Parser* parser = (io::Parser*) data;
+  frCoord originX = round(macro->originX() * parser->tech->getDBUPerUU()); 
+  frCoord originY = round(macro->originY() * parser->tech->getDBUPerUU());
+  frCoord sizeX   = round(macro->sizeX()   * parser->tech->getDBUPerUU());
+  frCoord sizeY   = round(macro->sizeY()   * parser->tech->getDBUPerUU());
   if (enableOutput) {
-    cout <<"  ORIGIN " <<originX * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                       <<originY * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
-    cout <<"  SIZE   " <<sizeX   * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                       <<sizeY   * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
+    cout <<"  ORIGIN " <<originX * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                       <<originY * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
+    cout <<"  SIZE   " <<sizeX   * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                       <<sizeY   * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
   }
   vector<frBoundary> bounds;
   frBoundary bound;
@@ -4124,7 +4149,7 @@ int io::Parser::Callbacks::getLefMacros(lefrCallbackType_e type, lefiMacro* macr
   bound.setPoints(points);
   bounds.push_back(bound);
 
-  ((io::Parser*)data)->tmpBlock->setBoundaries(bounds);
+  parser->tmpBlock->setBoundaries(bounds);
 
   if (enableOutput) {
     if (macro->hasClass()) {
@@ -4133,33 +4158,33 @@ int io::Parser::Callbacks::getLefMacros(lefrCallbackType_e type, lefiMacro* macr
   }
   if (macro->hasClass()) {
     if (strcmp(macro->macroClass(), "CORE") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE);
     } else if (strcmp(macro->macroClass(), "CORE TIEHIGH") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE_TIEHIGH);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE_TIEHIGH);
     } else if (strcmp(macro->macroClass(), "CORE TIELOW") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE_TIELOW);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE_TIELOW);
     } else if (strcmp(macro->macroClass(), "CORE WELLTAP") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE_WELLTAP);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE_WELLTAP);
     } else if (strcmp(macro->macroClass(), "CORE SPACER") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE_SPACER);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE_SPACER);
     } else if (strcmp(macro->macroClass(), "CORE ANTENNACELL") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::CORE_ANTENNACELL);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::CORE_ANTENNACELL);
     } else if (strcmp(macro->macroClass(), "COVER") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::COVER);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::COVER);
     } else if (strcmp(macro->macroClass(), "ENDCAP PRE") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::ENDCAP_PRE);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::ENDCAP_PRE);
     } else if (strcmp(macro->macroClass(), "BLOCK") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::BLOCK);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::BLOCK);
     } else if (strcmp(macro->macroClass(), "PAD") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::PAD);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::PAD);
     } else if (strcmp(macro->macroClass(), "RING") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::RING);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::RING);
     } else if (strcmp(macro->macroClass(), "PAD POWER") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::PAD_POWER);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::PAD_POWER);
     } else if (strcmp(macro->macroClass(), "PAD SPACER") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::PAD_SPACER);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::PAD_SPACER);
     } else if (strcmp(macro->macroClass(), "ENDCAP BOTTOMLEFT") == 0) {
-      ((io::Parser*)data)->tmpBlock->setMacroClass(MacroClassEnum::ENDCAP_BOTTOMLEFT);
+      parser->tmpBlock->setMacroClass(MacroClassEnum::ENDCAP_BOTTOMLEFT);
     } else {
       cout << "Warning: unknown macroClass " << macro->macroClass() << ", skipped macroClass property\n"; 
     }
@@ -4176,15 +4201,16 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
     cout <<"Type is not lefrPinCbkType!" <<endl;
     exit(1);
   }
+  io::Parser* parser = (io::Parser*) data;
 
   // term
   unique_ptr<frTerm>         uTerm = make_unique<frTerm>(pin->name());
   auto term = uTerm.get();
-  term->setId(((io::Parser*)data)->numTerms);
-  ((io::Parser*)data)->numTerms++;
+  term->setId(parser->numTerms);
+  parser->numTerms++;
 
   // inst 
-  ((io::Parser*)data)->tmpBlock->addTerm(std::move(uTerm));
+  parser->tmpBlock->addTerm(std::move(uTerm));
   // inst completed
   
   if (enableOutput) {
@@ -4233,15 +4259,15 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
       itemType = pin->port(i)->itemType(j);
       if (itemType == lefiGeomLayerE) {
         string layer = pin->port(i)->getLayer(j);
-        if (((io::Parser*)data)->tech->name2layer.find(layer) == ((io::Parser*)data)->tech->name2layer.end()) {
+        if (parser->tech->name2layer.find(layer) == parser->tech->name2layer.end()) {
           if (VERBOSE > 1) {
-            cout <<"Warning: layer " <<layer <<" is skipped for " <<((io::Parser*)data)->tmpBlock->getName() <<"/" <<pin->name() <<endl;
+            cout <<"Warning: layer " <<layer <<" is skipped for " <<parser->tmpBlock->getName() <<"/" <<pin->name() <<endl;
           }
           layerNum = -1;
           continue;
         }
 
-        layerNum = ((io::Parser*)data)->tech->name2layer.at(layer)->getLayerNum();
+        layerNum = parser->tech->name2layer.at(layer)->getLayerNum();
         //cout <<"  layer: " <<pin->port(i)->getLayer(j) <<endl;
         if (enableOutput) {
           cout <<"    LAYER " <<layer <<" ;" <<endl;
@@ -4251,10 +4277,10 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
         if (layerNum == -1) {
           continue;
         }
-        frCoord xl = round(pin->port(i)->getRect(j)->xl * ((io::Parser*)data)->tech->getDBUPerUU());
-        frCoord yl = round(pin->port(i)->getRect(j)->yl * ((io::Parser*)data)->tech->getDBUPerUU());
-        frCoord xh = round(pin->port(i)->getRect(j)->xh * ((io::Parser*)data)->tech->getDBUPerUU());
-        frCoord yh = round(pin->port(i)->getRect(j)->yh * ((io::Parser*)data)->tech->getDBUPerUU());
+        frCoord xl = round(pin->port(i)->getRect(j)->xl * parser->tech->getDBUPerUU());
+        frCoord yl = round(pin->port(i)->getRect(j)->yl * parser->tech->getDBUPerUU());
+        frCoord xh = round(pin->port(i)->getRect(j)->xh * parser->tech->getDBUPerUU());
+        frCoord yh = round(pin->port(i)->getRect(j)->yh * parser->tech->getDBUPerUU());
 
         // pinFig
         unique_ptr<frRect> pinFig = make_unique<frRect>();
@@ -4271,10 +4297,10 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
         // pin completed
 
         if (enableOutput) {
-          cout <<"      RECT " <<xl * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                               <<yl * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                               <<xh * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                               <<yh * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
+          cout <<"      RECT " <<xl * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                               <<yl * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                               <<xh * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                               <<yh * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
         }
              
       } else if (itemType == lefiGeomPolygonE) {
@@ -4287,12 +4313,12 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
         }
         frCollection<frPoint> tmpPoints;
         for (int k = 0; k < pin->port(i)->getPolygon(j)->numPoints; k++) {
-          frCoord x = round(pin->port(i)->getPolygon(j)->x[k] * ((io::Parser*)data)->tech->getDBUPerUU());
-          frCoord y = round(pin->port(i)->getPolygon(j)->y[k] * ((io::Parser*)data)->tech->getDBUPerUU());
+          frCoord x = round(pin->port(i)->getPolygon(j)->x[k] * parser->tech->getDBUPerUU());
+          frCoord y = round(pin->port(i)->getPolygon(j)->y[k] * parser->tech->getDBUPerUU());
           tmpPoints.push_back(frPoint(x, y));
           if (enableOutput) {
-             cout <<" " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                        <<y * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+             cout <<" " <<x * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                        <<y * 1.0 / parser->tech->getDBUPerUU();
           }
         }
         // pinFig
@@ -4354,12 +4380,12 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
   
   auto geometry = obs->geometries();
   int numItems  = geometry->numItems();
-
+  io::Parser* parser = (io::Parser*) data;
 
   // blockage
   auto blkIn = make_unique<frBlockage>();
-  blkIn->setId(((io::Parser*)data)->numBlockages);
-  ((io::Parser*)data)->numBlockages++;
+  blkIn->setId(parser->numBlockages);
+  parser->numBlockages++;
   // pin
   auto pinIn = make_unique<frPin>();
   pinIn->setId(0);
@@ -4369,11 +4395,11 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
   for (int i = 0; i < numItems; ++i) {
     if (geometry->itemType(i) == lefiGeomLayerE) {
       layer = geometry->getLayer(i);
-      if (((io::Parser*)data)->tech->name2layer.find(layer) != ((io::Parser*)data)->tech->name2layer.end()) {
-        layerNum = ((io::Parser*)data)->tech->name2layer[layer]->getLayerNum();
+      if (parser->tech->name2layer.find(layer) != parser->tech->name2layer.end()) {
+        layerNum = parser->tech->name2layer[layer]->getLayerNum();
       } else {
         if (VERBOSE > 2) {
-          cout <<"Warning: layer " <<geometry->getLayer(i) <<" is skipped for " <<((io::Parser*)data)->tmpBlock->getName() <<"/OBS" <<endl; 
+          cout <<"Warning: layer " <<geometry->getLayer(i) <<" is skipped for " <<parser->tmpBlock->getName() <<"/OBS" <<endl; 
         }
         layerNum = -1;
         continue;
@@ -4387,10 +4413,10 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
         continue;
       }
       auto rect = geometry->getRect(i);
-      frCoord xl = round(rect->xl * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yl = round(rect->yl * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord xh = round(rect->xh * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yh = round(rect->yh * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord xl = round(rect->xl * parser->tech->getDBUPerUU());
+      frCoord yl = round(rect->yl * parser->tech->getDBUPerUU());
+      frCoord xh = round(rect->xh * parser->tech->getDBUPerUU());
+      frCoord yh = round(rect->yh * parser->tech->getDBUPerUU());
       // pinFig
       unique_ptr<frRect> pinFig = make_unique<frRect>();
       pinFig->setBBox(frBox(xl, yl, xh, yh));
@@ -4414,12 +4440,12 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
       }
       std::vector<frPoint> tmpPoints;
       for (int k = 0; k < geometry->getPolygon(i)->numPoints; k++) {
-        frCoord x = round(geometry->getPolygon(i)->x[k] * ((io::Parser*)data)->tech->getDBUPerUU());
-        frCoord y = round(geometry->getPolygon(i)->y[k] * ((io::Parser*)data)->tech->getDBUPerUU());
+        frCoord x = round(geometry->getPolygon(i)->x[k] * parser->tech->getDBUPerUU());
+        frCoord y = round(geometry->getPolygon(i)->y[k] * parser->tech->getDBUPerUU());
         tmpPoints.push_back(frPoint(x, y));
         if (enableOutput) {
-           cout <<" " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                      <<y * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+           cout <<" " <<x * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                      <<y * 1.0 / parser->tech->getDBUPerUU();
         }
       }
       // pinFig
@@ -4445,18 +4471,18 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
         // cout <<"Warning: OBS on undefined layer " <<" is skipped... " <<endl; 
         continue;
       }
-      frCoord x = round(geometry->getLayerMinSpacing(i) * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord x = round(geometry->getLayerMinSpacing(i) * parser->tech->getDBUPerUU());
       if (enableOutput) {
-         cout <<"      MINSPACING " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
+         cout <<"      MINSPACING " <<x * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
       }
     } else if (geometry->itemType(i) == lefiGeomLayerRuleWidthE) {
       if (layerNum == -1) {
         // cout <<"Warning: OBS on undefined layer " <<" is skipped... " <<endl; 
         continue;
       }
-      frCoord x = round(geometry->getLayerRuleWidth(i) * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord x = round(geometry->getLayerRuleWidth(i) * parser->tech->getDBUPerUU());
       if (enableOutput) {
-         cout <<"      DESIGNRULEWIDTH " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
+         cout <<"      DESIGNRULEWIDTH " <<x * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
       }
     } else {
       if (VERBOSE > -1) {
@@ -4469,30 +4495,31 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
     cout <<"  END" <<endl;
   }
   blkIn->setPin(std::move(pinIn));
-  ((io::Parser*)data)->tmpBlock->addBlockage(std::move(blkIn));
+  parser->tmpBlock->addBlockage(std::move(blkIn));
   return 0;
 }
 
 int io::Parser::Callbacks::getLefString(lefrCallbackType_e type, const char* str, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
+  io::Parser* parser = (io::Parser*) data;
   if (type == lefrMacroBeginCbkType) {
-    auto &tmpBlock = ((io::Parser*)data)->tmpBlock;
+    auto &tmpBlock = parser->tmpBlock;
     tmpBlock = make_unique<frBlock>();
     tmpBlock->setName(string(str));
     if (enableOutput) {
       cout <<"MACRO " <<tmpBlock->getName() <<endl;
     }
   } else if (type == lefrMacroEndCbkType) {
-    auto &tmpBlock = ((io::Parser*)data)->tmpBlock;
-    tmpBlock->setId(((io::Parser*)data)->numRefBlocks + 1);
+    auto &tmpBlock = parser->tmpBlock;
+    tmpBlock->setId(parser->numRefBlocks + 1);
     if (enableOutput) {
-      cout <<"END " <<tmpBlock->getName() <<" " <<((io::Parser*)data)->numRefBlocks + 1 <<endl;
+      cout <<"END " <<tmpBlock->getName() <<" " <<parser->numRefBlocks + 1 <<endl;
     }
-    ((io::Parser*)data)->design->addRefBlock(std::move(((io::Parser*)data)->tmpBlock));
-    ((io::Parser*)data)->numRefBlocks++;
-    ((io::Parser*)data)->numTerms     = 0;
-    ((io::Parser*)data)->numBlockages = 0;
+    parser->design->addRefBlock(std::move(parser->tmpBlock));
+    parser->numRefBlocks++;
+    parser->numTerms     = 0;
+    parser->numBlockages = 0;
   } else {
     cout <<"Type is not supported!" <<endl;
     // exit(2);
@@ -4503,9 +4530,10 @@ int io::Parser::Callbacks::getLefString(lefrCallbackType_e type, const char* str
 int io::Parser::Callbacks::getLefUnits(lefrCallbackType_e type, lefiUnits* units, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  ((io::Parser*)data)->tech->setDBUPerUU(frUInt4(units->databaseNumber()));
+  io::Parser* parser = (io::Parser*) data;
+  parser->tech->setDBUPerUU(frUInt4(units->databaseNumber()));
   if (enableOutput) {
-    cout <<"DATABASE MICRONS " <<((io::Parser*)data)->tech->getDBUPerUU() <<endl;
+    cout <<"DATABASE MICRONS " <<parser->tech->getDBUPerUU() <<endl;
   }
   return 0;
 }
@@ -4537,7 +4565,8 @@ int io::Parser::Callbacks::getLefUseMinSpacing(lefrCallbackType_e type, lefiUseM
 int io::Parser::Callbacks::getLefManufacturingGrid(lefrCallbackType_e type, double number, lefiUserData data) {
   //bool enableOutput = true;
   bool enableOutput = false;
-  ((io::Parser*)data)->tech->setManufacturingGrid(frUInt4(round(number * ((io::Parser*)data)->tech->getDBUPerUU())));
+  io::Parser* parser = (io::Parser*) data;
+  parser->tech->setManufacturingGrid(frUInt4(round(number * parser->tech->getDBUPerUU())));
   if (enableOutput) {
     cout <<"MANUFACTURINGGRID " <<number <<endl;
   }
@@ -4563,15 +4592,16 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
     }
     exit(1);
   }
+  io::Parser* parser = (io::Parser*) data;
   map<frLayerNum, int> lNum2Int;
   for (int i = 0; i < via->numLayers(); ++i) {
-    if (((io::Parser*)data)->tech->name2layer.find(via->layerName(i)) == ((io::Parser*)data)->tech->name2layer.end()) {
+    if (parser->tech->name2layer.find(via->layerName(i)) == parser->tech->name2layer.end()) {
       if (VERBOSE > -1) {
         cout <<"Warning: layer " <<via->layerName(i) <<" is skipiped for " <<via->name() <<endl;
       }
       return 0;
     }
-    lNum2Int[((io::Parser*)data)->tech->name2layer.at(via->layerName(i))->getLayerNum()] = i;
+    lNum2Int[parser->tech->name2layer.at(via->layerName(i))->getLayerNum()] = i;
   }
   //for (auto &m: lNum2Int) {
   //  cout <<"print " <<m.first <<" " <<m.second <<endl;
@@ -4595,19 +4625,19 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
     }
     auto layerNum = m.first;
     for (int j = 0; j < via->numRects(i); ++j) {
-      frCoord xl = round(via->xl(i, j) * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yl = round(via->yl(i, j) * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord xh = round(via->xh(i, j) * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yh = round(via->yh(i, j) * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord xl = round(via->xl(i, j) * parser->tech->getDBUPerUU());
+      frCoord yl = round(via->yl(i, j) * parser->tech->getDBUPerUU());
+      frCoord xh = round(via->xh(i, j) * parser->tech->getDBUPerUU());
+      frCoord yh = round(via->yh(i, j) * parser->tech->getDBUPerUU());
       unique_ptr<frRect> pinFig = make_unique<frRect>();
       pinFig->setBBox(frBox(xl, yl, xh, yh));
       pinFig->setLayerNum(layerNum);
       unique_ptr<frShape> tmp(std::move(pinFig));
       if (enableOutput) {
-        cout <<"    RECT "   <<xl * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                             <<yl * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                             <<xh * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                             <<yh * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" ;" <<endl;
+        cout <<"    RECT "   <<xl * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                             <<yl * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                             <<xh * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                             <<yh * 1.0 / parser->tech->getDBUPerUU() <<" ;" <<endl;
       }
       switch(cnt) {
         case 0 :
@@ -4627,12 +4657,12 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
       }
       vector<frPoint> tmpPoints;
       for (int k = 0; k < via->getPolygon(i, j).numPoints; k++) {
-        frCoord x = round(via->getPolygon(i, j).x[k] * ((io::Parser*)data)->tech->getDBUPerUU());
-        frCoord y = round(via->getPolygon(i, j).y[k] * ((io::Parser*)data)->tech->getDBUPerUU());
+        frCoord x = round(via->getPolygon(i, j).x[k] * parser->tech->getDBUPerUU());
+        frCoord y = round(via->getPolygon(i, j).y[k] * parser->tech->getDBUPerUU());
         tmpPoints.push_back(frPoint(x, y));
         if (enableOutput) {
-           cout <<" " <<x * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU() <<" " 
-                      <<y * 1.0 / ((io::Parser*)data)->tech->getDBUPerUU();
+           cout <<" " <<x * 1.0 / parser->tech->getDBUPerUU() <<" " 
+                      <<y * 1.0 / parser->tech->getDBUPerUU();
         }
       }
       unique_ptr<frPolygon> pinFig = make_unique<frPolygon>();
@@ -4662,7 +4692,7 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
 
   // add via class information
   auto cutLayerNum = viaDef->getCutLayerNum();
-  auto cutLayer    = ((io::Parser*)data)->tech->getLayer(cutLayerNum);
+  auto cutLayer    = parser->tech->getLayer(cutLayerNum);
   int cutClassIdx = -1;
   frLef58CutClass *cutClass = nullptr;
 
@@ -4685,7 +4715,7 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
     viaDef->setCutClassIdx(cutClassIdx);
   }
 
-  ((io::Parser*)data)->tech->addVia(std::move(viaDef));
+  parser->tech->addVia(std::move(viaDef));
   return 0;
 }
 
@@ -4715,16 +4745,17 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
     }
     exit(1);
   }
+  io::Parser* parser = (io::Parser*) data;
   map<frLayerNum, int> lNum2Int;
   for (int i = 0; i < viaRule->numLayers(); ++i) {
     auto viaRuleLayer = viaRule->layer(i);
-    if (((io::Parser*)data)->tech->name2layer.find(viaRuleLayer->name()) == ((io::Parser*)data)->tech->name2layer.end()) {
+    if (parser->tech->name2layer.find(viaRuleLayer->name()) == parser->tech->name2layer.end()) {
       if (VERBOSE > -1) {
         cout <<"Warning: layer " <<viaRuleLayer->name() <<" is skipiped for " <<viaRule->name() <<endl;
       }
       return 0;
     }
-    lNum2Int[((io::Parser*)data)->tech->name2layer.at(viaRuleLayer->name())->getLayerNum()] = i;
+    lNum2Int[parser->tech->name2layer.at(viaRuleLayer->name())->getLayerNum()] = i;
   }
   if (lNum2Int.begin()->first + 2!= (--lNum2Int.end())->first) {
     if (VERBOSE > -1) {
@@ -4748,8 +4779,8 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
       cout <<"  LAYER " <<viaRuleLayer->name() <<" ;" <<endl;
     }
     if (viaRuleLayer->hasEnclosure()) {
-      frCoord x = round(viaRuleLayer->enclosureOverhang1() * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord y = round(viaRuleLayer->enclosureOverhang2() * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord x = round(viaRuleLayer->enclosureOverhang1() * parser->tech->getDBUPerUU());
+      frCoord y = round(viaRuleLayer->enclosureOverhang2() * parser->tech->getDBUPerUU());
       frPoint enc(x, y);
       switch(cnt) {
         case 0:
@@ -4767,10 +4798,10 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
       }
     }
     if (viaRuleLayer->hasRect()) {
-      frCoord xl = round(viaRuleLayer->xl() * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yl = round(viaRuleLayer->yl() * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord xh = round(viaRuleLayer->xh() * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord yh = round(viaRuleLayer->yh() * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord xl = round(viaRuleLayer->xl() * parser->tech->getDBUPerUU());
+      frCoord yl = round(viaRuleLayer->yl() * parser->tech->getDBUPerUU());
+      frCoord xh = round(viaRuleLayer->xh() * parser->tech->getDBUPerUU());
+      frCoord yh = round(viaRuleLayer->yh() * parser->tech->getDBUPerUU());
       frBox box(xl, yl, xh, yh);
       switch(cnt) {
         case 0:
@@ -4792,8 +4823,8 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
       }
     }
     if (viaRuleLayer->hasSpacing()) {
-      frCoord x = round(viaRuleLayer->spacingStepX() * ((io::Parser*)data)->tech->getDBUPerUU());
-      frCoord y = round(viaRuleLayer->spacingStepY() * ((io::Parser*)data)->tech->getDBUPerUU());
+      frCoord x = round(viaRuleLayer->spacingStepX() * parser->tech->getDBUPerUU());
+      frCoord y = round(viaRuleLayer->spacingStepY() * parser->tech->getDBUPerUU());
       frPoint pt(x, y);
       switch(cnt) {
         case 0:
@@ -4813,7 +4844,7 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
     cnt++;
   }
 
-  ((io::Parser*)data)->tech->addViaRuleGenerate(std::move(viaRuleGen));
+  parser->tech->addViaRuleGenerate(std::move(viaRuleGen));
   return 0;
 }
 
