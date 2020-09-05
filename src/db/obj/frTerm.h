@@ -41,7 +41,7 @@ namespace fr {
   class frTerm: public frBlockObject {
   public:
     // constructors
-    frTerm(const frString &in): frBlockObject(), name(in), net(nullptr), pins(), type(frTermEnum::frcNormalTerm) {}
+    frTerm(const frString &name): frBlockObject(), name(name), net(nullptr), pins(), type(frTermEnum::frcNormalTerm) {}
     frTerm(const frTerm &in): frBlockObject(), name(in.name), net(in.net), type(in.type) {
       for (auto &uPin: in.getPins()) {
         auto pin = uPin.get();

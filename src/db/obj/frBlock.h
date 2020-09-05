@@ -48,7 +48,7 @@ namespace fr {
   class frBlock: public frBlockObject {
   public:
     // constructors
-    frBlock(): frBlockObject(), name(), dbUnit(0)/*, manufacturingGrid(0)*/, macroClass(MacroClassEnum::UNKNOWN) {};
+    frBlock(const frString &name): frBlockObject(), name(name), dbUnit(0)/*, manufacturingGrid(0)*/, macroClass(MacroClassEnum::UNKNOWN) {};
     // getters
     frUInt4 getDBUPerUU() const {
       return dbUnit;
@@ -294,9 +294,6 @@ namespace fr {
     // setters
     void setDBUPerUU(frUInt4 uIn) {
       dbUnit = uIn;
-    }
-    void setName(const frString &nameIn) {
-      name = nameIn;
     }
     void addTerm(std::unique_ptr<frTerm> in) {
       name2term[in->getName()] = in.get();

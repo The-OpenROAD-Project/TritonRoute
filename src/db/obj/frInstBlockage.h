@@ -39,7 +39,8 @@ namespace fr {
   class frInstBlockage: public frBlockObject {
   public:
     // constructors
-    frInstBlockage(): frBlockObject(), inst(nullptr), blockage(nullptr) {}
+    frInstBlockage(frInst* inst, frBlockage* blockage)
+       : inst(inst), blockage(blockage) {}
     // getters
     frInst* getInst() const {
       return inst;
@@ -48,13 +49,6 @@ namespace fr {
       return blockage;
     }
     // setters
-    void addToInst(frInst* in) {
-      inst = in;
-    }
-    // do not call from outside
-    void addBlockage(frBlockage* in) {
-      blockage = in;
-    }
     // others
     frBlockObjectEnum typeId() const override {
       return frcInstBlockage;

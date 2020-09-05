@@ -84,8 +84,7 @@ void Fixture::makeDesign()
 {
   setupTech(design->getTech());
 
-  auto block = std::make_unique<frBlock>();
-  block->setName("test");
+  auto block = std::make_unique<frBlock>("test");
 
   // GC assumes these fake nets exist
   auto vssFakeNet = std::make_unique<frNet>("frFakeVSS");

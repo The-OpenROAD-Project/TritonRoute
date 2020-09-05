@@ -446,22 +446,18 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
   tmpInst->setOrient(frOrientEnum(comp->placementOrient()));
   for (auto &uTerm: tmpInst->getRefBlock()->getTerms()) {
     auto term = uTerm.get();
-    unique_ptr<frInstTerm> instTerm = make_unique<frInstTerm>();
+    unique_ptr<frInstTerm> instTerm = make_unique<frInstTerm>(tmpInst, term);
     instTerm->setId(parser->numTerms);
     parser->numTerms++;
-    instTerm->addToInst(tmpInst);
-    instTerm->addTerm(term);
     int pinCnt = term->getPins().size();
     instTerm->setAPSize(pinCnt);
     tmpInst->addInstTerm(std::move(instTerm));
   }
   for (auto &uBlk: tmpInst->getRefBlock()->getBlockages()) {
     auto blk = uBlk.get();
-    unique_ptr<frInstBlockage> instBlk = make_unique<frInstBlockage>();
+    unique_ptr<frInstBlockage> instBlk = make_unique<frInstBlockage>(tmpInst, blk);
     instBlk->setId(parser->numBlockages);
     parser->numBlockages++;
-    instBlk->addToInst(tmpInst);
-    instBlk->addBlockage(blk);
     tmpInst->addInstBlockage(std::move(instBlk));
   }
 
@@ -491,8 +487,7 @@ int io::Parser::Callbacks::getDefString(defrCallbackType_e type, const char* str
   if (type == defrDesignStartCbkType) {
     io::Parser* parser = (io::Parser*) data;
     auto &tmpBlock = parser->tmpBlock;
-    tmpBlock = make_unique<frBlock>();
-    tmpBlock->setName(string(str));
+    tmpBlock = make_unique<frBlock>(string(str));
     tmpBlock->trackPatterns.clear();
     tmpBlock->trackPatterns.resize(parser->tech->layers.size());
     if (enableOutput) {
@@ -4505,8 +4500,7 @@ int io::Parser::Callbacks::getLefString(lefrCallbackType_e type, const char* str
   io::Parser* parser = (io::Parser*) data;
   if (type == lefrMacroBeginCbkType) {
     auto &tmpBlock = parser->tmpBlock;
-    tmpBlock = make_unique<frBlock>();
-    tmpBlock->setName(string(str));
+    tmpBlock = make_unique<frBlock>(string(str));
     if (enableOutput) {
       cout <<"MACRO " <<tmpBlock->getName() <<endl;
     }

@@ -42,7 +42,7 @@ namespace fr {
   class frInstTerm: public frBlockObject {
   public:
     // constructors
-    frInstTerm(): frBlockObject(), inst(nullptr), term(nullptr), net(nullptr), ap() {}
+    frInstTerm(frInst* inst, frTerm* term): inst(inst), term(term), net(nullptr), ap() {}
     frInstTerm(const frInstTerm &in): frBlockObject(), inst(in.inst), term(in.term), 
                                       net(in.net), ap() {}
     // getters
@@ -71,13 +71,6 @@ namespace fr {
       return ap[idx];
     }
     // setters
-    void addToInst(frInst* in) {
-      inst = in;
-    }
-    // do not call from outside
-    void addTerm(frTerm* in) {
-      term = in;
-    }
     void setAPSize(int size) {
       ap.resize(size, nullptr);
     }
