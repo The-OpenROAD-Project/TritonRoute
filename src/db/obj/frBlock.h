@@ -37,7 +37,7 @@
 #include "db/obj/frTerm.h"
 #include "db/obj/frNet.h"
 #include "db/obj/frBoundary.h"
-#include "db/obj/frCMap.h"
+#include "db/obj/frGCellPattern.h"
 #include "db/obj/frMarker.h"
 
 namespace fr {
