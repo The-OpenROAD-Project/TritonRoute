@@ -41,7 +41,7 @@ namespace fr {
   class frInst: public frRef {
   public:
     // constructors
-    frInst(): frRef(), name(), refBlock(nullptr), instTerms(), instBlockages(), xform(), pinAccessIdx(0) {}
+    frInst(const frString &name, frBlock* refBlock): name(name), refBlock(refBlock), pinAccessIdx(0) {}
     // getters
     const frString& getName() const {
       return name;
@@ -65,12 +65,6 @@ namespace fr {
       return pinAccessIdx;
     }
     // setters
-    void setName(const frString &tmpString) {
-      name = tmpString;
-    }
-    void setRefBlock(frBlock* in) {
-      refBlock = in;
-    }
     void addInstTerm(std::unique_ptr<frInstTerm> in) {
       instTerms.push_back(std::move(in));
     }

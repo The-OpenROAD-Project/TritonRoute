@@ -437,11 +437,11 @@ int io::Parser::Callbacks::getDefComponents(defrCallbackType_e type, defiCompone
   }
 
   
-  auto uInst = make_unique<frInst>();
+  frBlock* refBlock = parser->design->name2refBlock.at(comp->name());
+  auto uInst = make_unique<frInst>(comp->id(), refBlock);
   auto tmpInst = uInst.get();
   tmpInst->setId(parser->numInsts);
   parser->numInsts++;
-  tmpInst->setName(comp->id());
   tmpInst->setOrigin(frPoint(comp->placementX(), comp->placementY()));
   tmpInst->setOrient(frOrientEnum(comp->placementOrient()));
   for (auto &uTerm: tmpInst->getRefBlock()->getTerms()) {
