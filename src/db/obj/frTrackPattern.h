@@ -38,10 +38,6 @@ namespace fr {
     // constructors
     frTrackPattern() : horizontal(false), startCoord(0), numTracks(0),
                        trackSpacing(0), layerNum(0) {}
-    frTrackPattern(const frTrackPattern& tmpTrackPattern) :
-      frBlockObject(tmpTrackPattern),
-      horizontal(tmpTrackPattern.horizontal), startCoord(tmpTrackPattern.startCoord), 
-      numTracks(tmpTrackPattern.numTracks), trackSpacing(tmpTrackPattern.trackSpacing), layerNum(tmpTrackPattern.layerNum) {}
     frTrackPattern(bool tmpIsH, frCoord tmpSC, frUInt4 tmpNT, frUInt4 tmpTS, frLayerNum tmpLN) :
       horizontal(tmpIsH), startCoord(tmpSC), numTracks(tmpNT), trackSpacing(tmpTS), layerNum(tmpLN) {}
     // getters
