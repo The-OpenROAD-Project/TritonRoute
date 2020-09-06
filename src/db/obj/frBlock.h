@@ -110,19 +110,10 @@ namespace fr {
     const std::vector<frBoundary>& getBoundaries() const {
       return boundaries;
     }
-    std::vector<frBoundary>& getBoundaries() {
-      return boundaries;
-    }
-    std::vector< std::unique_ptr<frBlockage> >& getBlockages() {
-      return blockages;
-    }
     const std::vector< std::unique_ptr<frBlockage> >& getBlockages() const {
       return blockages;
     }
     const std::vector<frGCellPattern>& getGCellPatterns() const {
-      return gCellPatterns;
-    }
-    std::vector<frGCellPattern>& getGCellPatterns() {
       return gCellPatterns;
     }
     std::vector<frGuide*> getGuides() const {
@@ -140,17 +131,8 @@ namespace fr {
     const std::vector<std::unique_ptr<frInst> >& getInsts() const {
       return insts;
     }
-    std::vector<std::unique_ptr<frInst> >& getInsts() {
-      return insts;
-    }
-    std::vector<std::unique_ptr<frNet> >& getNets() {
-      return nets;
-    }
     const std::vector<std::unique_ptr<frNet> >& getNets() const {
       return nets;
-    }
-    std::vector<std::unique_ptr<frNet> >& getSNets() {
-      return snets;
     }
     const std::vector<std::unique_ptr<frNet> >& getSNets() const {
       return snets;
@@ -166,12 +148,6 @@ namespace fr {
     }
     const std::vector<std::unique_ptr<frTrackPattern> >& getTrackPatterns(frLayerNum lNum) const {
       return trackPatterns.at(lNum);
-    }
-    std::vector<std::unique_ptr<frTrackPattern> >& getTrackPatterns(frLayerNum lNum) {
-      return trackPatterns.at(lNum);
-    }
-    std::vector<std::unique_ptr<frTerm> >& getTerms() {
-      return terms;
     }
     const std::vector<std::unique_ptr<frTerm> >& getTerms() const {
       return terms;
@@ -270,9 +246,6 @@ namespace fr {
       return macroClass;
     }
     const frList<std::unique_ptr<frMarker> >& getMarkers() const {
-      return markers;
-    }
-    frList<std::unique_ptr<frMarker> >& getMarkers() {
       return markers;
     }
     int getNumMarkers() const {

@@ -53,9 +53,6 @@ namespace fr {
     bool hasRoutes() const {
       return routeObj.empty() ? false : true;
     }
-    std::vector<std::unique_ptr<frConnFig> >& getRoutes() {
-      return routeObj;
-    }
     const std::vector<std::unique_ptr<frConnFig> >& getRoutes() const {
       return routeObj;
     }

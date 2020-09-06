@@ -50,35 +50,17 @@ namespace fr {
     const std::vector<frInstTerm*>& getInstTerms() const {
       return instTerms;
     }
-    std::vector<frInstTerm*>& getInstTerms() {
-      return instTerms;
-    }
     const std::vector<frTerm*>& getTerms() const {
       return terms;
-    }
-    std::vector<frTerm*>& getTerms() {
-      return terms;
-    }
-    std::list<std::unique_ptr<frShape> >& getShapes() {
-      return shapes;
     }
     const std::list<std::unique_ptr<frShape> >& getShapes() const {
       return shapes;
     }
-    std::list<std::unique_ptr<frVia> >& getVias() {
-      return vias;
-    }
     const std::list<std::unique_ptr<frVia> >& getVias() const {
       return vias;
     }
-    std::list<std::unique_ptr<frShape> >& getPatchWires() {
-      return pwires;
-    }
     const std::list<std::unique_ptr<frShape> >& getPatchWires() const {
       return pwires;
-    }
-    std::vector<std::unique_ptr<frGuide> >& getGuides() {
-      return guides;
     }
     const std::vector<std::unique_ptr<frGuide> >& getGuides() const {
       return guides;

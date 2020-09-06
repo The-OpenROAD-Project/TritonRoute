@@ -52,13 +52,7 @@ namespace fr {
     const std::vector<std::unique_ptr<frInstTerm> >& getInstTerms() const {
       return instTerms;
     }
-    std::vector<std::unique_ptr<frInstTerm> >& getInstTerms() {
-      return instTerms;
-    }
     const std::vector<std::unique_ptr<frInstBlockage> >& getInstBlockages() const {
-      return instBlockages;
-    }
-    std::vector<std::unique_ptr<frInstBlockage> >& getInstBlockages() {
       return instBlockages;
     }
     int getPinAccessIdx() const {

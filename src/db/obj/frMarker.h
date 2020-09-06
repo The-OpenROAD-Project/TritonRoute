@@ -90,21 +90,12 @@ namespace fr {
     const std::set<frBlockObject*>& getSrcs() const {
       return srcs;
     }
-    std::set<frBlockObject*>& getSrcs() {
-      return srcs;
-    }
     
     const std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getAggressors() const {
       return aggressors;
     }
-    std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getAggressors() {
-      return aggressors;
-    }
 
     const std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getVictims() const {
-      return victims;
-    }
-    std::vector<std::pair<frBlockObject*, std::tuple<frLayerNum, frBox, bool> > >& getVictims() {
       return victims;
     }
 

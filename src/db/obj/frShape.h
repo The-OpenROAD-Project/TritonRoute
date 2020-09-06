@@ -318,9 +318,6 @@ namespace fr {
     const std::vector<frPoint>& getPoints() const {
       return points;
     }
-    std::vector<frPoint>& getPoints() {
-      return points;
-    }
     // others
     frBlockObjectEnum typeId() const override {
       return frcPolygon;

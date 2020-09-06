@@ -83,9 +83,6 @@ namespace fr {
     const std::vector< std::unique_ptr<frPinFig> >& getFigs() const {
       return pinFigs;
     }
-    std::vector< std::unique_ptr<frPinFig> >& getFigs() {
-      return pinFigs;
-    }
 
     int getNumPinAccess() const {
       return aps.size();
@@ -113,9 +110,6 @@ namespace fr {
     void addLayerShape(const frLayerNum &layerNum, const Polygon &polyIn) {
       using namespace boost::polygon::operators;
       layer2PolySet[layerNum] += polyIn;
-    }
-    std::map< frLayerNum, PolygonSet >& getLayer2PolySet() {
-      return layer2PolySet;
     }
     void addPinAccess(std::unique_ptr<frPinAccess> in) {
       in->setId(aps.size());

@@ -64,9 +64,6 @@ namespace fr {
     const std::vector<frAccessPoint*>& getAccessPoints() const {
       return ap;
     }
-    std::vector<frAccessPoint*>& getAccessPoints() {
-      return ap;
-    }
     frAccessPoint* getAccessPoint(int idx = 0) const {
       return ap[idx];
     }

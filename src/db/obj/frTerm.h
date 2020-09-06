@@ -69,9 +69,6 @@ namespace fr {
     const std::vector< std::unique_ptr<frPin> >& getPins() const {
       return pins;
     }
-    std::vector< std::unique_ptr<frPin> >& getPins() {
-      return pins;
-    }
     // setters
     void addToNet(frNet* in) {
       net = in;
