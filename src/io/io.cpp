@@ -147,9 +147,6 @@ int io::Parser::Callbacks::getDefBlockages(defrCallbackType_e type, defiBlockage
     // pinFig completed
     unique_ptr<frPinFig> uptr(std::move(pinFig));
     pinIn->addPinFig(std::move(uptr));
-    Rectangle pinFigRect(xl, yl, xh, yh);
-    // std::cout << "(" << xl << ", " << yl << ") -- (" << xh << ", " << yh << ")\n";
-    pinIn->addLayerShape(layerNum, pinFigRect);
     // pin completed
     if (enableOutput) {
       cout <<"      RECT " <<blockage->xl(i) <<" " <<blockage->yl(i) <<" " <<blockage->xh(i) <<" " <<blockage->yh(i) <<" ;" <<endl;
@@ -976,9 +973,6 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
       // pin
       unique_ptr<frPinFig> uptr(std::move(pinFig));
       pinIn->addPinFig(std::move(uptr));
-      // std::cout << "Rect" << transformedBBox.left() << ", " << transformedBBox.bottom() << ", " << transformedBBox.right() << ", " << transformedBBox.top() << "\n";
-      Rectangle pinFigRect(transformedBBox.left(), transformedBBox.bottom(), transformedBBox.right(), transformedBBox.top());
-      pinIn->addLayerShape(layerNum, pinFigRect);
       // pin completed
     }
     // polygon
@@ -1010,16 +1004,6 @@ int io::Parser::Callbacks::getDefTerminals(defrCallbackType_e type, defiPin* ter
       // pin
       unique_ptr<frPinFig> uptr(std::move(pinFig));
       pinIn->addPinFig(std::move(uptr));
-      Polygon pinFigPoly;
-      frVector<Point> boostPolyPoints;
-      frTransform tmpXform(term->placementX(), term->placementY(), frOrientEnum(term->orient()));
-      for (auto &pt: tmpPoints) {
-        pt.transform(tmpXform);
-        boostPolyPoints.push_back(Point(pt.x(), pt.y()));
-        // std::cout << pt.x() << " " << pt.y() << "\n";
-      }
-      boost::polygon::set_points(pinFigPoly, boostPolyPoints.begin(), boostPolyPoints.end());
-      pinIn->addLayerShape(layerNum, pinFigPoly);
       // pin completed
     }
     termIn->addPin(std::move(pinIn));
@@ -4286,9 +4270,6 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
         // pin
         unique_ptr<frPinFig> uptr(std::move(pinFig));
         pinIn->addPinFig(std::move(uptr));
-        Rectangle pinFigRect(xl, yl, xh, yh);
-        // std::cout << "(" << xl << ", " << yl << ") -- (" << xh << ", " << yh << ")\n";
-        pinIn->addLayerShape(layerNum, pinFigRect);
         // pin completed
 
         if (enableOutput) {
@@ -4325,14 +4306,6 @@ int io::Parser::Callbacks::getLefPins(lefrCallbackType_e type, lefiPin* pin, lef
         // pin
         unique_ptr<frPinFig> uptr(std::move(pinFig));
         pinIn->addPinFig(std::move(uptr));
-        Polygon pinFigPoly;
-        frVector<Point> boostPolyPoints;
-        for (auto &pt: tmpPoints) {
-          boostPolyPoints.push_back(Point(pt.x(), pt.y()));
-          // std::cout << pt.x() << " " << pt.y() << "\n";
-        }
-        boost::polygon::set_points(pinFigPoly, boostPolyPoints.begin(), boostPolyPoints.end());
-        pinIn->addLayerShape(layerNum, pinFigPoly);
         // pin completed
 
         if (enableOutput) {
@@ -4421,9 +4394,6 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
       // pin
       unique_ptr<frPinFig> uptr(std::move(pinFig));
       pinIn->addPinFig(std::move(uptr));
-      Rectangle pinFigRect(xl, yl, xh, yh);
-      // std::cout << "(" << xl << ", " << yl << ") -- (" << xh << ", " << yh << ")\n";
-      pinIn->addLayerShape(layerNum, pinFigRect);
       // pin completed
       if (enableOutput) {
         cout <<"      RECT " <<rect->xl <<" " <<rect->yl <<" " <<rect->xh <<" " <<rect->yh <<" ;" <<endl;
@@ -4452,14 +4422,6 @@ int io::Parser::Callbacks::getLefObs(lefrCallbackType_e type, lefiObstruction* o
       // pin
       unique_ptr<frPinFig> uptr(std::move(pinFig));
       pinIn->addPinFig(std::move(uptr));
-      Polygon pinFigPoly;
-      std::vector<Point> boostPolyPoints;
-      for (auto &pt: tmpPoints) {
-        boostPolyPoints.push_back(Point(pt.x(), pt.y()));
-        // std::cout << pt.x() << " " << pt.y() << "\n";
-      }
-      boost::polygon::set_points(pinFigPoly, boostPolyPoints.begin(), boostPolyPoints.end());
-      pinIn->addLayerShape(layerNum, pinFigPoly);
       // pin completed
     } else if (geometry->itemType(i) == lefiGeomLayerMinSpacingE) {
       if (layerNum == -1) {

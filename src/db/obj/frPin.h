@@ -103,14 +103,6 @@ namespace fr {
       in->addToPin(this);
       pinFigs.push_back(std::move(in));
     }
-    void addLayerShape(const frLayerNum &layerNum, const Rectangle &rectIn) {
-      using namespace boost::polygon::operators;
-      layer2PolySet[layerNum] += rectIn;
-    }
-    void addLayerShape(const frLayerNum &layerNum, const Polygon &polyIn) {
-      using namespace boost::polygon::operators;
-      layer2PolySet[layerNum] += polyIn;
-    }
     void addPinAccess(std::unique_ptr<frPinAccess> in) {
       in->setId(aps.size());
       aps.push_back(std::move(in));
@@ -122,7 +114,6 @@ namespace fr {
   protected:
     frTerm* term;
     std::vector< std::unique_ptr<frPinFig> > pinFigs; // optional, set later
-    std::map< frLayerNum, PolygonSet> layer2PolySet;
     std::vector<std::unique_ptr<frPinAccess> > aps; // not copied in copy constructor
   };
 }
