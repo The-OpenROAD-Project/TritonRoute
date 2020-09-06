@@ -116,7 +116,6 @@ namespace fr {
   class frMinEnclosedAreaConstraint : public frConstraint {
   public:
     // constructor
-    frMinEnclosedAreaConstraint() : area(-1), width(-1) {}
     frMinEnclosedAreaConstraint(frCoord areaIn) : area(areaIn), width(-1) {}
     // getter
     frCoord getArea() const {
@@ -129,9 +128,6 @@ namespace fr {
       return width;
     }
     // setter
-    void setArea(frCoord &areaIn) {
-      area = areaIn;
-    }
     void setWidth(frCoord &widthIn) {
       width = widthIn;
     }
