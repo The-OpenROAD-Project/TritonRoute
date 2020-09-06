@@ -55,9 +55,6 @@ namespace fr {
     bool hasMazeIdx() const {
       return (!mazeIdx.empty());
     }
-    FlexMazeIdx& getMazeIdx() {
-      return mazeIdx;
-    }
     void getMazeIdx(FlexMazeIdx &in) const {
       in.set(mazeIdx);
     }

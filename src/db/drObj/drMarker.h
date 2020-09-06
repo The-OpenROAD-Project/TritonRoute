@@ -73,9 +73,6 @@ namespace fr {
     const std::map<drNet*, int>& getTrigNets() const {
       return trigNets;
     }
-    std::map<drNet*, int>& getTrigNets() {
-      return trigNets;
-    }
     int getCnt() const {
       return cnt;
     }

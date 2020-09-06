@@ -55,9 +55,6 @@ namespace fr{
     const std::vector<std::unique_ptr<taPinFig> >& getFigs() const {
       return pinFigs;
     }
-    std::vector<std::unique_ptr<taPinFig> >& getFigs() {
-      return pinFigs;
-    }
     frCost getCost() const {
       return cost;
     }

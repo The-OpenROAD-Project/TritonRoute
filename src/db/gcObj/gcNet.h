@@ -119,9 +119,6 @@ namespace fr {
     const std::vector<std::unique_ptr<gcPin> >& getPins(frLayerNum layerNum) const {
       return pins[layerNum];
     }
-    std::vector<std::unique_ptr<gcPin> >& getPins(frLayerNum layerNum) {
-      return pins[layerNum];
-    }
     bool hasOwner() const {
       return (owner);
     }

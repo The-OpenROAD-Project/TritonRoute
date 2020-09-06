@@ -257,9 +257,6 @@ namespace fr {
     const std::vector<frSpacingEndOfLineConstraint*>& getEolSpacing() const {
       return eols;
     }
-    std::vector<frSpacingEndOfLineConstraint*>& getEolSpacing() {
-      return eols;
-    }
     // lef58
     void addLef58CutSpacingConstraint(frLef58CutSpacingConstraint* in) {
       if (in->isSameNet()) {
@@ -275,20 +272,10 @@ namespace fr {
         return lef58CutSpacingConstraints;
       }
     }
-    std::vector<frLef58CutSpacingConstraint*>& getLef58CutSpacingConstraints(bool samenet = false) {
-      if (samenet) {
-        return lef58CutSpacingSamenetConstraints;
-      } else {
-        return lef58CutSpacingConstraints;
-      }
-    }
     void addLef58MinStepConstraint(frLef58MinStepConstraint* in) {
       lef58MinStepConstraints.push_back(in);
     }
     const std::vector<frLef58MinStepConstraint*>& getLef58MinStepConstraints() const {
-      return lef58MinStepConstraints;
-    }
-    std::vector<frLef58MinStepConstraint*>& getLef58MinStepConstraints() {
       return lef58MinStepConstraints;
     }
 
@@ -352,13 +339,6 @@ namespace fr {
       }
     }
     const std::vector<frCutSpacingConstraint*>& getCutSpacing(bool samenet = false) const {
-      if (samenet) {
-        return cutSpacingSamenetConstraints;
-      } else {
-        return cutConstraints;
-      }
-    }
-    std::vector<frCutSpacingConstraint*>& getCutSpacing(bool samenet = false) {
       if (samenet) {
         return cutSpacingSamenetConstraints;
       } else {

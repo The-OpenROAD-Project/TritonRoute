@@ -59,9 +59,6 @@ namespace fr {
     const std::vector<std::unique_ptr<drAccessPattern> >& getAccessPatterns() const {
       return accessPatterns;
     }
-    std::vector<std::unique_ptr<drAccessPattern> >& getAccessPatterns() {
-      return accessPatterns;
-    }
     drNet* getNet() const {
       return net;
     }

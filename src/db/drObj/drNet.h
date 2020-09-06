@@ -48,34 +48,19 @@ namespace fr {
     const std::vector<std::unique_ptr<drPin> >& getPins() const {
       return pins;
     }
-    std::vector<std::unique_ptr<drPin> >& getPins() {
-      return pins;
-    }
     const std::vector<std::unique_ptr<drConnFig> >& getExtConnFigs() const {
-      return extConnFigs;
-    }
-    std::vector<std::unique_ptr<drConnFig> >& getExtConnFigs() {
       return extConnFigs;
     }
     const std::vector<std::unique_ptr<drConnFig> >& getRouteConnFigs() const {
       return routeConnFigs;
     }
-    std::vector<std::unique_ptr<drConnFig> >& getRouteConnFigs() {
-      return routeConnFigs;
-    }
     const std::vector<std::unique_ptr<drConnFig> >& getBestRouteConnFigs() const {
-      return bestRouteConnFigs;
-    }
-    std::vector<std::unique_ptr<drConnFig> >& getBestRouteConnFigs() {
       return bestRouteConnFigs;
     }
     frNet* getFrNet() const {
       return fNet;
     }
     const std::set<frBlockObject*>& getFrNetTerms() const {
-      return fNetTerms;
-    }
-    std::set<frBlockObject*>& getFrNetTerms() {
       return fNetTerms;
     }
     bool isModified() const {
@@ -109,9 +94,6 @@ namespace fr {
       return routed;
     }
     const std::vector<frRect>& getOrigGuides() const {
-      return origGuides;
-    }
-    std::vector<frRect>& getOrigGuides() {
       return origGuides;
     }
 

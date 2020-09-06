@@ -116,15 +116,6 @@ namespace fr{
         exit(1);
       }
     }
-    std::vector<std::unique_ptr<frShape> >& getLayer1Figs() {
-      return layer1Figs;
-    }
-    std::vector<std::unique_ptr<frShape> >& getLayer2Figs() {
-      return layer2Figs;
-    }
-    std::vector<std::unique_ptr<frShape> >& getCutFigs() {
-      return cutFigs;
-    }
     const std::vector<std::unique_ptr<frShape> >& getLayer1Figs() const {
       return layer1Figs;
     }

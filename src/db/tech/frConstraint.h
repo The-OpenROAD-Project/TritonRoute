@@ -984,9 +984,6 @@ namespace fr {
     const fr2DLookupTbl<frCoord, frCoord, frCoord>& getLookupTbl() const {
       return tbl;
     }
-    fr2DLookupTbl<frCoord, frCoord, frCoord>& getLookupTbl() {
-      return tbl;
-    }
     frCoord find(frCoord width, frCoord prl) const {
       return tbl.find(width, prl);
     }
@@ -1022,9 +1019,6 @@ namespace fr {
     frSpacingTableTwConstraint(const fr2DLookupTbl<frSpacingTableTwRowType, frSpacingTableTwRowType, frCoord> &in): tbl(in) {}
     // getter
     const fr2DLookupTbl<frSpacingTableTwRowType, frSpacingTableTwRowType, frCoord>& getLookupTbl() const {
-      return tbl;
-    }
-    fr2DLookupTbl<frSpacingTableTwRowType, frSpacingTableTwRowType, frCoord>& getLookupTbl() {
       return tbl;
     }
     frCoord find(frCoord width1, frCoord width2, frCoord prl) const {

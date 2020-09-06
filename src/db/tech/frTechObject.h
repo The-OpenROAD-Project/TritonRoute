@@ -76,39 +76,21 @@ namespace fr {
     frLayerNum getTopLayerNum() const {
       return (frLayerNum)((int)layers.size() - 1);
     }
-    std::vector<std::unique_ptr<frLayer> >& getLayers() {
-      return layers;
-    }
     const std::vector<std::unique_ptr<frLayer> >& getLayers() const {
       return layers;
     }
     
-    std::vector<std::unique_ptr<frViaDef> >& getVias() {
-      return vias;
-    }
     const std::vector<std::unique_ptr<frViaDef> >& getVias() const {
       return vias;
-    }
-    std::vector<std::unique_ptr<frViaRuleGenerate> >& getViaRuleGenerates() {
-      return viaRuleGenerates;
     }
     const std::vector<std::unique_ptr<frViaRuleGenerate> >& getViaRuleGenerates() const {
       return viaRuleGenerates;
     }
-    std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getVia2ViaForbiddenLen() {
-      return via2ViaForbiddenLen;
-    }
     const std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getVia2ViaForbiddenLen() const {
       return via2ViaForbiddenLen;
     }
-    std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getViaForbiddenTurnLen() {
-      return viaForbiddenTurnLen;
-    }
     const std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getViaForbiddenTurnLen() const {
       return viaForbiddenTurnLen;
-    }
-    std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getViaForbiddenPlanarLen() {
-      return viaForbiddenPlanarLen;
     }
     const std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > >& getViaForbiddenPlanarLen() const {
       return viaForbiddenPlanarLen;
