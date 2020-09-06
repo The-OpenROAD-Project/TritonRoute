@@ -54,9 +54,6 @@ namespace fr {
     frConstraint() {}
   };
 
-  namespace io {
-    class Parser;
-  }
   class frLef58CutClassConstraint : public frConstraint {
   public:
     friend class io::Parser;
