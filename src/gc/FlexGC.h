@@ -69,7 +69,6 @@ namespace fr {
     // constructors
     FlexGCWorker(frDesign* designIn, FlexDRWorker* drWorkerIn = nullptr): design(designIn), drWorker(drWorkerIn), 
                  extBox(), drcBox(), owner2nets(), nets(), markers(), mapMarkers(), pwires(), rq(this), printMarker(false), modifiedDRNets(),
-                 modifiedOwners(), modifiedOwnersSet(),
                  targetNet(nullptr), minLayerNum(std::numeric_limits<frLayerNum>::min()), maxLayerNum(std::numeric_limits<frLayerNum>::max()),
                  targetObj(nullptr), ignoreDB(false), ignoreMinArea(false), surgicalFixEnabled(false) {}
     // setters
@@ -164,8 +163,6 @@ namespace fr {
     // initialization from FlexPA, initPA0 --> addPAObj --> initPA1
     void initPA0();
     void initPA1();
-    void resetPAOwner(frBlockObject* owner);
-    void initPA2();
     void updateDRNet(drNet* net);
 
   protected:
@@ -187,8 +184,6 @@ namespace fr {
 
     // temps
     std::vector<drNet*>                  modifiedDRNets;
-    std::vector<frBlockObject*>          modifiedOwners;
-    std::set<frBlockObject*>             modifiedOwnersSet;
 
     // parameters
     gcNet*                               targetNet;

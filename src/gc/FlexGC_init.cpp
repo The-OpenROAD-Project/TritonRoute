@@ -243,12 +243,6 @@ void FlexGCWorker::addPAObj(frConnFig* obj, frBlockObject* owner) {
     pwire->getBBox(box);
     currNet->addPolygon(box, pwire->getLayerNum(), false);
   }
-  
-  // added 09/24/19
-  if (modifiedOwnersSet.find(owner) == modifiedOwnersSet.end()) {
-    modifiedOwners.push_back(owner);
-    modifiedOwnersSet.insert(owner);
-  }
 }
 
 
@@ -891,24 +885,3 @@ void FlexGCWorker::updateDRNet(drNet* net) {
   modifiedDRNets.push_back(net);
 }
 
-// for use incremental mode in pa
-void FlexGCWorker::resetPAOwner(frBlockObject* owner) {
-  auto net = owner2nets[owner];
-  getWorkerRegionQuery().removeFromRegionQuery(net); // delete all region queries
-  net->clear();               // delete all pins and routeXXX
-  if (modifiedOwnersSet.find(owner) == modifiedOwnersSet.end()) {
-    modifiedOwners.push_back(owner);
-    modifiedOwnersSet.insert(owner);
-  }
-}
-
-void FlexGCWorker::initPA2() {
-  for (auto &owner: modifiedOwners) {
-    auto net = owner2nets[owner];
-    // init gc net
-    initNet(net);
-    getWorkerRegionQuery().addToRegionQuery(net);
-  }
-  modifiedOwners.clear();
-  modifiedOwnersSet.clear();
-}
