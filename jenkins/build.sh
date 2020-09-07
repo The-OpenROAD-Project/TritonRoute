@@ -1,2 +1,5 @@
-docker build --target=base-dependencies -t tritonroute .
-docker run -v $(pwd):/tritonroute tritonroute bash -c "./tritonroute/jenkins/install.sh"
+#!/bin/bash
+set -x
+set -e
+cmake -B build .
+cmake --build build -j "$(nproc)"
