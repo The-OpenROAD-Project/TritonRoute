@@ -140,4 +140,24 @@ BOOST_AUTO_TEST_CASE(min_width_combines_shapes)
   BOOST_TEST(worker.getMarkers().size() == 0);
 }
 
+// Check violation for off-grid points
+BOOST_AUTO_TEST_CASE(off_grid)
+{
+  // Setup
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {1, 1}, {501, 1});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(worker.getMarkers().size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcOffGridConstraint,
+             frBox(1, -49, 501, 51));
+}
+
 BOOST_AUTO_TEST_SUITE_END();
