@@ -167,10 +167,9 @@ BOOST_AUTO_TEST_CASE(corner_basic)
   makeCornerConstraint(2);
 
   frNet* n1 = makeNet("n1");
-  frNet* n2 = makeNet("n2");
 
   makePathseg(n1, 2, {0, 0}, {500, 0});
-  makePathseg(n2, 2, {500, 200}, {1000, 200});
+  makePathseg(n1, 2, {500, 200}, {1000, 200});
 
   runGC();
 
@@ -192,10 +191,9 @@ BOOST_AUTO_TEST_CASE(corner_eol_no_violation)
   makeCornerConstraint(2, 200);
 
   frNet* n1 = makeNet("n1");
-  frNet* n2 = makeNet("n2");
 
   makePathseg(n1, 2, {0, 0}, {500, 0});
-  makePathseg(n2, 2, {500, 200}, {1000, 200});
+  makePathseg(n1, 2, {500, 200}, {1000, 200});
 
   runGC();
 
@@ -213,10 +211,9 @@ BOOST_AUTO_TEST_CASE(corner_prl_no_violation)
   makeCornerConstraint(2);
 
   frNet* n1 = makeNet("n1");
-  frNet* n2 = makeNet("n2");
 
   makePathseg(n1, 2, {0, 0}, {500, 0});
-  makePathseg(n2, 2, {400, 200}, {1000, 200});
+  makePathseg(n1, 2, {400, 200}, {1000, 200});
 
   runGC();
 
@@ -233,11 +230,10 @@ BOOST_AUTO_TEST_CASE(corner_concave, * boost::unit_test::disabled())
   makeCornerConstraint(2, /* no eol */ -1, frCornerTypeEnum::CONCAVE);
 
   frNet* n1 = makeNet("n1");
-  frNet* n2 = makeNet("n2");
 
   makePathseg(n1, 2, {-50, 0}, {500, 0});
   makePathseg(n1, 2, {0, -50}, {0, 500});
-  makePathseg(n2, 2, {200, 200}, {1000, 200});
+  makePathseg(n1, 2, {200, 200}, {1000, 200});
 
   runGC();
 
