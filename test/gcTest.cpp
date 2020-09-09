@@ -104,6 +104,28 @@ BOOST_AUTO_TEST_CASE(metal_short)
              frBox(500, -50, 500, 50));
 }
 
+// Two touching metal shape from the same net must have sufficient
+// overlap
+BOOST_AUTO_TEST_CASE(metal_non_sufficient)
+{
+  // Setup
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {0, 500});
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(markers.size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcNonSufficientMetalConstraint,
+             frBox(0, 0, 50, 50));
+}
+
 // Path seg less than min width flags a violation
 BOOST_AUTO_TEST_CASE(min_width)
 {
