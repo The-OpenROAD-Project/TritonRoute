@@ -44,7 +44,8 @@ class Fixture
 
   void makeDesign();
 
-  void makeCornerConstraint(fr::frLayerNum layer_num);
+  void makeCornerConstraint(fr::frLayerNum layer_num,
+                            fr::frCoord eolWidth = -1);
 
   fr::frNet* makeNet(const char* name);
 

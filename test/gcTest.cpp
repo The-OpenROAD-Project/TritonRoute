@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(off_grid)
 }
 
 // Check violation for corner spacing
-BOOST_AUTO_TEST_CASE(basic_corner)
+BOOST_AUTO_TEST_CASE(corner_basic)
 {
   // Setup
   makeCornerConstraint(2);
@@ -182,6 +182,48 @@ BOOST_AUTO_TEST_CASE(basic_corner)
              2,
              frConstraintTypeEnum::frcLef58CornerSpacingConstraint,
              frBox(500, 50, 500, 150));
+}
+
+// Check no violation for corner spacing with EOL spacing
+// (same as corner_basic but for eol)
+BOOST_AUTO_TEST_CASE(corner_eol_no_violation)
+{
+  // Setup
+  makeCornerConstraint(2, 200);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+  makePathseg(n2, 2, {500, 200}, {1000, 200});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(worker.getMarkers().size() == 0);
+}
+
+// Check no violation for corner spacing with PRL > 0
+// (same as corner_basic but for n2's pathseg begin pt)
+BOOST_AUTO_TEST_CASE(corner_prl_no_violation)
+{
+  // Setup
+  makeCornerConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+  makePathseg(n2, 2, {400, 200}, {1000, 200});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(worker.getMarkers().size() == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
