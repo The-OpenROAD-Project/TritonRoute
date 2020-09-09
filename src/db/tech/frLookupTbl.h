@@ -58,9 +58,9 @@ namespace fr {
                                             interpolateTypeCol(in.interpolateTypeCol),
                                             extrapolateTypeRowLower(in.extrapolateTypeRowLower),
                                             extrapolateTypeRowUpper(in.extrapolateTypeRowUpper) {}
-    fr1DLookupTbl(frString &rowNameIn,
-                  frCollection<rowClass> &rowsIn,
-                  frCollection<valClass> &valsIn) {
+    fr1DLookupTbl(const frString &rowNameIn,
+                  const frCollection<rowClass> &rowsIn,
+                  const frCollection<valClass> &valsIn) {
       rowName = rowNameIn;
       rows = rowsIn;
       vals = valsIn;
@@ -73,13 +73,6 @@ namespace fr {
     // getters
     frString getRowName();
     frCollection<rowClass> getRows();
-
-    // setters
-    void setRowName(frString &name);
-    void setInterpolateTypeRow(frInterpolateType &type);
-    void setInterpolateTypeCol(frInterpolateType &type);
-    void setExtrapolateTypeRowLower(frExtrapolateType &type);
-    void setExtrapolateTypeRowUpper(frExtrapolateType &type);
 
     // others
     valClass find(const rowClass &rowVal) const {
@@ -197,16 +190,6 @@ namespace fr {
     frCollection<colClass> getCols() {
       return cols;
     }
-
-    // setters
-    void setRowName(frString &name);
-    void setColName(frString &name);
-    void setInterpolateTypeRow(frInterpolateType &type);
-    void setInterpolateTypeCol(frInterpolateType &type);
-    void setExtrapolateTypeRowLower(frExtrapolateType &type);
-    void setExtrapolateTypeColLower(frExtrapolateType &type);
-    void setExtrapolateTypeRowUpper(frExtrapolateType &type);
-    void setExtrapolateTypeColUpper(frExtrapolateType &type);
 
     // others
     valClass find(const rowClass &rowVal, const colClass &colVal) const {
