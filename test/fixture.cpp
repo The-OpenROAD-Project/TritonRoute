@@ -60,6 +60,10 @@ void Fixture::addLayer(frTechObject* tech,
     auto offGridConstraint = std::make_unique<frOffGridConstraint>();
     layer->setOffGridConstraint(offGridConstraint.get());
     tech->addUConstraint(std::move(offGridConstraint));
+
+    auto nsmetalConstraint = std::make_unique<frNonSufficientMetalConstraint>();
+    layer->setNonSufficientMetalConstraint(nsmetalConstraint.get());
+    tech->addUConstraint(std::move(nsmetalConstraint));
   }
 
   auto shortConstraint = std::make_unique<frShortConstraint>();
@@ -101,13 +105,14 @@ void Fixture::makeDesign()
 }
 
 void Fixture::makeCornerConstraint(frLayerNum layer_num,
-                                   fr::frCoord eolWidth)
+                                   fr::frCoord eolWidth,
+                                   frCornerTypeEnum type)
 {
   fr1DLookupTbl<frCoord, std::pair<frCoord, frCoord> > cornerSpacingTbl(
       "WIDTH", {0}, {{200, 200}});
   auto con = std::make_unique<frLef58CornerSpacingConstraint>(cornerSpacingTbl);
 
-  con->setCornerType(frCornerTypeEnum::CONVEX);
+  con->setCornerType(type);
   con->setSameXY(true);
   if (eolWidth >= 0) {
     con->setEolWidth(eolWidth);

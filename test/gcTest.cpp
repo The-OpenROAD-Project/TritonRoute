@@ -226,4 +226,29 @@ BOOST_AUTO_TEST_CASE(corner_prl_no_violation)
   BOOST_TEST(worker.getMarkers().size() == 0);
 }
 
+// Check violation for corner spacing on a concave corner
+BOOST_AUTO_TEST_CASE(corner_concave, * boost::unit_test::disabled())
+{
+  // Setup
+  makeCornerConstraint(2, /* no eol */ -1, frCornerTypeEnum::CONCAVE);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  makePathseg(n1, 2, {-50, 0}, {500, 0});
+  makePathseg(n1, 2, {0, -50}, {0, 500});
+  makePathseg(n2, 2, {200, 200}, {1000, 200});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(worker.getMarkers().size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcLef58CornerSpacingConstraint,
+             frBox(50, 50, 200, 200));
+}
+
 BOOST_AUTO_TEST_SUITE_END();
