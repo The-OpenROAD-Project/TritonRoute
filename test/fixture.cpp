@@ -100,6 +100,21 @@ void Fixture::makeDesign()
   design->setTopBlock(std::move(block));
 }
 
+void Fixture::makeCornerConstraint(frLayerNum layer_num)
+{
+  fr1DLookupTbl<frCoord, std::pair<frCoord, frCoord> > cornerSpacingTbl(
+      "WIDTH", {0}, {{200, 200}});
+  auto con = std::make_unique<frLef58CornerSpacingConstraint>(cornerSpacingTbl);
+
+  con->setCornerType(frCornerTypeEnum::CONVEX);
+  con->setSameXY(true);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->addLef58CornerSpacingConstraint(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
 frNet* Fixture::makeNet(const char* name)
 {
   frBlock* block = design->getTopBlock();

@@ -44,6 +44,8 @@ class Fixture
 
   void makeDesign();
 
+  void makeCornerConstraint(fr::frLayerNum layer_num);
+
   fr::frNet* makeNet(const char* name);
 
   void makePathseg(fr::frNet* net,

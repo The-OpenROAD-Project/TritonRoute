@@ -29,12 +29,12 @@
 #define BOOST_TEST_MODULE gc
 
 #ifdef HAS_BOOST_UNIT_TEST_LIBRARY
-  // Shared library version
-  #define BOOST_TEST_DYN_LINK
-  #include <boost/test/unit_test.hpp>
+// Shared library version
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 #else
-  // Header only version
-  #include <boost/test/included/unit_test.hpp>
+// Header only version
+#include <boost/test/included/unit_test.hpp>
 #endif
 
 #include "fixture.h"
@@ -158,6 +158,30 @@ BOOST_AUTO_TEST_CASE(off_grid)
              2,
              frConstraintTypeEnum::frcOffGridConstraint,
              frBox(1, -49, 501, 51));
+}
+
+// Check violation for corner spacing
+BOOST_AUTO_TEST_CASE(basic_corner)
+{
+  // Setup
+  makeCornerConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+  makePathseg(n2, 2, {500, 200}, {1000, 200});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  BOOST_TEST(worker.getMarkers().size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcLef58CornerSpacingConstraint,
+             frBox(500, 50, 500, 150));
 }
 
 BOOST_AUTO_TEST_SUITE_END();
