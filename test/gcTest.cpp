@@ -31,6 +31,7 @@
 #ifdef HAS_BOOST_UNIT_TEST_LIBRARY
 // Shared library version
 #define BOOST_TEST_DYN_LINK
+#include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #else
 // Header only version
@@ -42,6 +43,7 @@
 #include "gc/FlexGC.h"
 
 using namespace fr;
+namespace bdata = boost::unit_test::data;
 
 // Fixture for GC tests
 struct GCFixture : public Fixture
@@ -246,7 +248,7 @@ BOOST_AUTO_TEST_CASE(corner_prl_no_violation)
 }
 
 // Check violation for corner spacing on a concave corner
-BOOST_AUTO_TEST_CASE(corner_concave, * boost::unit_test::disabled())
+BOOST_AUTO_TEST_CASE(corner_concave, *boost::unit_test::disabled())
 {
   // Setup
   makeCornerConstraint(2, /* no eol */ -1, frCornerTypeEnum::CONCAVE);
@@ -267,6 +269,48 @@ BOOST_AUTO_TEST_CASE(corner_concave, * boost::unit_test::disabled())
              2,
              frConstraintTypeEnum::frcLef58CornerSpacingConstraint,
              frBox(50, 50, 200, 200));
+}
+
+// Check violation for parallel-run-length (PRL) spacing tables
+// This test runs over a variety of width / prl / spacing values
+// where the spacing is both legal or illegal.
+BOOST_DATA_TEST_CASE(spacing_prl,
+                     (bdata::make({100, 220}) * bdata::make({300, 500})
+                      ^ bdata::make({100, 200, 300, 400}))
+                         * bdata::make({true, false}),
+                     width,
+                     prl,
+                     spacing,
+                     legal)
+{
+  // Setup
+  makeSpacingConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  frCoord y = /* n2_width / 2 */ 50 + spacing + width / 2;
+  if (!legal) {
+    /* move too close making a violation */
+    y -= 10;
+  }
+  makePathseg(n1, 2, {0, y}, {prl, y}, width);
+  makePathseg(n2, 2, {0, 0}, {500, 0}, 100);
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+
+  if (legal) {
+    BOOST_TEST(worker.getMarkers().size() == 0);
+  } else {
+    BOOST_TEST(worker.getMarkers().size() == 1);
+    testMarker(markers[0].get(),
+               2,
+               frConstraintTypeEnum::frcSpacingTablePrlConstraint,
+               frBox(0, 50, prl, y - width / 2));
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END();

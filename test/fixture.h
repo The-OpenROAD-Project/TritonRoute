@@ -48,6 +48,9 @@ class Fixture
                             fr::frCoord eolWidth = -1,
                             fr::frCornerTypeEnum type
                             = fr::frCornerTypeEnum::CONVEX);
+
+  void makeSpacingConstraint(fr::frLayerNum layer_num);
+
   fr::frNet* makeNet(const char* name);
 
   void makePathseg(fr::frNet* net,

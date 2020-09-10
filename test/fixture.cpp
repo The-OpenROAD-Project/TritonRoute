@@ -124,6 +124,21 @@ void Fixture::makeCornerConstraint(frLayerNum layer_num,
   tech->addUConstraint(std::move(con));
 }
 
+void Fixture::makeSpacingConstraint(fr::frLayerNum layer_num)
+{
+  fr2DLookupTbl<frCoord, frCoord, frCoord> tbl("WIDTH",
+                                               {0, 200},
+                                               "PARALLELRUNLENGTH",
+                                               {0, 400},
+                                               {{100, 200}, {300, 400}});
+  auto con = std::make_unique<frSpacingTablePrlConstraint>(tbl);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->setMinSpacing(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
 frNet* Fixture::makeNet(const char* name)
 {
   frBlock* block = design->getTopBlock();
