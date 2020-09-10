@@ -235,6 +235,7 @@ target_link_libraries(trTest
 # the code to select the corresponding include.  Using the shared
 # library speeds up compilation.
 if (Boost_unit_test_framework_FOUND)
+  message(STATUS "Boost unit_test_framework library found")
   target_link_libraries(trTest
     Boost::unit_test_framework
   )
