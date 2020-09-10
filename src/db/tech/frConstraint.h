@@ -128,7 +128,7 @@ namespace fr {
       return width;
     }
     // setter
-    void setWidth(frCoord &widthIn) {
+    void setWidth(frCoord widthIn) {
       width = widthIn;
     }
 
@@ -365,7 +365,7 @@ namespace fr {
       return minArea;
     }
     // setter
-    void setMinArea(frCoord &minAreaIn) {
+    void setMinArea(frCoord minAreaIn) {
       minArea = minAreaIn;
     }
 
@@ -388,7 +388,7 @@ namespace fr {
       return minWidth;
     }
     // setter
-    void set(frCoord &minWidthIn) {
+    void set(frCoord minWidthIn) {
       minWidth = minWidthIn;
     }
 
@@ -752,14 +752,14 @@ namespace fr {
   class frSpacingConstraint : public frConstraint {
   public:
     frSpacingConstraint(): minSpacing(0) {}
-    frSpacingConstraint(frCoord &minSpacingIn): minSpacing(minSpacingIn) {}
+    frSpacingConstraint(frCoord minSpacingIn): minSpacing(minSpacingIn) {}
 
     // getter
     frCoord getMinSpacing() const {
       return minSpacing;
     }
     // setter
-    void setMinSpacing(frCoord &minSpacingIn) {
+    void setMinSpacing(frCoord minSpacingIn) {
       minSpacing = minSpacingIn;
     }
     // check
@@ -818,10 +818,10 @@ namespace fr {
       return isTwoEdges;
     }
     // setter
-    void setEolWithin(frCoord &eolWithinIn) {
+    void setEolWithin(frCoord eolWithinIn) {
       eolWithin = eolWithinIn;
     }
-    void setEolWidth(frCoord &eolWidthIn) {
+    void setEolWidth(frCoord eolWidthIn) {
       eolWidth = eolWidthIn;
     }
     void setParSpace(frCoord parSpaceIn) {
@@ -1114,7 +1114,7 @@ namespace fr {
   // constructor
   frCutSpacingConstraint() {}
   frCutSpacingConstraint(
-    frCoord &cutSpacingIn,
+    frCoord cutSpacingIn,
     bool centerToCenterIn,
     bool sameNetIn,
     frString secondLayerNameIn,
@@ -1794,46 +1794,46 @@ namespace fr {
     }
 
     // setters
-    void setCornerType(const frCornerTypeEnum &in) {
+    void setCornerType(frCornerTypeEnum in) {
       cornerType = in;
     }
-    void setSameMask(const bool &in) {
+    void setSameMask(bool in) {
       sameMask = in;
     }
-    void setWithin(const frCoord &in) {
+    void setWithin(frCoord in) {
       within = in;
     }
-    void setEolWidth(const frCoord &in) {
+    void setEolWidth(frCoord in) {
       eolWidth = in;
     }
-    void setLength(const frCoord &in) {
+    void setLength(frCoord in) {
       length = in;
     }
-    void setEdgeLength(const bool &in) {
+    void setEdgeLength(bool in) {
       edgeLength = in;
     }
-    void setIncludeLShape(const bool &in) {
+    void setIncludeLShape(bool in) {
       includeLShape = in;
     }
-    void setMinLength(const frCoord &in) {
+    void setMinLength(frCoord in) {
       minLength = in;
     }
-    void setExceptNotch(const bool &in) {
+    void setExceptNotch(bool in) {
       exceptNotch = in;
     }
-    void setExceptNotchLength(const frCoord &in) {
+    void setExceptNotchLength(frCoord in) {
       notchLength = in;
     }
-    void setExceptSameNet(const bool &in) {
+    void setExceptSameNet(bool in) {
       exceptSameNet = in;
     }
-    void setExceptSameMetal(const bool &in) {
+    void setExceptSameMetal(bool in) {
       exceptSameMetal = in;
     }
     void setLookupTbl(const fr1DLookupTbl<frCoord, std::pair<frCoord, frCoord> > &in) {
       tbl = in;
     }
-    void setSameXY(const bool &in) {
+    void setSameXY(bool in) {
       sameXY = in;
     }
 
@@ -1858,7 +1858,7 @@ namespace fr {
   class frLef58CornerSpacingSpacingConstraint : public frConstraint {
   public:
     // constructor
-    frLef58CornerSpacingSpacingConstraint(frCoord &widthIn)
+    frLef58CornerSpacingSpacingConstraint(frCoord widthIn)
       : width(widthIn)
     {}
     // getter
@@ -1866,7 +1866,7 @@ namespace fr {
       return width;
     }
     // setter
-    void setWidth(frCoord &widthIn) {
+    void setWidth(frCoord widthIn) {
       width = widthIn;
     }
 
@@ -1888,7 +1888,7 @@ namespace fr {
       return spacing;
     }
     // setter
-    void setSpacing(frCoord &spacingIn) {
+    void setSpacing(frCoord spacingIn) {
       spacing = spacingIn;
     }
 
@@ -1914,10 +1914,10 @@ namespace fr {
       return verticalSpacing;
     }
     // setter
-    void setHorizontalSpacing(frCoord &horizontalSpacingIn) {
+    void setHorizontalSpacing(frCoord horizontalSpacingIn) {
       horizontalSpacing = horizontalSpacingIn;
     }
-    void setVerticalSpacing(frCoord &verticalSpacingIn) {
+    void setVerticalSpacing(frCoord verticalSpacingIn) {
       verticalSpacing = verticalSpacingIn;
     }
 
