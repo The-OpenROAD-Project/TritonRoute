@@ -355,4 +355,36 @@ BOOST_AUTO_TEST_CASE(min_step58)
              frBox(200, 50, 300, 70));
 }
 
+// Check for a lef58 rect only violation.  The markers are
+// the concave corners expanded by min-width and intersected
+// with the metal shapes.
+BOOST_AUTO_TEST_CASE(rect_only)
+{
+  // Setup
+  makeRectOnlyConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+  makePathseg(n1, 2, {200, 0}, {200, 100});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+  BOOST_TEST(markers.size() == 3);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcLef58RectOnlyConstraint,
+             frBox(150, -50, 250, 100));
+  testMarker(markers[1].get(),
+             2,
+             frConstraintTypeEnum::frcLef58RectOnlyConstraint,
+             frBox(150, -50, 350, 50));
+  testMarker(markers[2].get(),
+             2,
+             frConstraintTypeEnum::frcLef58RectOnlyConstraint,
+             frBox(50, -50, 250, 50));
+}
+
 BOOST_AUTO_TEST_SUITE_END();
