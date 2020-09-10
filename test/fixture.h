@@ -59,7 +59,10 @@ class Fixture
 
   void makeMinEnclosedAreaConstraint(fr::frLayerNum layer_num);
 
-  void makeSpacingEndOfLineConstraint(fr::frLayerNum layer_num);
+  void makeSpacingEndOfLineConstraint(fr::frLayerNum layer_num,
+                                      fr::frCoord par_space = -1,
+                                      fr::frCoord par_within = -1,
+                                      bool two_edges = false);
 
   fr::frNet* makeNet(const char* name);
 

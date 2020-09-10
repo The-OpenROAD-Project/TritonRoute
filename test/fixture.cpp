@@ -188,13 +188,25 @@ void Fixture::makeMinEnclosedAreaConstraint(frLayerNum layer_num)
   tech->addUConstraint(std::move(con));
 }
 
-void Fixture::makeSpacingEndOfLineConstraint(frLayerNum layer_num)
+void Fixture::makeSpacingEndOfLineConstraint(frLayerNum layer_num,
+                                             frCoord par_space,
+                                             frCoord par_within,
+                                             bool two_edges)
 {
   auto con = std::make_unique<frSpacingEndOfLineConstraint>();
 
   con->setMinSpacing(200);
   con->setEolWidth(200);
   con->setEolWithin(50);
+
+  if (par_space != -1) {
+    if (par_within == -1) {
+      throw std::invalid_argument("Must give par_within with par_space");
+    }
+    con->setParSpace(par_space);
+    con->setParWithin(par_within);
+    con->setTwoEdges(two_edges);
+  }
 
   frTechObject* tech = design->getTech();
   frLayer* layer = tech->getLayer(layer_num);
