@@ -27,6 +27,7 @@
  */
 
 #include "fixture.h"
+#include <stdexcept>
 
 using namespace fr;
 
@@ -207,10 +208,17 @@ void Fixture::makePathseg(frNet* net,
   ps->setPoints(begin, end);
   ps->setLayerNum(layer_num);
 
+  if (begin_style == frcVariableEndStyle || end_style == frcVariableEndStyle) {
+    throw std::invalid_argument("frcVariableEndStyle not supported");
+  }
+
+  frCoord begin_ext = begin_style == frcExtendEndStyle ? width / 2 : 0;
+  frCoord end_ext = begin_style == frcExtendEndStyle ? width / 2 : 0;
+
   frSegStyle style;
   style.setWidth(width);
-  style.setBeginStyle(begin_style);
-  style.setEndStyle(end_style);
+  style.setBeginStyle(begin_style, begin_ext);
+  style.setEndStyle(end_style, end_ext);
 
   ps->setStyle(style);
   net->addShape(std::move(ps));
