@@ -1579,7 +1579,7 @@ void FlexGCWorker::checkMetalShape_minStep(gcPin* pin) {
     lly = edge->high().y();
     urx = edge->high().x();
     ury = edge->high().y();
-    while (1) {
+    while (true) {
       edge = edge->getNextEdge();
       if (gtl::length(*edge) < minStepLength) {
         currEdges++;

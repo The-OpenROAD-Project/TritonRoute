@@ -313,4 +313,45 @@ BOOST_DATA_TEST_CASE(spacing_prl,
   }
 }
 
+// Check for a min step violation.  The checker seems broken
+// so this test is disabled.
+BOOST_AUTO_TEST_CASE(min_step, *boost::unit_test::disabled())
+{
+  // Setup
+  makeMinStepConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {200, 0});
+  makePathseg(n1, 2, {100, 20}, {200, 20});
+
+  runGC();
+
+  // Test the results
+  BOOST_TEST(worker.getMarkers().size() == 1);
+}
+
+// Check for a lef58 style min step violation.  The checker is very
+// limited and just supports NOBETWEENEOL style.
+BOOST_AUTO_TEST_CASE(min_step58)
+{
+  // Setup
+  makeMinStep58Constraint(2);
+
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {0, 0}, {500, 0});
+  makePathseg(n1, 2, {200, 20}, {300, 20});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+  BOOST_TEST(markers.size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcLef58MinStepConstraint,
+             frBox(200, 50, 300, 70));
+}
+
 BOOST_AUTO_TEST_SUITE_END();

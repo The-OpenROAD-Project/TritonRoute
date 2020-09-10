@@ -51,6 +51,10 @@ class Fixture
 
   void makeSpacingConstraint(fr::frLayerNum layer_num);
 
+  void makeMinStepConstraint(fr::frLayerNum layer_num);
+
+  void makeMinStep58Constraint(fr::frLayerNum layer_num);
+
   fr::frNet* makeNet(const char* name);
 
   void makePathseg(fr::frNet* net,

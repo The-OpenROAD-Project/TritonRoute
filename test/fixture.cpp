@@ -105,7 +105,7 @@ void Fixture::makeDesign()
 }
 
 void Fixture::makeCornerConstraint(frLayerNum layer_num,
-                                   fr::frCoord eolWidth,
+                                   frCoord eolWidth,
                                    frCornerTypeEnum type)
 {
   fr1DLookupTbl<frCoord, std::pair<frCoord, frCoord> > cornerSpacingTbl(
@@ -124,7 +124,7 @@ void Fixture::makeCornerConstraint(frLayerNum layer_num,
   tech->addUConstraint(std::move(con));
 }
 
-void Fixture::makeSpacingConstraint(fr::frLayerNum layer_num)
+void Fixture::makeSpacingConstraint(frLayerNum layer_num)
 {
   fr2DLookupTbl<frCoord, frCoord, frCoord> tbl("WIDTH",
                                                {0, 200},
@@ -136,6 +136,33 @@ void Fixture::makeSpacingConstraint(fr::frLayerNum layer_num)
   frTechObject* tech = design->getTech();
   frLayer* layer = tech->getLayer(layer_num);
   layer->setMinSpacing(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
+void Fixture::makeMinStepConstraint(frLayerNum layer_num)
+{
+  auto con = std::make_unique<frMinStepConstraint>();
+
+  con->setMinstepType(frMinstepTypeEnum::STEP);
+  con->setMinStepLength(50);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->setMinStepConstraint(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
+void Fixture::makeMinStep58Constraint(frLayerNum layer_num)
+{
+  auto con = std::make_unique<frLef58MinStepConstraint>();
+
+  con->setMinStepLength(50);
+  con->setMaxEdges(1);
+  con->setEolWidth(200);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->addLef58MinStepConstraint(con.get());
   tech->addUConstraint(std::move(con));
 }
 
