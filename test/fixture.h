@@ -69,6 +69,21 @@ class Fixture
                    fr::frEndStyleEnum begin_style = fr::frcTruncateEndStyle,
                    fr::frEndStyleEnum end_style = fr::frcTruncateEndStyle);
 
+  void makePathsegExt(fr::frNet* net,
+                      fr::frLayerNum layer_num,
+                      const fr::frPoint& begin,
+                      const fr::frPoint& end,
+                      fr::frUInt4 width = 100)
+  {
+    makePathseg(net,
+                layer_num,
+                begin,
+                end,
+                width,
+                fr::frcExtendEndStyle,
+                fr::frcExtendEndStyle);
+  }
+
   void initRegionQuery();
 
   // Public data members are accessible from inside the test function

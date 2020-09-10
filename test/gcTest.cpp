@@ -256,8 +256,8 @@ BOOST_AUTO_TEST_CASE(corner_concave, *boost::unit_test::disabled())
 
   frNet* n1 = makeNet("n1");
 
-  makePathseg(n1, 2, {-50, 0}, {500, 0});
-  makePathseg(n1, 2, {0, -50}, {0, 500});
+  makePathsegExt(n1, 2, {0, 0}, {500, 0});
+  makePathsegExt(n1, 2, {0, 0}, {0, 500});
   makePathseg(n1, 2, {200, 200}, {1000, 200});
 
   runGC();
@@ -395,10 +395,10 @@ BOOST_AUTO_TEST_CASE(min_enclosed_area)
 
   frNet* n1 = makeNet("n1");
 
-  makePathseg(n1, 2, {-50, 0}, {250, 0});
-  makePathseg(n1, 2, {0, -50}, {0, 250});
-  makePathseg(n1, 2, {-50, 200}, {250, 200});
-  makePathseg(n1, 2, {200, -50}, {200, 250});
+  makePathsegExt(n1, 2, {0, 0}, {200, 0});
+  makePathsegExt(n1, 2, {0, 0}, {0, 200});
+  makePathsegExt(n1, 2, {0, 200}, {200, 200});
+  makePathsegExt(n1, 2, {200, 0}, {200, 200});
 
   runGC();
 
