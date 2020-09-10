@@ -1,1 +1,6 @@
-docker run -v $(pwd):/tritonroute tritonroute bash -c "make -C /tritonroute/build test && cd /tritonroute/test/ && ./unit_test.sh /tritonroute/build/TritonRoute"
+#!/bin/bash
+set -x
+set -e
+cmake --build build --target test
+cd ./test || exit 1
+./unit_test.sh ../build/TritonRoute
