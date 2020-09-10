@@ -387,4 +387,28 @@ BOOST_AUTO_TEST_CASE(rect_only)
              frBox(50, -50, 250, 50));
 }
 
+// Check for a min enclosed area violation.
+BOOST_AUTO_TEST_CASE(min_enclosed_area)
+{
+  // Setup
+  makeMinEnclosedAreaConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+
+  makePathseg(n1, 2, {-50, 0}, {250, 0});
+  makePathseg(n1, 2, {0, -50}, {0, 250});
+  makePathseg(n1, 2, {-50, 200}, {250, 200});
+  makePathseg(n1, 2, {200, -50}, {200, 250});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+  BOOST_TEST(markers.size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcMinEnclosedAreaConstraint,
+             frBox(50, 50, 150, 150));
+}
+
 BOOST_AUTO_TEST_SUITE_END();

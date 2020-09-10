@@ -176,6 +176,16 @@ void Fixture::makeRectOnlyConstraint(frLayerNum layer_num)
   tech->addUConstraint(std::move(con));
 }
 
+void Fixture::makeMinEnclosedAreaConstraint(frLayerNum layer_num)
+{
+  auto con = std::make_unique<frMinEnclosedAreaConstraint>(200 * 200);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->addMinEnclosedAreaConstraint(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
 frNet* Fixture::makeNet(const char* name)
 {
   frBlock* block = design->getTopBlock();

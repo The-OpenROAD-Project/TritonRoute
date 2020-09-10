@@ -57,6 +57,8 @@ class Fixture
 
   void makeRectOnlyConstraint(fr::frLayerNum layer_num);
 
+  void makeMinEnclosedAreaConstraint(fr::frLayerNum layer_num);
+
   fr::frNet* makeNet(const char* name);
 
   void makePathseg(fr::frNet* net,
