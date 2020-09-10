@@ -411,4 +411,27 @@ BOOST_AUTO_TEST_CASE(min_enclosed_area)
              frBox(50, 50, 150, 150));
 }
 
+// Check for a min enclosed area violation.
+BOOST_AUTO_TEST_CASE(eol_basic)
+{
+  // Setup
+  makeSpacingEndOfLineConstraint(2);
+
+  frNet* n1 = makeNet("n1");
+  frNet* n2 = makeNet("n2");
+
+  makePathseg(n1, 2, {500, 0}, {500, 500});
+  makePathseg(n2, 2, {0, 700}, {1000, 700});
+
+  runGC();
+
+  // Test the results
+  auto& markers = worker.getMarkers();
+  BOOST_TEST(markers.size() == 1);
+  testMarker(markers[0].get(),
+             2,
+             frConstraintTypeEnum::frcSpacingEndOfLineConstraint,
+             frBox(450, 500, 550, 650));
+}
+
 BOOST_AUTO_TEST_SUITE_END();

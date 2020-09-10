@@ -26,8 +26,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fixture.h"
 #include <stdexcept>
+
+#include "fixture.h"
 
 using namespace fr;
 
@@ -184,6 +185,20 @@ void Fixture::makeMinEnclosedAreaConstraint(frLayerNum layer_num)
   frTechObject* tech = design->getTech();
   frLayer* layer = tech->getLayer(layer_num);
   layer->addMinEnclosedAreaConstraint(con.get());
+  tech->addUConstraint(std::move(con));
+}
+
+void Fixture::makeSpacingEndOfLineConstraint(frLayerNum layer_num)
+{
+  auto con = std::make_unique<frSpacingEndOfLineConstraint>();
+
+  con->setMinSpacing(200);
+  con->setEolWidth(200);
+  con->setEolWithin(50);
+
+  frTechObject* tech = design->getTech();
+  frLayer* layer = tech->getLayer(layer_num);
+  layer->addEolSpacing(con.get());
   tech->addUConstraint(std::move(con));
 }
 
