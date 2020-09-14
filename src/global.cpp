@@ -64,8 +64,6 @@ bool   ENABLE_VIA_GEN = true;
 
 frLayerNum VIAINPIN_BOTTOMLAYERNUM             = std::numeric_limits<frLayerNum>::max();
 frLayerNum VIAINPIN_TOPLAYERNUM                = std::numeric_limits<frLayerNum>::max();
-frLayerNum VIAONLY_MACROCELLPIN_BOTTOMLAYERNUM = std::numeric_limits<frLayerNum>::max();
-frLayerNum VIAONLY_MACROCELLPIN_TOPLAYERNUM    = std::numeric_limits<frLayerNum>::max();
 int        MINNUMACCESSPOINT_MACROCELLPIN      = 3;
 int        MINNUMACCESSPOINT_STDCELLPIN        = 3;
 int        ACCESS_PATTERN_END_ITERATION_NUM    = 5;

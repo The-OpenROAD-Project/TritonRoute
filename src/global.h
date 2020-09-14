@@ -66,8 +66,6 @@ extern bool ENABLE_VIA_GEN;
 //extern int TEST;
 extern fr::frLayerNum VIAINPIN_BOTTOMLAYERNUM;
 extern fr::frLayerNum VIAINPIN_TOPLAYERNUM;
-extern fr::frLayerNum VIAONLY_MACROCELLPIN_BOTTOMLAYERNUM;
-extern fr::frLayerNum VIAONLY_MACROCELLPIN_TOPLAYERNUM;
 extern fr::frLayerNum VIAONLY_STDCELLPIN_BOTTOMLAYERNUM;
 extern fr::frLayerNum VIAONLY_STDCELLPIN_TOPLAYERNUM;
 // uni-directional routing related
