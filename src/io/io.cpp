@@ -4958,6 +4958,21 @@ void io::Parser::readGuide() {
           exit(2);
         }
         layerNum = tech->name2layer[vLine[4]]->getLayerNum();
+
+        if (layerNum < BOTTOM_ROUTING_LAYER && layerNum != VIA_ACCESS_LAYERNUM
+            || layerNum > TOP_ROUTING_LAYER) {
+          cout << "Error: guide in net " << netName
+               << " uses layer " << vLine[4]
+               << " (" << layerNum << ")"
+               << " that is outside the allowed routing range "
+               << "[" << tech->getLayer(BOTTOM_ROUTING_LAYER)->getName()
+               << " (" << BOTTOM_ROUTING_LAYER << "), "
+               << tech->getLayer(TOP_ROUTING_LAYER)->getName()
+               << " (" << TOP_ROUTING_LAYER << ")]"
+               << endl;
+          exit(2);
+        }
+
         box.set(stoi(vLine[0]), stoi(vLine[1]), stoi(vLine[2]), stoi(vLine[3]));
         frRect rect;
         rect.setBBox(box);
