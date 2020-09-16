@@ -642,15 +642,6 @@ void io::Parser::writeRefDef() {
 }
 
 void io::Parser::postProcess() {
-  if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
-    VIAINPIN_BOTTOMLAYERNUM = 2;
-    VIAINPIN_TOPLAYERNUM = 2;
-    USENONPREFTRACKS = false;
-    BOTTOM_ROUTING_LAYER = 4;
-    TOP_ROUTING_LAYER = 18;
-    ENABLE_VIA_GEN = false;
-  }
-
   initDefaultVias();
   if (DBPROCESSNODE == "N16_11m_2xa1xd3xe2y2r_utrdl") {
     initDefaultVias_N16(DBPROCESSNODE);

@@ -40,6 +40,15 @@ using namespace std;
 using namespace fr;
 
 void FlexRoute::init() {
+  if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
+    VIAINPIN_BOTTOMLAYERNUM = 2;
+    VIAINPIN_TOPLAYERNUM = 2;
+    USENONPREFTRACKS = false;
+    BOTTOM_ROUTING_LAYER = 4;
+    TOP_ROUTING_LAYER = 18;
+    ENABLE_VIA_GEN = false;
+  }
+
   io::Parser parser(getDesign());
   parser.readLefDef();
   parser.readGuide();
