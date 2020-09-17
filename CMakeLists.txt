@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 
 project(TritonRoute
   LANGUAGES CXX
@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
   message(FATAL_ERROR "TritonRoute requires GCC 7 and above! \nuse -DCMAKE_CXX_COMPILER to assign your compiler path")
@@ -192,6 +194,13 @@ target_link_libraries( flexroutelib
 add_executable( TritonRoute
   ${FLEXROUTE_HOME}/src/main.cpp
 )
+
+if( ipo_supported )
+    message(STATUS "IPO / LTO enabled")
+    set_property(TARGET TritonRoute PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(STATUS "IPO / LTO not supported: <${error}>")
+endif()
 
 target_link_libraries( TritonRoute
   PUBLIC
