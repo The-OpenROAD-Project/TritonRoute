@@ -2,33 +2,15 @@ pipeline {
   agent any
   stages {
     stage('Build and Test') {
-      parallel {
-        stage('Local') {
-          stages{
-            stage('Build local') {
-              steps {
-                sh './jenkins/build.sh'
-              }
-            }
-            stage('Test local') {
-              steps {
-                sh './jenkins/test.sh'
-              }
-            }
+      stages{
+        stage('Build') {
+          steps {
+            sh './jenkins/build_centos7_gcc8.sh'
           }
         }
-        stage('Docker centos') {
-          stages{
-            stage('Build docker centos') {
-              steps {
-                sh './jenkins/docker/build.sh centos gcc'
-              }
-            }
-            stage('Test docker centos') {
-              steps {
-                sh './jenkins/docker/test.sh centos gcc'
-              }
-            }
+        stage('Test') {
+          steps {
+            sh './jenkins/test_centos7_gcc8.sh'
           }
         }
       }
