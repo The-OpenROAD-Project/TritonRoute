@@ -32,6 +32,7 @@
 #include "global.h"
 #include "io/io.h"
 #include "frBaseTypes.h"
+#include "frProfileTask.h"
 #include <fstream>
 #include <sstream>
 
@@ -667,6 +668,7 @@ void io::Parser::postProcess() {
 }
 
 void io::Parser::postProcessGuide() {
+  ProfileTask profile("IO:postProcessGuide");
   if (VERBOSE > 0) {
     cout <<endl <<"post process guides ..." <<endl;
   }

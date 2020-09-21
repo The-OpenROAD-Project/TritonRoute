@@ -1,6 +1,6 @@
-/* Authors: Lutong Wang and Bangqi Xu */
+/* Authors: Matt Liberty */
 /*
- * Copyright (c) 2019, The Regents of the University of California
+ * Copyright (c) 2020, The Regents of the University of California
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-#include <sstream>
-#include "frProfileTask.h"
-#include "FlexRP.h"
-#include "db/infra/frTime.h"
-#include "gc/FlexGC.h"
+#ifndef _FR_PROFILE_TASK_H_
+#define _FR_PROFILE_TASK_H_
 
-using namespace std;
-using namespace fr;
 
-void FlexRP::main() {
-  ProfileTask profile("RP:main");
-  init();
-  prep();
+#ifdef HAS_VTUNE
+#include <ittnotify.h>
+#endif
+
+namespace fr {
+
+#ifdef HAS_VTUNE
+// This class make a VTune task in its scope (RAII).  This is useful
+// in VTune to see where the runtime is going with more domain specific
+// display.
+class ProfileTask
+{
+public:
+  ProfileTask(const char* name) {
+    domain_ = __itt_domain_create("TritonRoute");
+    name_ = __itt_string_handle_create(name);
+    __itt_task_begin(domain_, __itt_null, __itt_null, name_);
+  }
+
+  ~ProfileTask() {
+    __itt_task_end(domain_);
+  }
+
+private:
+  __itt_domain* domain_;
+  __itt_string_handle* name_;
+};
+
+#else
+
+// No-op version
+class ProfileTask
+{
+public:
+  ProfileTask(const char* name) {
+  }
+};
+#endif
+
 }
 
+#endif

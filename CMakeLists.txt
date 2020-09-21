@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
@@ -15,7 +17,7 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
   message(FATAL_ERROR "TritonRoute requires GCC 7 and above! \nuse -DCMAKE_CXX_COMPILER to assign your compiler path")
 endif()
 
-# Default to bulding optimnized/release executable.
+# Default to bulding optimized/release executable.
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RELEASE)
 endif()
@@ -43,6 +45,7 @@ find_package(BISON REQUIRED)
 find_package(Boost 1.68.0 COMPONENTS unit_test_framework)
 find_package(OpenMP REQUIRED)
 find_package(Threads REQUIRED)
+find_package(VTune)
 
 set (FLEXROUTE_SRC
   ${FLEXROUTE_HOME}/src/dr/FlexDR_conn.cpp
@@ -179,6 +182,7 @@ target_include_directories( flexroutelib
 )
 
 target_link_libraries( flexroutelib
+  PUBLIC
   def
   lef
 
@@ -255,3 +259,20 @@ if (Boost_unit_test_framework_FOUND)
 endif()
 
 add_test(NAME trTest COMMAND trTest)
+
+############################################################
+# VTune ITT API
+############################################################
+
+if (VTune_FOUND)
+  target_compile_definitions( flexroutelib
+    PUBLIC
+    HAS_VTUNE=1
+  )
+
+  target_link_libraries( flexroutelib
+    PUBLIC
+    VTune::VTune
+  )
+
+endif(VTune_FOUND)

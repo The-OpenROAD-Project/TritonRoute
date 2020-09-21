@@ -26,8 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "frProfileTask.h"
 #include "dr/FlexDR.h"
-//#include "drc/frDRC.h"
 #include "gc/FlexGC.h"
 #include <chrono>
 #include <algorithm>
@@ -2939,6 +2939,7 @@ void FlexDRWorker::routeNet_prepAreaMap(drNet* net, map<FlexMazeIdx, frCoord> &a
 }
 
 bool FlexDRWorker::routeNet(drNet* net) {
+  ProfileTask profile("DR:routeNet");
   //bool enableOutput = true;
   bool enableOutput = false;
   if (net->getPins().size() <= 1) {

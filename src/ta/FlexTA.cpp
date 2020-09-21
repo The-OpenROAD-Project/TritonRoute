@@ -32,6 +32,7 @@
 #include "global.h"
 #include "FlexTA.h"
 #include "db/infra/frTime.h"
+#include "frProfileTask.h"
 #include <algorithm>
 #include <omp.h>
 
@@ -82,6 +83,7 @@ int FlexTAWorker::main() {
 }
 
 int FlexTAWorker::main_mt() {
+  ProfileTask profile("TA:main_mt");
   using namespace std::chrono;
   high_resolution_clock::time_point t0 = high_resolution_clock::now();
   if (VERBOSE > 1) {
@@ -222,6 +224,7 @@ int FlexTA::initTA_helper(int iter, int size, int offset, bool isH, int &numPane
     // parallel execution
     // multi thread
     for (auto &workerBatch: workers) {
+      ProfileTask profile("TA:batch");
       #pragma omp parallel for schedule(dynamic)
       for (int i = 0; i < (int)workerBatch.size(); i++) {
         workerBatch[i]->main_mt();
@@ -241,6 +244,7 @@ int FlexTA::initTA_helper(int iter, int size, int offset, bool isH, int &numPane
 }
 
 void FlexTA::initTA(int size) {
+  ProfileTask profile("TA:init");
   frTime t;
 
   if (VERBOSE > 1) {
@@ -282,6 +286,7 @@ void FlexTA::initTA(int size) {
 }
 
 void FlexTA::searchRepair(int iter, int size, int offset) {
+  ProfileTask profile("TA:searchRepair");
   frTime t;
 
   if (VERBOSE > 1) {
@@ -337,6 +342,8 @@ void FlexTA::searchRepair(int iter, int size, int offset) {
 }
 
 int FlexTA::main() {
+  ProfileTask profile("TA:main");
+
   frTime t;
   if (VERBOSE > 0) {
     cout <<endl <<endl <<"start track assignment" <<endl;

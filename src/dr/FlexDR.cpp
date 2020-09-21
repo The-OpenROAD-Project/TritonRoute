@@ -29,7 +29,7 @@
 #include <chrono>
 #include <fstream>
 #include <boost/io/ios_state.hpp>
-//#include <taskflow/taskflow.hpp>
+#include "frProfileTask.h"
 #include "dr/FlexDR.h"
 #include "db/infra/frTime.h"
 #include <omp.h>
@@ -74,6 +74,7 @@ int FlexDRWorker::main() {
 }
 
 int FlexDRWorker::main_mt() {
+  ProfileTask profile("DR:main_mt");
   using namespace std::chrono;
   high_resolution_clock::time_point t0 = high_resolution_clock::now();
   if (VERBOSE > 1) {
@@ -1231,6 +1232,7 @@ void FlexDR::init_via2turnMinLen() {
 
 
 void FlexDR::init() {
+  ProfileTask profile("DR:init");
   frTime t;
   if (VERBOSE > 0) {
     cout <<endl <<"start routing data preparation" <<endl;
@@ -1479,6 +1481,9 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
                           frUInt4 workerMarkerBloatWidth, frUInt4 workerMarkerBloatDepth,
                           bool enableDRC, int ripupMode, bool followGuide, 
                           int fixMode, bool TEST) {
+  std::string profile_name("DR:searchRepair");
+  profile_name += std::to_string(iter);
+  ProfileTask profile(profile_name.c_str());
   if (iter > END_ITERATION) {
     return;
   }
@@ -1618,38 +1623,45 @@ void FlexDR::searchRepair(int iter, int size, int offset, int mazeEndIter,
 
     // parallel execution
     for (auto &workerBatch: workers) {
+      ProfileTask profile("DR:checkerboard");
       for (auto &workersInBatch: workerBatch) {
-        // multi thread
-        #pragma omp parallel for schedule(dynamic)
-        for (int i = 0; i < (int)workersInBatch.size(); i++) {
-          workersInBatch[i]->main_mt();
-          #pragma omp critical 
-          {
-            cnt++;
-            if (VERBOSE > 0) {
-              if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc < 90) {
-                if (prev_perc == 0 && t.isExceed(0)) {
-                  isExceed = true;
-                }
-                prev_perc += 10;
-                //if (true) {
-                if (isExceed) {
-                  if (enableDRC) {
-                    cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
-                  } else {
-                    cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+        {
+          ProfileTask profile("DR:batch");
+          // multi thread
+          #pragma omp parallel for schedule(dynamic)
+          for (int i = 0; i < (int)workersInBatch.size(); i++) {
+            workersInBatch[i]->main_mt();
+            #pragma omp critical 
+            {
+              cnt++;
+              if (VERBOSE > 0) {
+                if (cnt * 1.0 / tot >= prev_perc / 100.0 + 0.1 && prev_perc < 90) {
+                  if (prev_perc == 0 && t.isExceed(0)) {
+                    isExceed = true;
                   }
-                  cout <<"    " <<t <<endl <<flush;
+                  prev_perc += 10;
+                  //if (true) {
+                  if (isExceed) {
+                    if (enableDRC) {
+                      cout <<"    completing " <<prev_perc <<"% with " <<getDesign()->getTopBlock()->getNumMarkers() <<" violations" <<endl;
+                    } else {
+                      cout <<"    completing " <<prev_perc <<"% with " <<numQuickMarkers <<" quick violations" <<endl;
+                    }
+                    cout <<"    " <<t <<endl <<flush;
+                  }
                 }
               }
             }
           }
         }
-        // single thread
-        for (int i = 0; i < (int)workersInBatch.size(); i++) {
-          workersInBatch[i]->end();
+        {
+          ProfileTask profile("DR:end_batch");
+          // single thread
+          for (int i = 0; i < (int)workersInBatch.size(); i++) {
+            workersInBatch[i]->end();
+          }
+          workersInBatch.clear();
         }
-        workersInBatch.clear();
       }
     }
   }
@@ -1898,6 +1910,7 @@ void FlexDR::reportDRC() {
 
 
 int FlexDR::main() {
+  ProfileTask profile("DR:main");
   init();
   frTime t;
   if (VERBOSE > 0) {

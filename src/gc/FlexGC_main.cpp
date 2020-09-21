@@ -27,6 +27,7 @@
  */
 
 #include <iostream>
+#include "frProfileTask.h"
 #include "gc/FlexGC.h"
 
 using namespace std;
@@ -3697,6 +3698,7 @@ void FlexGCWorker::patchMetalShape_helper() {
 
 
 int FlexGCWorker::main() {
+  ProfileTask profile("GC:main");
   //printMarker = true;
   // minStep patching for GF14
   if (surgicalFixEnabled && getDRWorker() && DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {

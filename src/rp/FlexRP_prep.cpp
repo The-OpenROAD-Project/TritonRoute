@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "frProfileTask.h"
 #include "FlexRP.h"
 #include "db/infra/frTime.h"
 #include "gc/FlexGC.h"
@@ -36,6 +37,7 @@ using namespace std;
 using namespace fr;
 
 void FlexRP::prep() {
+  ProfileTask profile("RP:prep");
   prep_via2viaForbiddenLen();
   prep_viaForbiddenTurnLen();
   prep_viaForbiddenPlanarLen();

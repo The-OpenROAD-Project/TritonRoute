@@ -26,6 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "frProfileTask.h"
 #include "dr/FlexDR.h"
 #include "io/io.h"
 #include <omp.h>
@@ -1018,6 +1019,7 @@ void FlexDR::checkConnectivity_addMarker(frNet* net, frLayerNum lNum, const frBo
 
 // feedthrough and loop check
 void FlexDR::checkConnectivity(int iter) {
+  ProfileTask profile("DR:checkConnectivity");
   bool isWrong = false;
 
   int batchSize = 131072;

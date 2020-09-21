@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include "frProfileTask.h"
 #include "FlexPA.h"
 #include "db/infra/frTime.h"
 #include "gc/FlexGC.h"
@@ -1116,6 +1117,7 @@ void FlexPA::prepPoint_pin(frPin* pin, frInstTerm* instTerm) {
 }
 
 void FlexPA::prepPoint() {
+  ProfileTask profile("PA:point");
   // bool enableOutput = true;
   bool enableOutput = false;
   if (enableOutput) {
@@ -1138,6 +1140,7 @@ void FlexPA::prepPoint() {
         inst->getRefBlock()->getMacroClass() != MacroClassEnum::RING) {
       continue;
     }
+    ProfileTask profile("PA:uniqueInstance");
     for (auto &instTerm: inst->getInstTerms()) {
       // only do for normal and clock terms
       if (isSkipInstTerm(instTerm.get())) {
@@ -1198,6 +1201,7 @@ void FlexPA::prepPoint() {
 }
 
 void FlexPA::prepPattern() {
+  ProfileTask profile("PA:pattern");
   //bool enableOutput = true;
   bool enableOutput = false;
   if (enableOutput) {

@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include "frProfileTask.h"
 #include "FlexPA.h"
 #include "db/infra/frTime.h"
 #include "gc/FlexGC.h"
@@ -37,6 +38,7 @@ using namespace std;
 using namespace fr;
 
 void FlexPA::init() {
+  ProfileTask profile("PA:init");
   initViaRawPriority();
   initTrackCoords();
 
@@ -45,6 +47,7 @@ void FlexPA::init() {
 }
 
 void FlexPA::prep() {
+  ProfileTask profile("PA:prep");
   using namespace std::chrono;
   high_resolution_clock::time_point t0 = high_resolution_clock::now();
   prepPoint();
@@ -61,6 +64,8 @@ void FlexPA::prep() {
 }
 
 int FlexPA::main() {
+  ProfileTask profile("PA:main");
+
   //bool enableOutput = true;
   frTime t;
   if (VERBOSE > 0) {

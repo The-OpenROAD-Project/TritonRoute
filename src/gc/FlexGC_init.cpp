@@ -27,6 +27,7 @@
  */
 
 #include <iostream>
+#include "frProfileTask.h"
 #include "gc/FlexGC.h"
 #include "db/drObj/drNet.h"
 #include "dr/FlexDR.h"
@@ -749,6 +750,7 @@ void FlexGCWorker::initRegionQuery() {
 
 // init initializes all nets from frDesign if no drWorker is provided
 void FlexGCWorker::init() {
+  ProfileTask profile("GC:init");
   //bool enableOutput = true;
   bool enableOutput = false;
   addNet(design->getTopBlock()->getFakeVSSNet()); //[0] floating VSS

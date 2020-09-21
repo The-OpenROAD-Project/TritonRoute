@@ -31,6 +31,7 @@
 #include <sstream>
 #include <exception>
 
+#include "frProfileTask.h"
 #include "global.h"
 #include "io/io.h"
 #include "db/tech/frConstraint.h"
@@ -1069,6 +1070,7 @@ int io::Parser::Callbacks::getDefUnits(defrCallbackType_e type, double number, d
 }
 
 void io::Parser::readDef() {
+  ProfileTask profile("IO:readDef");
   FILE* f;
   int res;
   
@@ -4805,6 +4807,7 @@ int io::Parser::Callbacks::getLefViaRules(lefrCallbackType_e type, lefiViaRule* 
 }
 
 void io::Parser::readLef() {
+  ProfileTask profile("IO:readLef");
   FILE* f;
   int res;
 
@@ -4908,6 +4911,7 @@ void io::Parser::readLefDef() {
 }
 
 void io::Parser::readGuide() {
+  ProfileTask profile("IO:readGuide");
 
   if (VERBOSE > 0) {
     cout <<endl <<"reading guide ..." <<endl;
@@ -5339,6 +5343,7 @@ void io::Writer::fillConnFigs(bool isTA) {
 }
 
 void io::Writer::writeFromTA() {
+  ProfileTask profile("IO:writeFromTA");
   if (OUTTA_FILE == string("")) {
     if (VERBOSE > 0) {
       cout <<"Waring: no output def specified, skipped writing track assignment def" <<endl;
@@ -5354,6 +5359,7 @@ void io::Writer::writeFromTA() {
 }
 
 void io::Writer::writeFromDR(const string &str) {
+  ProfileTask profile("IO:writeFromDR");
   if (OUT_FILE == string("")) {
     if (VERBOSE > 0) {
       cout <<"Waring: no output def specified, skipped writing routed def" <<endl;
