@@ -63,11 +63,10 @@ namespace fr {
   class FlexTAWorker;
   class FlexTAWorkerRegionQuery {
   public:
-    FlexTAWorkerRegionQuery(FlexTAWorker* in): taWorker(in) {}
+    FlexTAWorkerRegionQuery(FlexTAWorker* in);
+    ~FlexTAWorkerRegionQuery();
     frDesign* getDesign() const;
-    FlexTAWorker* getTAWorker() const {
-      return taWorker;
-    }
+    FlexTAWorker* getTAWorker() const;
     
     void add(taPinFig* fig);
     void remove(taPinFig* fig);
@@ -75,17 +74,13 @@ namespace fr {
 
     void addCost(const frBox &box, frLayerNum layerNum, frBlockObject* obj, frConstraint* con);
     void removeCost(const frBox &box, frLayerNum layerNum, frBlockObject* obj, frConstraint* con);
-    void queryCost(const frBox &box, frLayerNum layerNum, std::vector<rq_generic_value_t<std::pair<frBlockObject*, frConstraint*> > > &result);
+    void queryCost(const frBox &box, frLayerNum layerNum, std::vector<rq_box_value_t<std::pair<frBlockObject*, frConstraint*> > > &result);
    
     void init();
   protected:
-    FlexTAWorker* taWorker;
-    std::vector<bgi::rtree<rq_rptr_value_t<taPinFig>, 
-                           bgi::quadratic<16>>> shapes; // resource map
-    // fixed objs, owner:: nullptr or net, con = short 
-    std::vector<bgi::rtree<rq_generic_value_t<std::pair<frBlockObject*, frConstraint*>>, 
-                           bgi::quadratic<16>>> costs;
-    
+    struct Impl;
+    std::unique_ptr<Impl> impl;
+
     void modCost(taPinFig* fig, bool isAddCost);
   };
 

@@ -261,8 +261,10 @@ namespace fr {
 
   template <typename T>
   using rq_rptr_value_t = std::pair<box_t, T* >;
+
+  class frBox;
   template <typename T>
-  using rq_generic_value_t = std::pair<box_t, T>;
+  using rq_box_value_t = std::pair<frBox, T>;
 
   // BoostPolygon
   typedef boost::polygon::rectangle_data<int>  Rectangle;

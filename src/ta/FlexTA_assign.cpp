@@ -659,14 +659,14 @@ frUInt4 FlexTAWorker::assignIroute_getPinCost(taPin* iroute, frCoord trackLoc) {
 
 frUInt4 FlexTAWorker::assignIroute_getDRCCost_helper(taPin* iroute, const frBox &box, frLayerNum lNum) {
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_generic_value_t<std::pair<frBlockObject*, frConstraint*> > > result;
+  vector<rq_box_value_t<std::pair<frBlockObject*, frConstraint*> > > result;
   int overlap = 0;
   workerRegionQuery.queryCost(box, lNum, result);
   bool isCut = false;
-  for (auto &[boostb, pr]: result) {
+  for (auto &[bounds, pr]: result) {
     auto &[obj, con] = pr;
-    frCoord tmpOvlp = - max(box.left(),   boostb.min_corner().x()) + min(box.right(),  boostb.max_corner().x()) 
-                      - max(box.bottom(), boostb.min_corner().y()) + min(box.top(),    boostb.max_corner().y()) + 1;
+    frCoord tmpOvlp = - max(box.left(),   bounds.left()) + min(box.right(),  bounds.right())
+                      - max(box.bottom(), bounds.bottom()) + min(box.top(),    bounds.top()) + 1;
     if (tmpOvlp <= 0) {
       cout <<"Error: assignIroute_getDRCCost_helper overlap < 0" <<endl;
       exit(1);
