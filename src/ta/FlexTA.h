@@ -80,8 +80,6 @@ namespace fr {
   protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
-
-    void modCost(taPinFig* fig, bool isAddCost);
   };
 
   class FlexTAWorker {
