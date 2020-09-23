@@ -77,7 +77,7 @@ namespace fr {
     void queryCost(const frBox &box, frLayerNum layerNum, std::vector<rq_box_value_t<std::pair<frBlockObject*, frConstraint*> > > &result);
    
     void init();
-  protected:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl;
   };
