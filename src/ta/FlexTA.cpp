@@ -35,6 +35,7 @@
 #include "frProfileTask.h"
 #include <algorithm>
 #include <omp.h>
+#include <boost/polygon/polygon.hpp>
 
 using namespace std;
 using namespace fr;

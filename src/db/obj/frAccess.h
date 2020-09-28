@@ -31,6 +31,7 @@
 
 #include "db/infra/frPoint.h"
 #include "db/obj/frBlockObject.h"
+#include <iostream>
 
 namespace fr {
   class frViaDef;

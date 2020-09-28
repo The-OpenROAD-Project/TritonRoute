@@ -31,6 +31,7 @@
 
 #include "db/infra/frPoint.h"
 #include "db/infra/frOrient.h"
+#include <iostream>
 
 namespace fr {
   class frTransform {

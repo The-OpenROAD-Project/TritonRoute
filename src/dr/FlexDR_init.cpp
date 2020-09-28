@@ -28,6 +28,7 @@
 
 #include "dr/FlexDR.h"
 #include <algorithm>
+#include <boost/polygon/polygon.hpp>
 
 using namespace std;
 using namespace fr;
@@ -35,6 +36,8 @@ namespace bgi = boost::geometry::index;
 
 template <typename T>
 using rq_rptr_value_t = std::pair<box_t, T* >;
+
+using Rectangle = boost::polygon::rectangle_data<int>;
 
 void FlexDRWorker::initNetObjs_pathSeg(frPathSeg* pathSeg,
                                        set<frNet*, frBlockObjectComp> &nets, 
@@ -868,6 +871,7 @@ void FlexDRWorker::initNet_termGenAp_new(drPin* dPin) {
   //bool enableOutput = true;
   auto routeBox = getRouteBox();
   Rectangle routeRect(routeBox.left(), routeBox.bottom(), routeBox.right(), routeBox.top());
+  using Point = boost::polygon::point_data<int>;
   Point routeRectCenter;
   center(routeRectCenter, routeRect);
 
@@ -3823,24 +3827,6 @@ void FlexDRWorker::initMazeCost_planarTerm() {
           }
         }
       } 
-    }
-  }
-}
-
-void FlexDRWorker::addToCostGrids(const Rectangle &region, std::set<std::pair<frMIdx, frMIdx> > &costGrids) {
-  frMIdx startXIdx, endXIdx, startYIdx, endYIdx;
-  startXIdx = gridGraph.getMazeXIdx(xl(region));
-  endXIdx = gridGraph.getMazeXIdx(xh(region));
-  startYIdx = gridGraph.getMazeYIdx(yl(region));
-  endYIdx = gridGraph.getMazeYIdx(yh(region));
-  frMIdx xDim, yDim, zDim;
-  gridGraph.getDim(xDim,yDim,zDim);
-  xDim -= 1;
-  yDim -= 1;
-  zDim -= 1;
-  for (auto currXIdx = startXIdx; currXIdx < min(endXIdx, xDim); ++currXIdx) {
-    for (auto currYIdx = startYIdx; currYIdx < min(endYIdx, yDim); ++currYIdx) {
-      costGrids.insert(make_pair(currXIdx, currYIdx));
     }
   }
 }

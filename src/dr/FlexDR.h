@@ -620,7 +620,6 @@ namespace fr {
     void initMazeCost_ap_planar_helper(const FlexMazeIdx &mi, const frDirEnum &dir, frCoord bloatLen, bool isAddPathCost);
     void initMazeCost_ap_planarGrid_helper(const FlexMazeIdx &mi, const frDirEnum &dir, frCoord bloatLen, bool isAddPathCost);
     void initMazeCost_boundary_helper(drNet* net, bool isAddPathCost);
-    void addToCostGrids(const Rectangle &region, std::set<std::pair<frMIdx, frMIdx> > &costGrids);
 
     // DRC
     void initFixedObjs();

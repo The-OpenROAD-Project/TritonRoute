@@ -35,10 +35,13 @@
 #include "frProfileTask.h"
 #include <fstream>
 #include <sstream>
+#include <boost/polygon/polygon.hpp>
 
 using namespace std;
 using namespace fr;
 using namespace boost::polygon::operators;
+
+using Rectangle = boost::polygon::rectangle_data<int>;
 
 void io::Parser::initDefaultVias() {
   for (auto &uViaDef: tech->getVias()) {
@@ -259,6 +262,7 @@ void io::Parser::getViaRawPriority(frViaDef* viaDef, viaRawPriorityTuple &priori
   bool isNotDefaultVia = !(viaDef->getDefault());
   bool isNotUpperAlign = false;
   bool isNotLowerAlign = false;
+  using PolygonSet = std::vector<boost::polygon::polygon_90_data<int>>;
   PolygonSet viaLayerPS1;
 
   for (auto &fig: viaDef->getLayer1Figs()) {

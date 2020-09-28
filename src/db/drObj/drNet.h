@@ -34,6 +34,7 @@
 #include "db/drObj/drPin.h"
 #include "db/drObj/drShape.h"
 #include "db/drObj/drVia.h"
+#include <set>
 
 namespace fr {
   class frNet;

@@ -30,6 +30,7 @@
 #define _FR_FLEXPA_H_
 
 #include "frDesign.h"
+#include <boost/polygon/polygon.hpp>
 namespace gtl = boost::polygon;
 
 namespace fr {

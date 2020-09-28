@@ -39,8 +39,6 @@
 #include <boost/geometry/algorithms/covered_by.hpp>
 #include <boost/geometry/algorithms/equals.hpp>
 
-#include <boost/polygon/polygon.hpp>
-
 namespace fr {
   using frLayerNum = int;
   using frCoord = int;
@@ -265,11 +263,6 @@ namespace fr {
 
   template <typename T>
   using rq_box_value_t = std::pair<frBox, T>;
-
-  // BoostPolygon
-  typedef boost::polygon::rectangle_data<int>  Rectangle;
-  typedef std::vector<boost::polygon::polygon_90_data<int>> PolygonSet;
-  typedef boost::polygon::point_data<int> Point;
 }
 
 #endif
