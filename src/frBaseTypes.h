@@ -35,7 +35,11 @@
 #include <string>
 #include <utility>
 
-#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/index/rtree.hpp>
+#include <boost/geometry/algorithms/covered_by.hpp>
+#include <boost/geometry/algorithms/equals.hpp>
+
 #include <boost/polygon/polygon.hpp>
 
 namespace fr {
