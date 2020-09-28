@@ -30,6 +30,7 @@
 
 using namespace std;
 using namespace fr;
+namespace bgi = boost::geometry::index;
 
 template <typename T>
 using rq_rptr_value_t = std::pair<box_t, T* >;

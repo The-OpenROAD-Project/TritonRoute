@@ -32,6 +32,7 @@
 #include "frRegionQuery.h"
 using namespace std;
 using namespace fr;
+namespace bgi = boost::geometry::index;
 
 struct frRegionQuery::Impl
 {
