@@ -30,25 +30,17 @@
 #include "global.h"
 #include "frDesign.h"
 #include "frRegionQuery.h"
-#include <boost/geometry/algorithms/equals.hpp>
-#include <boost/geometry/algorithms/covered_by.hpp>
+#include "frRTree.h"
 using namespace std;
 using namespace fr;
-namespace bgi = boost::geometry::index;
 
 struct frRegionQuery::Impl
 {
-    template <typename T>
-    using rq_rptr_value_t = std::pair<box_t, T* >;
+    template<typename T>
+    using rtree = bgi::rtree<rq_box_value_t<T*>, bgi::quadratic<16>>;
 
     template<typename T>
-    using rtree = bgi::rtree<rq_rptr_value_t<T>, bgi::quadratic<16>>;
-
-    template<typename T>
-    using ObjectsInternal = std::vector<rq_rptr_value_t<T>>;
-
-    template<typename T>
-    using ObjectsByLayer = std::vector<ObjectsInternal<T>>;
+    using ObjectsByLayer = std::vector<Objects<T>>;
 
     frDesign*         design;
     std::vector<rtree<frBlockObject>> shapes; // only for pin shapes, obs and snet
@@ -88,12 +80,10 @@ frDesign* frRegionQuery::getDesign() const {
 }
 
 void frRegionQuery::Impl::add(frShape* shape, ObjectsByLayer<frBlockObject> &allShapes) {
-  frBox frb;
-  box_t boostb;
   if (shape->typeId() == frcPathSeg || shape->typeId() == frcRect) {
+    frBox frb;
     shape->getBBox(frb);
-    boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-    allShapes.at(shape->getLayerNum()).push_back(make_pair(boostb, shape));
+    allShapes.at(shape->getLayerNum()).push_back(make_pair(frb, shape));
   } else {
     cout <<"Error: unsupported region query add" <<endl;
   }
@@ -567,7 +557,7 @@ void frRegionQuery::initGRPin(vector<pair<frBlockObject*, frPoint> > &in) {
 
 void frRegionQuery::Impl::initGRPin(vector<pair<frBlockObject*, frPoint> > &in) {
   grPins.clear();
-  ObjectsInternal<frBlockObject> allGRPins;
+  Objects<frBlockObject> allGRPins;
   box_t boostb;
   for (auto &[obj, pt]: in) {
     boostb = box_t(point_t(pt.x(), pt.y()), point_t(pt.x(), pt.y()));

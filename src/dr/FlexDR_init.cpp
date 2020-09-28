@@ -28,15 +28,12 @@
 
 #include "dr/FlexDR.h"
 #include <algorithm>
+#include "frRTree.h"
 #include <boost/polygon/polygon.hpp>
-#include <boost/geometry/index/rtree.hpp>
 
 using namespace std;
 using namespace fr;
 namespace bgi = boost::geometry::index;
-
-template <typename T>
-using rq_rptr_value_t = std::pair<box_t, T* >;
 
 using Rectangle = boost::polygon::rectangle_data<int>;
 
@@ -1644,7 +1641,7 @@ void FlexDRWorker::initNets_regionQuery() {
 }
 
 void FlexDRWorker::initNets_numPinsIn() {
-  vector<rq_rptr_value_t<drPin> > allPins;
+  vector<rq_box_value_t<drPin*>> allPins;
   frPoint pt;
   for (auto &net: nets) {
     for (auto &pin: net->getPins()) {
@@ -1667,7 +1664,7 @@ void FlexDRWorker::initNets_numPinsIn() {
       }
     }
   }
-  bgi::rtree<rq_rptr_value_t<drPin>, bgi::quadratic<16> > pinRegionQuery(allPins);
+  bgi::rtree<rq_box_value_t<drPin*>, bgi::quadratic<16> > pinRegionQuery(allPins);
   for (auto &net: nets) {
     frCoord x1 = getExtBox().right();
     frCoord x2 = getExtBox().left();
@@ -1704,12 +1701,11 @@ void FlexDRWorker::initNets_numPinsIn() {
       }
     }
     if (x1 <= x2 && y1 <= y2) {
-      box_t boostb = box_t(point_t(x1, y1), point_t(x2, y2));
+      frBox box = frBox(frPoint(x1, y1), frPoint(x2, y2));
       allPins.clear();
-      pinRegionQuery.query(bgi::intersects(boostb), back_inserter(allPins));
+      pinRegionQuery.query(bgi::intersects(box), back_inserter(allPins));
       net->setNumPinsIn(allPins.size());
-      frBox tmpBox(x1, y1, x2, y2);
-      net->setPinBox(tmpBox);
+      net->setPinBox(box);
     } else {
       net->setNumPinsIn(99999);
       net->setPinBox(getExtBox());

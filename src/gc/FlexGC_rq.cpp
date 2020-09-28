@@ -28,25 +28,20 @@
 
 #include <iostream>
 #include "gc/FlexGC_impl.h"
-#include <boost/geometry/algorithms/equals.hpp>
-#include <boost/geometry/algorithms/covered_by.hpp>
+#include "frRTree.h"
 
 using namespace std;
 using namespace fr;
-namespace bgi = boost::geometry::index;
 
 struct FlexGCWorkerRegionQuery::Impl
 {
-  template <typename T>
-  using rq_rptr_value_t = std::pair<box_t, T* >;
-
   void addPolygonEdge(gcSegment* edge, std::vector<std::vector<std::pair<segment_t, gcSegment*> > > &allShapes);
-  void addMaxRectangle(gcRect* rect, std::vector<std::vector<rq_rptr_value_t<gcRect> > > &allShapes);
+  void addMaxRectangle(gcRect* rect, std::vector<std::vector<rq_box_value_t<gcRect*>>> &allShapes);
   void init(int numLayers);
 
   FlexGCWorker* gcWorker;
   std::vector<bgi::rtree<std::pair<segment_t, gcSegment*>, bgi::quadratic<16> > > polygon_edges; // merged
-  std::vector<bgi::rtree<rq_rptr_value_t<gcRect>,          bgi::quadratic<16> > > max_rectangles; // merged
+  std::vector<bgi::rtree<rq_box_value_t<gcRect*>,          bgi::quadratic<16> > > max_rectangles; // merged
 
 };
 
@@ -76,7 +71,7 @@ void FlexGCWorkerRegionQuery::addMaxRectangle(gcRect* rect) {
   impl->max_rectangles[rect->getLayerNum()].insert(make_pair(boostb, rect));
 }
 
-void FlexGCWorkerRegionQuery::Impl::addMaxRectangle(gcRect* rect, vector<vector<rq_rptr_value_t<gcRect> > > &allShapes) {
+void FlexGCWorkerRegionQuery::Impl::addMaxRectangle(gcRect* rect, vector<vector<rq_box_value_t<gcRect*>>> &allShapes) {
   box_t boostb(point_t(gtl::xl(*rect), gtl::yl(*rect)), point_t(gtl::xh(*rect), gtl::yh(*rect)));
   allShapes[rect->getLayerNum()].push_back(make_pair(boostb, rect));
 }
@@ -126,8 +121,8 @@ void FlexGCWorkerRegionQuery::Impl::init(int numLayers) {
   max_rectangles.clear();
   max_rectangles.resize(numLayers);
   
-  vector<vector<pair<segment_t, gcSegment*> > > allPolygonEdges(numLayers);
-  vector<vector<rq_rptr_value_t<gcRect> > >  allMaxRectangles(numLayers);
+  vector<vector<pair<segment_t, gcSegment*>>> allPolygonEdges(numLayers);
+  vector<vector<rq_box_value_t<gcRect*>>> allMaxRectangles(numLayers);
 
   int cntPolygonEdge  = 0;
   int cntMaxRectangle = 0;
@@ -151,8 +146,8 @@ void FlexGCWorkerRegionQuery::Impl::init(int numLayers) {
   int cntRTPolygonEdge  = 0;
   int cntRTMaxRectangle = 0;
   for (int i = 0; i < numLayers; i++) {
-    polygon_edges[i]  = boost::move(bgi::rtree<pair<segment_t, gcSegment*>, bgi::quadratic<16> >(allPolygonEdges[i]));
-    max_rectangles[i] = boost::move(bgi::rtree<rq_rptr_value_t<gcRect>, bgi::quadratic<16> >(allMaxRectangles[i]));
+    polygon_edges[i]  = boost::move(bgi::rtree<pair<segment_t, gcSegment*>, bgi::quadratic<16>>(allPolygonEdges[i]));
+    max_rectangles[i] = boost::move(bgi::rtree<rq_box_value_t<gcRect*>, bgi::quadratic<16>>(allMaxRectangles[i]));
     cntRTPolygonEdge  += polygon_edges[i].size();
     cntRTMaxRectangle += max_rectangles[i].size();
   }

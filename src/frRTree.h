@@ -1,8 +1,8 @@
-/* Authors: Lutong Wang and Bangqi Xu */
+/* Authors: Matt Liberty */
 /*
- * Copyright (c) 2019, The Regents of the University of California
+ * Copyright (c) 2020, The Regents of the University of California
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the University nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,54 +26,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FR_POINT_H_
-#define _FR_POINT_H_
+#ifndef _FR_RTREE_H_
+#define _FR_RTREE_H_
 
-#include "frBaseTypes.h"
+#include "db/infra/frPoint.h"
+#include "db/infra/frBox.h"
+#include <boost/geometry/algorithms/equals.hpp>
+#include <boost/geometry/algorithms/covered_by.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry/geometries/register/box.hpp>
 
-namespace fr {
-  class frTransform;
+namespace bgi = boost::geometry::index;
 
-  class frPoint {
-  public:
-    // constructors
-    frPoint(): xCoord(0), yCoord(0) {}
-    frPoint(const frPoint &tmpPoint): xCoord(tmpPoint.xCoord), yCoord(tmpPoint.yCoord) {}
-    frPoint(const frCoord tmpX, const frCoord tmpY)
-      : xCoord(tmpX), yCoord(tmpY) {};
-    // setters
-    void set(const frPoint &tmpPoint) {
-      xCoord = tmpPoint.xCoord;
-      yCoord = tmpPoint.yCoord;
-    }
-    void set(const frCoord tmpX, const frCoord tmpY) {
-      xCoord = tmpX;
-      yCoord = tmpY;
-    }
-    void setX(const frCoord tmpX) {
-      xCoord = tmpX;
-    }
-    void setY(const frCoord tmpY) {
-      yCoord = tmpY;
-    }
-    // getters
-    frCoord x() const {
-      return xCoord;
-    }
-    frCoord y() const {
-      return yCoord;
-    }
-    // others
-    void transform(const frTransform &xform);
-    bool operator<(const frPoint &pIn) const {
-      return (xCoord == pIn.xCoord) ? (yCoord < pIn.yCoord) : (xCoord < pIn.xCoord);
-    }
-    bool operator==(const frPoint &pIn) const {
-      return (xCoord == pIn.xCoord) && (yCoord == pIn.yCoord);
-    }
-  protected:
-    frCoord xCoord, yCoord;
-  };
-}
+// Enable frPoint & frBox to be used with boost geometry
+BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(fr::frPoint,
+                                         fr::frCoord,
+                                         cs::cartesian,
+                                         x,
+                                         y,
+                                         setX,
+                                         setY);
+
+BOOST_GEOMETRY_REGISTER_BOX(fr::frBox,
+                            fr::frPoint,
+                            lowerLeft(),
+                            upperRight());
+
 
 #endif
+

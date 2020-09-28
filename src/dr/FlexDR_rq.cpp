@@ -27,22 +27,17 @@
  */
 
 #include "dr/FlexDR.h"
-#include <boost/geometry/algorithms/equals.hpp>
-#include <boost/geometry/algorithms/covered_by.hpp>
+#include "frRTree.h"
 
 using namespace std;
 using namespace fr;
-namespace bgi = boost::geometry::index;
-
-template <typename T>
-using rq_rptr_value_t = std::pair<box_t, T* >;
 
 struct FlexDRWorkerRegionQuery::Impl
 {
   FlexDRWorker* drWorker;
-  std::vector<bgi::rtree<rq_rptr_value_t<drConnFig>, bgi::quadratic<16> > > shapes; // only for drXXX in dr worker
+  std::vector<bgi::rtree<rq_box_value_t<drConnFig*>, bgi::quadratic<16>>> shapes; // only for drXXX in dr worker
 
-  static void add(drConnFig* connFig, std::vector<std::vector<rq_rptr_value_t<drConnFig> > > &allShapes);
+  static void add(drConnFig* connFig, std::vector<std::vector<rq_box_value_t<drConnFig*>>> &allShapes);
 };
 
 FlexDRWorkerRegionQuery::FlexDRWorkerRegionQuery(FlexDRWorker* in)
@@ -68,12 +63,10 @@ frDesign* FlexDRWorkerRegionQuery::getDesign() const {
 
 void FlexDRWorkerRegionQuery::add(drConnFig* connFig) {
   frBox frb;
-  box_t boostb;
   if (connFig->typeId() == drcPathSeg || connFig->typeId() == frcRect || connFig->typeId() == drcPatchWire) {
     auto obj = static_cast<drShape*>(connFig);
     obj->getBBox(frb);
-    boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-    impl->shapes.at(obj->getLayerNum()).insert(make_pair(boostb, obj));
+    impl->shapes.at(obj->getLayerNum()).insert(make_pair(frb, obj));
   } else if (connFig->typeId() == drcVia) {
     auto via = static_cast<drVia*>(connFig);
     frTransform xform;
@@ -85,8 +78,7 @@ void FlexDRWorkerRegionQuery::add(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getLayer1Num()).insert(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getLayer1Num()).insert(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -96,8 +88,7 @@ void FlexDRWorkerRegionQuery::add(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getLayer2Num()).insert(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getLayer2Num()).insert(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -107,8 +98,7 @@ void FlexDRWorkerRegionQuery::add(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getCutLayerNum()).insert(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getCutLayerNum()).insert(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -120,14 +110,12 @@ void FlexDRWorkerRegionQuery::add(drConnFig* connFig) {
 
 
 
-void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_rptr_value_t<drConnFig> > > &allShapes) {
+void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_box_value_t<drConnFig*>>> &allShapes) {
   frBox frb;
-  box_t boostb;
   if (connFig->typeId() == drcPathSeg || connFig->typeId() == frcRect || connFig->typeId() == drcPatchWire) {
     auto obj = static_cast<drShape*>(connFig);
     obj->getBBox(frb);
-    boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-    allShapes.at(obj->getLayerNum()).push_back(make_pair(boostb, obj));
+    allShapes.at(obj->getLayerNum()).push_back(make_pair(frb, obj));
   } else if (connFig->typeId() == drcVia) {
     auto via = static_cast<drVia*>(connFig);
     frTransform xform;
@@ -139,8 +127,7 @@ void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_rpt
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        allShapes.at(via->getViaDef()->getLayer1Num()).push_back(make_pair(boostb, via));
+        allShapes.at(via->getViaDef()->getLayer1Num()).push_back(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -150,8 +137,7 @@ void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_rpt
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        allShapes.at(via->getViaDef()->getLayer2Num()).push_back(make_pair(boostb, via));
+        allShapes.at(via->getViaDef()->getLayer2Num()).push_back(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -161,8 +147,7 @@ void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_rpt
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        allShapes.at(via->getViaDef()->getCutLayerNum()).push_back(make_pair(boostb, via));
+        allShapes.at(via->getViaDef()->getCutLayerNum()).push_back(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query add" <<endl;
       }
@@ -174,12 +159,10 @@ void FlexDRWorkerRegionQuery::Impl::add(drConnFig* connFig, vector<vector<rq_rpt
 
 void FlexDRWorkerRegionQuery::remove(drConnFig* connFig) {
   frBox frb;
-  box_t boostb;
   if (connFig->typeId() == drcPathSeg || connFig->typeId() == frcRect || connFig->typeId() == drcPatchWire) {
     auto obj = static_cast<drShape*>(connFig);
     obj->getBBox(frb);
-    boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-    impl->shapes.at(obj->getLayerNum()).remove(make_pair(boostb, obj));
+    impl->shapes.at(obj->getLayerNum()).remove(make_pair(frb, obj));
   } else if (connFig->typeId() == drcVia) {
     auto via = static_cast<drVia*>(connFig);
     frTransform xform;
@@ -191,8 +174,7 @@ void FlexDRWorkerRegionQuery::remove(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getLayer1Num()).remove(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getLayer1Num()).remove(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query remove" <<endl;
       }
@@ -202,8 +184,7 @@ void FlexDRWorkerRegionQuery::remove(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getLayer2Num()).remove(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getLayer2Num()).remove(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query remove" <<endl;
       }
@@ -213,8 +194,7 @@ void FlexDRWorkerRegionQuery::remove(drConnFig* connFig) {
       if (shape->typeId() == frcRect) {
         shape->getBBox(frb);
         frb.transform(xform);
-        boostb = box_t(point_t(frb.left(), frb.bottom()), point_t(frb.right(), frb.top()));
-        impl->shapes.at(via->getViaDef()->getCutLayerNum()).remove(make_pair(boostb, via));
+        impl->shapes.at(via->getViaDef()->getCutLayerNum()).remove(make_pair(frb, via));
       } else {
         cout <<"Error: unsupported region query remove" <<endl;
       }
@@ -225,22 +205,20 @@ void FlexDRWorkerRegionQuery::remove(drConnFig* connFig) {
 }
 
 void FlexDRWorkerRegionQuery::query(const frBox &box, frLayerNum layerNum, vector<drConnFig*> &result) {
-  vector<rq_rptr_value_t<drConnFig> > temp;
-  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
-  impl->shapes.at(layerNum).query(bgi::intersects(boostb), back_inserter(temp));
+  vector<rq_box_value_t<drConnFig*> > temp;
+  impl->shapes.at(layerNum).query(bgi::intersects(box), back_inserter(temp));
   transform(temp.begin(), temp.end(), back_inserter(result), [](auto &kv) {return kv.second;});
 }
 
 void FlexDRWorkerRegionQuery::query(const frBox &box, frLayerNum layerNum, vector<rq_box_value_t<drConnFig*> > &result) {
-  box_t boostb = box_t(point_t(box.left(), box.bottom()), point_t(box.right(), box.top()));
-  impl->shapes.at(layerNum).query(bgi::intersects(boostb), back_inserter(result));
+  impl->shapes.at(layerNum).query(bgi::intersects(box), back_inserter(result));
 }
 
 void FlexDRWorkerRegionQuery::init() {
   int numLayers = getDesign()->getTech()->getLayers().size();
   impl->shapes.clear();
   impl->shapes.resize(numLayers);
-  vector<vector<rq_rptr_value_t<drConnFig> > > allShapes(numLayers);
+  vector<vector<rq_box_value_t<drConnFig*>>> allShapes(numLayers);
   for (auto &net: getDRWorker()->getNets()) {
     for (auto &connFig: net->getRouteConnFigs()) {
       impl->add(connFig.get(), allShapes);
@@ -250,7 +228,7 @@ void FlexDRWorkerRegionQuery::init() {
     }
   }
   for (auto i = 0; i < numLayers; i++) {
-    impl->shapes.at(i) = boost::move(bgi::rtree<rq_rptr_value_t<drConnFig>, bgi::quadratic<16> >(allShapes.at(i)));
+    impl->shapes.at(i) = boost::move(bgi::rtree<rq_box_value_t<drConnFig*>, bgi::quadratic<16> >(allShapes.at(i)));
     allShapes.at(i).clear();
     allShapes.at(i).shrink_to_fit();
     //if (VERBOSE > 0) {
