@@ -268,7 +268,6 @@ namespace fr {
 
   // BoostPolygon
   typedef boost::polygon::rectangle_data<int>  Rectangle;
-  typedef boost::polygon::polygon_90_data<int> Polygon;
   typedef std::vector<boost::polygon::polygon_90_data<int>> PolygonSet;
   typedef boost::polygon::point_data<int> Point;
 }
