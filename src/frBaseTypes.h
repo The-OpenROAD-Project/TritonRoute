@@ -237,13 +237,13 @@ namespace fr {
     CORE_WELLTAP,
     CORE_SPACER,
     CORE_ANTENNACELL,
-    COVER, // GF14
+    COVER,
     ENDCAP_PRE,
     BLOCK,
     RING, // ispd19
     PAD, // ispd19
     PAD_POWER, // ispd19
-    PAD_SPACER, // GF14
+    PAD_SPACER,
     ENDCAP_BOTTOMLEFT // ispd19
   };
 
