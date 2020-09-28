@@ -28,12 +28,12 @@
 
 #include <iostream>
 #include "frProfileTask.h"
-#include "gc/FlexGC.h"
+#include "gc/FlexGC_impl.h"
 
 using namespace std;
 using namespace fr;
 
-bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const frBox &box) {
+bool FlexGCWorker::Impl::isCornerOverlap(gcCorner* corner, const frBox &box) {
   frCoord cornerX = corner->getNextEdge()->low().x();
   frCoord cornerY = corner->getNextEdge()->low().y();
   switch (corner->getDir()) {
@@ -63,7 +63,7 @@ bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const frBox &box) {
   return false;
 }
 
-bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const gtl::rectangle_data<frCoord> &rect) {
+bool FlexGCWorker::Impl::isCornerOverlap(gcCorner* corner, const gtl::rectangle_data<frCoord> &rect) {
   frCoord cornerX = corner->getNextEdge()->low().x();
   frCoord cornerY = corner->getNextEdge()->low().y();
   switch (corner->getDir()) {
@@ -93,14 +93,14 @@ bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const gtl::rectangle_data<f
   return false;
 }
 
-void FlexGCWorker::myBloat(const gtl::rectangle_data<frCoord> &rect, frCoord val, box_t &box) {
+void FlexGCWorker::Impl::myBloat(const gtl::rectangle_data<frCoord> &rect, frCoord val, box_t &box) {
   bg::set<bg::min_corner, 0>(box, gtl::xl(rect) - val);
   bg::set<bg::min_corner, 1>(box, gtl::yl(rect) - val);
   bg::set<bg::max_corner, 0>(box, gtl::xh(rect) + val);
   bg::set<bg::max_corner, 1>(box, gtl::yh(rect) + val);
 }
 
-frCoord FlexGCWorker::checkMetalSpacing_getMaxSpcVal(frLayerNum layerNum) {
+frCoord FlexGCWorker::Impl::checkMetalSpacing_getMaxSpcVal(frLayerNum layerNum) {
   frCoord maxSpcVal = 0;
   auto currLayer = getDesign()->getTech()->getLayer(layerNum);
   if (currLayer->hasMinSpacing()) {
@@ -119,7 +119,7 @@ frCoord FlexGCWorker::checkMetalSpacing_getMaxSpcVal(frLayerNum layerNum) {
   return maxSpcVal;
 }
 
-void FlexGCWorker::checkMetalCornerSpacing_getMaxSpcVal(frLayerNum layerNum, frCoord &maxSpcValX, frCoord &maxSpcValY) {
+void FlexGCWorker::Impl::checkMetalCornerSpacing_getMaxSpcVal(frLayerNum layerNum, frCoord &maxSpcValX, frCoord &maxSpcValY) {
   maxSpcValX = 0;
   maxSpcValY = 0;
   auto currLayer = getDesign()->getTech()->getLayer(layerNum);
@@ -133,7 +133,7 @@ void FlexGCWorker::checkMetalCornerSpacing_getMaxSpcVal(frLayerNum layerNum, frC
   return;
 }
 
-bool FlexGCWorker::isOppositeDir(gcCorner* corner, gcSegment* seg) {
+bool FlexGCWorker::Impl::isOppositeDir(gcCorner* corner, gcSegment* seg) {
   auto cornerDir = corner->getDir();
   auto segDir = seg->getDir();
   if ((cornerDir == frCornerDirEnum::NE && (segDir == frDirEnum::S || segDir == frDirEnum::E)) ||
@@ -146,7 +146,7 @@ bool FlexGCWorker::isOppositeDir(gcCorner* corner, gcSegment* seg) {
   }
 }
 
-box_t FlexGCWorker::checkMetalCornerSpacing_getQueryBox(gcCorner* corner, frCoord &maxSpcValX, frCoord &maxSpcValY) {
+box_t FlexGCWorker::Impl::checkMetalCornerSpacing_getQueryBox(gcCorner* corner, frCoord &maxSpcValX, frCoord &maxSpcValY) {
   box_t queryBox;
   frCoord baseX = corner->getNextEdge()->low().x();
   frCoord baseY = corner->getNextEdge()->low().y();
@@ -184,7 +184,7 @@ box_t FlexGCWorker::checkMetalCornerSpacing_getQueryBox(gcCorner* corner, frCoor
   return queryBox;
 }
 
-frCoord FlexGCWorker::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* rect2, frCoord prl/*, bool &hasRoute*/) {
+frCoord FlexGCWorker::Impl::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* rect2, frCoord prl/*, bool &hasRoute*/) {
   auto layerNum = rect1->getLayerNum();
   frCoord reqSpcVal = 0;
   auto currLayer = getDesign()->getTech()->getLayer(layerNum);
@@ -255,7 +255,7 @@ frCoord FlexGCWorker::checkMetalSpacing_prl_getReqSpcVal(gcRect* rect1, gcRect* 
 // type: 0 -- check H edge only
 // type: 1 -- check V edge only
 // type: 2 -- check both
-bool FlexGCWorker::checkMetalSpacing_prl_hasPolyEdge(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect, int type, frCoord prl) {
+bool FlexGCWorker::Impl::checkMetalSpacing_prl_hasPolyEdge(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect, int type, frCoord prl) {
   auto layerNum = rect1->getLayerNum();
   auto net1 = rect1->getNet();
   auto net2 = rect2->getNet();
@@ -320,7 +320,7 @@ bool FlexGCWorker::checkMetalSpacing_prl_hasPolyEdge(gcRect* rect1, gcRect* rect
   }
 }
 
-void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect,
+void FlexGCWorker::Impl::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect,
                                      frCoord prl, frCoord distX, frCoord distY) {
   bool enableOutput = printMarker;
 
@@ -454,7 +454,7 @@ void FlexGCWorker::checkMetalSpacing_prl(gcRect* rect1, gcRect* rect2, const gtl
   }
 }
 
-bool FlexGCWorker::checkMetalSpacing_short_skipOBSPin(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
+bool FlexGCWorker::Impl::checkMetalSpacing_short_skipOBSPin(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
   bool isRect1Obs = false;
   bool isRect2Obs = false;
   if (rect1->getNet()->getOwner() && 
@@ -493,7 +493,7 @@ bool FlexGCWorker::checkMetalSpacing_short_skipOBSPin(gcRect* rect1, gcRect* rec
   return false;
 }
 
-void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
+void FlexGCWorker::Impl::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
   bool enableOutput = printMarker;
 
   auto layerNum = rect1->getLayerNum();
@@ -653,7 +653,7 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
   }
 }
 
-void FlexGCWorker::checkMetalSpacing_main(gcRect* ptr1, gcRect* ptr2) {
+void FlexGCWorker::Impl::checkMetalSpacing_main(gcRect* ptr1, gcRect* ptr2) {
   //bool enableOutput = true;
 
   // NSMetal does not need self-intersection
@@ -688,7 +688,7 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* ptr1, gcRect* ptr2) {
 
 
 
-void FlexGCWorker::checkMetalSpacing_main(gcRect* rect) {
+void FlexGCWorker::Impl::checkMetalSpacing_main(gcRect* rect) {
   //bool enableOutput = true;
   bool enableOutput = false;
 
@@ -740,7 +740,7 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* rect) {
   }
 }
 
-void FlexGCWorker::checkMetalSpacing() {
+void FlexGCWorker::Impl::checkMetalSpacing() {
   if (targetNet) {
     // layer --> net --> polygon --> maxrect
     for (int i = std::max((frLayerNum)(getDesign()->getTech()->getBottomLayerNum()), minLayerNum); 
@@ -777,7 +777,7 @@ void FlexGCWorker::checkMetalSpacing() {
 
 // (new) currently only support ISPD2019-related part
 // check between the corner and the target rect
-void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcRect* rect, frLef58CornerSpacingConstraint* con) {
+void FlexGCWorker::Impl::checkMetalCornerSpacing_main(gcCorner* corner, gcRect* rect, frLef58CornerSpacingConstraint* con) {
   bool enableOutput = false;
   // skip if corner type mismatch
   if (corner->getType() != con->getCornerType()) {
@@ -958,7 +958,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcRect* rect, 
 }
 
 // currently only support ISPD19-related part
-void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg, frLef58CornerSpacingConstraint* con) {
+void FlexGCWorker::Impl::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg, frLef58CornerSpacingConstraint* con) {
   bool enableOutput = false;
   // only trigger between opposite corner-edge
   if (!isOppositeDir(corner, seg)) {
@@ -1094,7 +1094,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg
   }
 }
 
-void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner) {
+void FlexGCWorker::Impl::checkMetalCornerSpacing_main(gcCorner* corner) {
   // bool enableOutput = true;
 
   auto layerNum = corner->getPrevEdge()->getLayerNum();
@@ -1114,7 +1114,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner) {
   }
 }
 
-void FlexGCWorker::checkMetalCornerSpacing() {
+void FlexGCWorker::Impl::checkMetalCornerSpacing() {
   if (targetNet) {
     // layer --> net --> polygon --> corner
     for (int i = std::max((frLayerNum)(getDesign()->getTech()->getBottomLayerNum()), minLayerNum); 
@@ -1154,7 +1154,7 @@ void FlexGCWorker::checkMetalCornerSpacing() {
   }
 }
 
-void FlexGCWorker::checkMetalShape_minWidth(const gtl::rectangle_data<frCoord> &rect, frLayerNum layerNum, gcNet* net, bool isH) {
+void FlexGCWorker::Impl::checkMetalShape_minWidth(const gtl::rectangle_data<frCoord> &rect, frLayerNum layerNum, gcNet* net, bool isH) {
   bool enableOutput = printMarker;
   // skip enough width
   auto minWidth = getDesign()->getTech()->getLayer(layerNum)->getMinWidth();
@@ -1216,7 +1216,7 @@ void FlexGCWorker::checkMetalShape_minWidth(const gtl::rectangle_data<frCoord> &
   }
 }
 
-void FlexGCWorker::checkMetalShape_minStep_helper(const frBox &markerBox, frLayerNum layerNum, gcNet* net, 
+void FlexGCWorker::Impl::checkMetalShape_minStep_helper(const frBox &markerBox, frLayerNum layerNum, gcNet* net, 
                                                   frMinStepConstraint* con,
                                                   bool hasInsideCorner, bool hasOutsideCorner, bool hasStep, 
                                                   int currEdges, frCoord currLength, bool hasRoute) {
@@ -1302,7 +1302,7 @@ void FlexGCWorker::checkMetalShape_minStep_helper(const frBox &markerBox, frLaye
   }
 }
 
-void FlexGCWorker::checkMetalShape_minArea(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_minArea(gcPin* pin) {
   bool enableOutput = false;
 
   if (ignoreMinArea) {
@@ -1400,7 +1400,7 @@ void FlexGCWorker::checkMetalShape_minArea(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalShape_lef58MinStep_noBetweenEol(gcPin* pin, frLef58MinStepConstraint* con) {
+void FlexGCWorker::Impl::checkMetalShape_lef58MinStep_noBetweenEol(gcPin* pin, frLef58MinStepConstraint* con) {
   auto enableOutput = false;
   // auto enableOutput = true;
 
@@ -1510,7 +1510,7 @@ void FlexGCWorker::checkMetalShape_lef58MinStep_noBetweenEol(gcPin* pin, frLef58
 }
 
 // currently only support nobetweeneol
-void FlexGCWorker::checkMetalShape_lef58MinStep(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_lef58MinStep(gcPin* pin) {
   //bool enableOutput = true;
 
   auto poly = pin->getPolygon();
@@ -1527,7 +1527,7 @@ void FlexGCWorker::checkMetalShape_lef58MinStep(gcPin* pin) {
   
 }
 
-void FlexGCWorker::checkMetalShape_minStep(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_minStep(gcPin* pin) {
   //bool enableOutput = true;
 
   auto poly = pin->getPolygon();
@@ -1620,7 +1620,7 @@ void FlexGCWorker::checkMetalShape_minStep(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalShape_rectOnly(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_rectOnly(gcPin* pin) {
   // bool enableOutput = true;
   bool enableOutput = false;
 
@@ -1717,7 +1717,7 @@ void FlexGCWorker::checkMetalShape_rectOnly(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalShape_offGrid(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_offGrid(gcPin* pin) {
   bool enableOutput = false;
   auto net = pin->getNet();
   // Needs to be signed to make modulo work correctly with
@@ -1781,7 +1781,7 @@ void FlexGCWorker::checkMetalShape_offGrid(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalShape_minEnclosedArea(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_minEnclosedArea(gcPin* pin) {
   bool enableOutput = false;
   auto net = pin->getNet();
   auto poly = pin->getPolygon();
@@ -1846,7 +1846,7 @@ void FlexGCWorker::checkMetalShape_minEnclosedArea(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalShape_main(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalShape_main(gcPin* pin) {
   //bool enableOutput = true;
 
   auto poly = pin->getPolygon();
@@ -1889,7 +1889,7 @@ void FlexGCWorker::checkMetalShape_main(gcPin* pin) {
   checkMetalShape_minEnclosedArea(pin);
 }
 
-void FlexGCWorker::checkMetalShape() {
+void FlexGCWorker::Impl::checkMetalShape() {
   if (targetNet) {
     // layer --> net --> polygon
     for (int i = std::max((frLayerNum)(getDesign()->getTech()->getBottomLayerNum()), minLayerNum); 
@@ -1919,7 +1919,7 @@ void FlexGCWorker::checkMetalShape() {
   }
 }
 
-bool FlexGCWorker::checkMetalEndOfLine_eol_isEolEdge(gcSegment *edge, frSpacingEndOfLineConstraint *con) {
+bool FlexGCWorker::Impl::checkMetalEndOfLine_eol_isEolEdge(gcSegment *edge, frSpacingEndOfLineConstraint *con) {
   // skip if >= eolWidth
   if (gtl::length(*edge) >= con->getEolWidth()) {
     return false;
@@ -1934,7 +1934,7 @@ bool FlexGCWorker::checkMetalEndOfLine_eol_isEolEdge(gcSegment *edge, frSpacingE
 }
 
 // bbox on the gcSegment->low() side
-void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getQueryBox(gcSegment *edge, frSpacingEndOfLineConstraint *con, 
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getQueryBox(gcSegment *edge, frSpacingEndOfLineConstraint *con, 
                                                                               bool isSegLow, box_t &queryBox, 
                                                                               gtl::rectangle_data<frCoord> &queryRect) {
   frCoord ptX, ptY;
@@ -1996,7 +1996,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getQueryBox(gc
   gtl::yh(queryRect, queryBox.max_corner().y());
 }
 
-void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getParallelEdgeRect(gcSegment *edge, gtl::rectangle_data<frCoord> &rect) {
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getParallelEdgeRect(gcSegment *edge, gtl::rectangle_data<frCoord> &rect) {
   if (edge->getDir() == frDirEnum::E) {
     gtl::xl(rect, edge->low().x());
     gtl::yl(rect, edge->low().y());
@@ -2021,7 +2021,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir_getParallelEdg
 }
 
 
-bool FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool isSegLow, bool &hasRoute) {
+bool FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasParallelEdge_oneDir(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool isSegLow, bool &hasRoute) {
   bool sol = false;
   auto layerNum = edge->getLayerNum();
   box_t queryBox; // (shrink by one, disabled)
@@ -2070,7 +2070,7 @@ bool FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge_oneDir(gcSegment *edg
   return sol;
 }
 
-bool FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool &hasRoute) {
+bool FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasParallelEdge(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool &hasRoute) {
   if (!con->hasParallelEdge()) {
     return true;
   }
@@ -2085,7 +2085,7 @@ bool FlexGCWorker::checkMetalEndOfLine_eol_hasParallelEdge(gcSegment *edge, frSp
   return false;
 }
 
-void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_getQueryBox(gcSegment *edge, frSpacingEndOfLineConstraint *con, 
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasEol_getQueryBox(gcSegment *edge, frSpacingEndOfLineConstraint *con, 
                                                               box_t &queryBox, gtl::rectangle_data<frCoord> &queryRect) {
   auto eolWithin = con->getEolWithin();
   auto eolSpace  = con->getMinSpacing();
@@ -2116,7 +2116,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_getQueryBox(gcSegment *edge, f
   gtl::yh(queryRect, queryBox.max_corner().y());
 }
 
-void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSegment *edge2, frSpacingEndOfLineConstraint *con) {
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSegment *edge2, frSpacingEndOfLineConstraint *con) {
   bool enableOutput = printMarker;
   auto layerNum = edge1->getLayerNum();
   auto net1 = edge1->getNet();
@@ -2218,7 +2218,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSeg
 
 }
 
-void FlexGCWorker::checkMetalEndOfLine_eol_hasEol(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool hasRoute) {
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol_hasEol(gcSegment *edge, frSpacingEndOfLineConstraint *con, bool hasRoute) {
   auto layerNum = edge->getLayerNum();
   box_t queryBox;
   gtl::rectangle_data<frCoord> queryRect; // original size
@@ -2261,7 +2261,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol(gcSegment *edge, frSpacingEndO
   }
 }
 
-void FlexGCWorker::checkMetalEndOfLine_eol(gcSegment *edge, frSpacingEndOfLineConstraint *con) {
+void FlexGCWorker::Impl::checkMetalEndOfLine_eol(gcSegment *edge, frSpacingEndOfLineConstraint *con) {
   if (!checkMetalEndOfLine_eol_isEolEdge(edge, con)) {
     return;
   }
@@ -2292,7 +2292,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol(gcSegment *edge, frSpacingEndOfLineCo
   checkMetalEndOfLine_eol_hasEol(edge, con, hasRoute);
 }
 
-void FlexGCWorker::checkMetalEndOfLine_main(gcPin* pin) {
+void FlexGCWorker::Impl::checkMetalEndOfLine_main(gcPin* pin) {
   //bool enableOutput = true;
 
   auto poly = pin->getPolygon();
@@ -2313,7 +2313,7 @@ void FlexGCWorker::checkMetalEndOfLine_main(gcPin* pin) {
   }
 }
 
-void FlexGCWorker::checkMetalEndOfLine() {
+void FlexGCWorker::Impl::checkMetalEndOfLine() {
   if (targetNet) {
     // layer --> net --> polygon
     for (int i = std::max((frLayerNum)(getDesign()->getTech()->getBottomLayerNum()), minLayerNum); 
@@ -2343,7 +2343,7 @@ void FlexGCWorker::checkMetalEndOfLine() {
   }
 }
 
-frCoord FlexGCWorker::checkCutSpacing_getMaxSpcVal(frCutSpacingConstraint* con) {
+frCoord FlexGCWorker::Impl::checkCutSpacing_getMaxSpcVal(frCutSpacingConstraint* con) {
   frCoord maxSpcVal = 0;
   if (con) {
     maxSpcVal = con->getCutSpacing();
@@ -2354,7 +2354,7 @@ frCoord FlexGCWorker::checkCutSpacing_getMaxSpcVal(frCutSpacingConstraint* con) 
   return maxSpcVal;
 }
 
-frCoord FlexGCWorker::checkLef58CutSpacing_getMaxSpcVal(frLef58CutSpacingConstraint* con) {
+frCoord FlexGCWorker::Impl::checkLef58CutSpacing_getMaxSpcVal(frLef58CutSpacingConstraint* con) {
   frCoord maxSpcVal = 0;
   if (con) {
     maxSpcVal = con->getCutSpacing();
@@ -2365,7 +2365,7 @@ frCoord FlexGCWorker::checkLef58CutSpacing_getMaxSpcVal(frLef58CutSpacingConstra
   return maxSpcVal;
 }
 
-frCoord FlexGCWorker::checkCutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect* ptr2, frCutSpacingConstraint* con) {
+frCoord FlexGCWorker::Impl::checkCutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect* ptr2, frCutSpacingConstraint* con) {
   frCoord maxSpcVal = 0;
   if (con) {
     maxSpcVal = con->getCutSpacing();
@@ -2387,7 +2387,7 @@ frCoord FlexGCWorker::checkCutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect* ptr
   return maxSpcVal;
 }
 
-void FlexGCWorker::checkCutSpacing_short(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
+void FlexGCWorker::Impl::checkCutSpacing_short(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect) {
   bool enableOutput = printMarker;
 
   auto layerNum = rect1->getLayerNum();
@@ -2468,7 +2468,7 @@ void FlexGCWorker::checkCutSpacing_short(gcRect* rect1, gcRect* rect2, const gtl
   }
 }
 
-void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect, 
+void FlexGCWorker::Impl::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::rectangle_data<frCoord> &markerRect, 
                                        frCutSpacingConstraint* con, frCoord prl) {
   bool enableOutput = printMarker;
   // bool enableOutput = true;
@@ -2612,7 +2612,7 @@ void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::
   }
 }
 
-void FlexGCWorker::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2, 
+void FlexGCWorker::Impl::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2, 
                                                   const gtl::rectangle_data<frCoord> &markerRect, frCutSpacingConstraint* con) {
   bool enableOutput = printMarker;
   
@@ -2719,7 +2719,7 @@ void FlexGCWorker::checkCutSpacing_spc_diff_layer(gcRect* rect1, gcRect* rect2,
 
 // check LEF58 SPACING constraint for cut layer
 // rect1 ==  victim, rect2 == aggressor
-void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect1, gcRect* rect2, frLef58CutSpacingConstraint* con) {
+void FlexGCWorker::Impl::checkLef58CutSpacing_main(gcRect* rect1, gcRect* rect2, frLef58CutSpacingConstraint* con) {
   // skip if same obj
   if (rect1 == rect2) {
     return;
@@ -2741,7 +2741,7 @@ void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect1, gcRect* rect2, frLef
   }
 }
 
-bool FlexGCWorker::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutSpacingConstraint* con) {
+bool FlexGCWorker::Impl::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutSpacingConstraint* con) {
   auto layerNum = rect->getLayerNum();
   auto layer = getDesign()->getTech()->getLayer(layerNum);
 
@@ -2783,7 +2783,7 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutS
   }
 }
 
-bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts(gcRect* rect1, 
+bool FlexGCWorker::Impl::checkLef58CutSpacing_spc_hasTwoCuts(gcRect* rect1, 
                                                        gcRect* rect2, 
                                                        frLef58CutSpacingConstraint* con) {
   if (checkLef58CutSpacing_spc_hasTwoCuts_helper(rect1, con) && checkLef58CutSpacing_spc_hasTwoCuts_helper(rect2, con)) {
@@ -2793,7 +2793,7 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts(gcRect* rect1,
   }
 }
 
-bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
+bool FlexGCWorker::Impl::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
                                                               frLef58CutSpacingConstraint* con) {
   auto layerNum = rect->getLayerNum();
   auto layer = getDesign()->getTech()->getLayer(layerNum);
@@ -2837,7 +2837,7 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
   }
 }
 
-frCoord FlexGCWorker::checkLef58CutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect* ptr2, frLef58CutSpacingConstraint* con) {
+frCoord FlexGCWorker::Impl::checkLef58CutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect* ptr2, frLef58CutSpacingConstraint* con) {
   frCoord maxSpcVal = 0;
   if (con) {
     maxSpcVal = con->getCutSpacing();
@@ -2860,7 +2860,7 @@ frCoord FlexGCWorker::checkLef58CutSpacing_spc_getReqSpcVal(gcRect* ptr1, gcRect
 }
 
 // only works for GF14 syntax (i.e., TWOCUTS), not full rule support
-void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1, 
+void FlexGCWorker::Impl::checkLef58CutSpacing_spc_adjCut(gcRect* rect1, 
                                                    gcRect* rect2, 
                                                    const gtl::rectangle_data<frCoord> &markerRect,
                                                    frLef58CutSpacingConstraint* con) {
@@ -3022,7 +3022,7 @@ void FlexGCWorker::checkLef58CutSpacing_spc_adjCut(gcRect* rect1,
 }
 
 // only works for GF14 syntax, not full rule support
-void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1, 
+void FlexGCWorker::Impl::checkLef58CutSpacing_spc_layer(gcRect* rect1, 
                                                   gcRect* rect2, 
                                                   const gtl::rectangle_data<frCoord> &markerRect,
                                                   frLef58CutSpacingConstraint* con) {
@@ -3348,7 +3348,7 @@ void FlexGCWorker::checkLef58CutSpacing_spc_layer(gcRect* rect1,
 }
 
 // check short for every spacing rule except layer
-void FlexGCWorker::checkCutSpacing_main(gcRect* ptr1, gcRect* ptr2, frCutSpacingConstraint* con) {
+void FlexGCWorker::Impl::checkCutSpacing_main(gcRect* ptr1, gcRect* ptr2, frCutSpacingConstraint* con) {
   // skip if same obj
   if (ptr1 == ptr2) {
     return;
@@ -3398,7 +3398,7 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* ptr1, gcRect* ptr2, frCutSpacing
   }
 }
 
-bool FlexGCWorker::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingConstraint* con) {
+bool FlexGCWorker::Impl::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingConstraint* con) {
   // no adj cut rule, must proceed checking
   if (!con->isAdjacentCuts()) {
     return true;
@@ -3454,7 +3454,7 @@ bool FlexGCWorker::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingCon
   }
 }
 
-void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect, frLef58CutSpacingConstraint* con, bool skipDiffNet) {
+void FlexGCWorker::Impl::checkLef58CutSpacing_main(gcRect* rect, frLef58CutSpacingConstraint* con, bool skipDiffNet) {
   // bool enableOutput = false;
   auto layerNum = rect->getLayerNum();
   auto maxSpcVal = checkLef58CutSpacing_getMaxSpcVal(con);
@@ -3477,7 +3477,7 @@ void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect, frLef58CutSpacingCons
   }
 }
 
-void FlexGCWorker::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* con) {
+void FlexGCWorker::Impl::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* con) {
   //bool enableOutput = true;
   bool enableOutput = false;
   auto layerNum = rect->getLayerNum();
@@ -3547,7 +3547,7 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* co
   }
 }
 
-void FlexGCWorker::checkCutSpacing_main(gcRect* rect) {
+void FlexGCWorker::Impl::checkCutSpacing_main(gcRect* rect) {
   auto layerNum = rect->getLayerNum();
 
   // CShort
@@ -3580,7 +3580,7 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect) {
   }
 }
 
-void FlexGCWorker::checkCutSpacing() {
+void FlexGCWorker::Impl::checkCutSpacing() {
   if (targetNet) {
     // layer --> net --> polygon --> maxrect
     for (int i = std::max((frLayerNum)(getDesign()->getTech()->getBottomLayerNum()), minLayerNum); 
@@ -3615,7 +3615,7 @@ void FlexGCWorker::checkCutSpacing() {
   }
 }
 
-void FlexGCWorker::patchMetalShape() {
+void FlexGCWorker::Impl::patchMetalShape() {
   pwires.clear();
   clearMarkers();
 
@@ -3627,7 +3627,7 @@ void FlexGCWorker::patchMetalShape() {
 }
 
 // loop through violation and patch C5 enclosure minStep for GF14
-void FlexGCWorker::patchMetalShape_helper() {
+void FlexGCWorker::Impl::patchMetalShape_helper() {
   vector<drConnFig*> results;
   for (auto &marker: markers) {
     results.clear();
@@ -3696,7 +3696,7 @@ void FlexGCWorker::patchMetalShape_helper() {
 }
 
 
-int FlexGCWorker::main() {
+int FlexGCWorker::Impl::main() {
   ProfileTask profile("GC:main");
   //printMarker = true;
   // minStep patching for GF14

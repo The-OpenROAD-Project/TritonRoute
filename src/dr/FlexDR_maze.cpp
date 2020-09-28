@@ -32,9 +32,11 @@
 #include <chrono>
 #include <algorithm>
 #include <random>
+#include <boost/polygon/polygon.hpp>
 
 using namespace std;
 using namespace fr;
+namespace gtl = boost::polygon;
 
 inline frCoord FlexDRWorker::pt2boxDistSquare(const frPoint &pt, const frBox &box) {
   frCoord dx = max(max(box.left()   - pt.x(), pt.x() - box.right()), 0);

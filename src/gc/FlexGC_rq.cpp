@@ -27,7 +27,7 @@
  */
 
 #include <iostream>
-#include "gc/FlexGC.h"
+#include "gc/FlexGC_impl.h"
 
 using namespace std;
 using namespace fr;

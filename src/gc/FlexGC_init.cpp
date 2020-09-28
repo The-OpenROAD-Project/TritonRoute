@@ -28,14 +28,14 @@
 
 #include <iostream>
 #include "frProfileTask.h"
-#include "gc/FlexGC.h"
+#include "gc/FlexGC_impl.h"
 #include "db/drObj/drNet.h"
 #include "dr/FlexDR.h"
 
 using namespace std;
 using namespace fr;
 
-gcNet* FlexGCWorker::getNet(frBlockObject* obj) {
+gcNet* FlexGCWorker::Impl::getNet(frBlockObject* obj) {
   bool isFloatingVDD = false;
   bool isFloatingVSS = false;
   frBlockObject* owner = nullptr;
@@ -102,7 +102,7 @@ gcNet* FlexGCWorker::getNet(frBlockObject* obj) {
   }
 }
 
-void FlexGCWorker::initObj(const frBox &box, frLayerNum layerNum, frBlockObject* obj, bool isFixed) {
+void FlexGCWorker::Impl::initObj(const frBox &box, frLayerNum layerNum, frBlockObject* obj, bool isFixed) {
   auto currNet = getNet(obj);
   if (getDesign()->getTech()->getLayer(layerNum)->getType() == frLayerTypeEnum::CUT) {
     currNet->addRectangle(box, layerNum, isFixed);
@@ -111,7 +111,7 @@ void FlexGCWorker::initObj(const frBox &box, frLayerNum layerNum, frBlockObject*
   }
 }
 
-bool FlexGCWorker::initDesign_skipObj(frBlockObject* obj) {
+bool FlexGCWorker::Impl::initDesign_skipObj(frBlockObject* obj) {
   if (targetObj) {
     if (targetObj->typeId() == frcInst) {
       if (obj->typeId() == frcInstTerm &&
@@ -140,7 +140,7 @@ bool FlexGCWorker::initDesign_skipObj(frBlockObject* obj) {
 }
 
 
-void FlexGCWorker::initDesign() {
+void FlexGCWorker::Impl::initDesign() {
   bool enableOutput = false;
   //bool enableOutput = true;
 
@@ -196,7 +196,7 @@ void FlexGCWorker::initDesign() {
   }
 }
 
-void FlexGCWorker::addPAObj(frConnFig* obj, frBlockObject* owner) {
+void FlexGCWorker::Impl::addPAObj(frConnFig* obj, frBlockObject* owner) {
   auto it = owner2nets.find(owner);
   gcNet* currNet = nullptr;
   if (it == owner2nets.end()) {
@@ -244,7 +244,7 @@ void FlexGCWorker::addPAObj(frConnFig* obj, frBlockObject* owner) {
 }
 
 
-void FlexGCWorker::initDRObj(drConnFig* obj, gcNet* currNet) {
+void FlexGCWorker::Impl::initDRObj(drConnFig* obj, gcNet* currNet) {
   if (currNet == nullptr) {
     currNet = getNet(obj);
   }
@@ -310,7 +310,7 @@ void FlexGCWorker::initDRObj(drConnFig* obj, gcNet* currNet) {
   }
 }
 
-void FlexGCWorker::initDRWorker() {
+void FlexGCWorker::Impl::initDRWorker() {
   //bool enableOutput = true;
   bool enableOutput = false;
   if (!getDRWorker()) {
@@ -338,7 +338,7 @@ void FlexGCWorker::initDRWorker() {
   }
 }
 
-void FlexGCWorker::initNet_pins_polygon(gcNet* net) {
+void FlexGCWorker::Impl::initNet_pins_polygon(gcNet* net) {
   int numLayers = getDesign()->getTech()->getLayers().size();
   // init pin from polygons
   vector<gtl::polygon_90_set_data<frCoord> > layerPolys(numLayers);
@@ -364,7 +364,7 @@ void FlexGCWorker::initNet_pins_polygon(gcNet* net) {
   }
 }
 
-void FlexGCWorker::initNet_pins_polygonEdges_getFixedPolygonEdges(gcNet* net, vector<set<pair<frPoint, frPoint> > > &fixedPolygonEdges) {
+void FlexGCWorker::Impl::initNet_pins_polygonEdges_getFixedPolygonEdges(gcNet* net, vector<set<pair<frPoint, frPoint> > > &fixedPolygonEdges) {
   int numLayers = getDesign()->getTech()->getLayers().size();
   vector<gtl::polygon_90_with_holes_data<frCoord> > polys;
   frPoint bp, ep, firstPt;
@@ -419,7 +419,7 @@ void FlexGCWorker::initNet_pins_polygonEdges_getFixedPolygonEdges(gcNet* net, ve
   }
 }
 
-void FlexGCWorker::initNet_pins_polygonEdges_helper_outer(gcNet* net, gcPin* pin, gcPolygon* poly, frLayerNum i, 
+void FlexGCWorker::Impl::initNet_pins_polygonEdges_helper_outer(gcNet* net, gcPin* pin, gcPolygon* poly, frLayerNum i, 
                                                           const vector<set<pair<frPoint, frPoint> > > &fixedPolygonEdges) {
   frPoint bp, ep, firstPt;
   gtl::point_data<frCoord> bp1, ep1, firstPt1;
@@ -486,7 +486,7 @@ void FlexGCWorker::initNet_pins_polygonEdges_helper_outer(gcNet* net, gcPin* pin
   pin->addPolygonEdges(tmpEdges);
 }
 
-void FlexGCWorker::initNet_pins_polygonEdges_helper_inner(gcNet* net, gcPin* pin, 
+void FlexGCWorker::Impl::initNet_pins_polygonEdges_helper_inner(gcNet* net, gcPin* pin, 
                                                           const gtl::polygon_90_data<frCoord> &hole_poly, frLayerNum i, 
                                                           const vector<set<pair<frPoint, frPoint> > > &fixedPolygonEdges) {
   frPoint bp, ep, firstPt;
@@ -554,7 +554,7 @@ void FlexGCWorker::initNet_pins_polygonEdges_helper_inner(gcNet* net, gcPin* pin
   pin->addPolygonEdges(tmpEdges);
 }
 
-void FlexGCWorker::initNet_pins_polygonEdges(gcNet* net) {
+void FlexGCWorker::Impl::initNet_pins_polygonEdges(gcNet* net) {
   //bool enableOutput = true;
   //bool enableOutput = false;
   int numLayers = getDesign()->getTech()->getLayers().size();
@@ -580,7 +580,7 @@ void FlexGCWorker::initNet_pins_polygonEdges(gcNet* net) {
   //}
 }
 
-void FlexGCWorker::initNet_pins_polygonCorners_helper(gcNet* net, gcPin* pin) {
+void FlexGCWorker::Impl::initNet_pins_polygonCorners_helper(gcNet* net, gcPin* pin) {
   for (auto &edges: pin->getPolygonEdges()) {
     vector<unique_ptr<gcCorner> > tmpCorners;
     auto prevEdge = edges.back().get();
@@ -659,7 +659,7 @@ void FlexGCWorker::initNet_pins_polygonCorners_helper(gcNet* net, gcPin* pin) {
   }
 }
 
-void FlexGCWorker::initNet_pins_polygonCorners(gcNet* net) {
+void FlexGCWorker::Impl::initNet_pins_polygonCorners(gcNet* net) {
   int numLayers = getDesign()->getTech()->getLayers().size();
   for (int i = 0; i < numLayers; i++) {
     for (auto &pin: net->getPins(i)) {
@@ -668,7 +668,7 @@ void FlexGCWorker::initNet_pins_polygonCorners(gcNet* net) {
   }
 }
 
-void FlexGCWorker::initNet_pins_maxRectangles_getFixedMaxRectangles(gcNet* net, vector<set<pair<frPoint, frPoint> > > &fixedMaxRectangles) {
+void FlexGCWorker::Impl::initNet_pins_maxRectangles_getFixedMaxRectangles(gcNet* net, vector<set<pair<frPoint, frPoint> > > &fixedMaxRectangles) {
   int numLayers = getDesign()->getTech()->getLayers().size();
   vector<gtl::rectangle_data<frCoord> > rects;
   frPoint bp, ep;
@@ -687,7 +687,7 @@ void FlexGCWorker::initNet_pins_maxRectangles_getFixedMaxRectangles(gcNet* net, 
   }
 }
 
-void FlexGCWorker::initNet_pins_maxRectangles_helper(gcNet* net, gcPin* pin, const gtl::rectangle_data<frCoord>& rect, frLayerNum i,
+void FlexGCWorker::Impl::initNet_pins_maxRectangles_helper(gcNet* net, gcPin* pin, const gtl::rectangle_data<frCoord>& rect, frLayerNum i,
                                                      const vector<set<pair<frPoint, frPoint> > > &fixedMaxRectangles) {
   auto rectangle = make_unique<gcRect>();
   rectangle->setRect(rect);
@@ -708,7 +708,7 @@ void FlexGCWorker::initNet_pins_maxRectangles_helper(gcNet* net, gcPin* pin, con
   pin->addMaxRectangle(std::move(rectangle));
 }
 
-void FlexGCWorker::initNet_pins_maxRectangles(gcNet* net) {
+void FlexGCWorker::Impl::initNet_pins_maxRectangles(gcNet* net) {
   int numLayers = getDesign()->getTech()->getLayers().size();
   vector<set<pair<frPoint, frPoint> > > fixedMaxRectangles(numLayers);
   // get all fixed max rectangles
@@ -727,26 +727,26 @@ void FlexGCWorker::initNet_pins_maxRectangles(gcNet* net) {
   }
 }
 
-void FlexGCWorker::initNet(gcNet* net) {
+void FlexGCWorker::Impl::initNet(gcNet* net) {
   initNet_pins_polygon(net);
   initNet_pins_polygonEdges(net);
   initNet_pins_polygonCorners(net);
   initNet_pins_maxRectangles(net);
 }
 
-void FlexGCWorker::initNets() {
+void FlexGCWorker::Impl::initNets() {
   for (auto &uNet: getNets()) {
     auto net = uNet.get();
     initNet(net);
   }
 }
 
-void FlexGCWorker::initRegionQuery() {
+void FlexGCWorker::Impl::initRegionQuery() {
   getWorkerRegionQuery().init(getDesign()->getTech()->getLayers().size());
 }
 
 // init initializes all nets from frDesign if no drWorker is provided
-void FlexGCWorker::init() {
+void FlexGCWorker::Impl::init() {
   ProfileTask profile("GC:init");
   //bool enableOutput = true;
   bool enableOutput = false;
@@ -782,7 +782,7 @@ void FlexGCWorker::init() {
 }
 
 // init initializes all nets from frDesign if no drWorker is provided
-void FlexGCWorker::initPA0() {
+void FlexGCWorker::Impl::initPA0() {
   //bool enableOutput = true;
   bool enableOutput = false;
   addNet(design->getTopBlock()->getFakeVSSNet()); //[0] floating VSS
@@ -814,12 +814,12 @@ void FlexGCWorker::initPA0() {
   }
 }
 
-void FlexGCWorker::initPA1() {
+void FlexGCWorker::Impl::initPA1() {
   initNets();
   initRegionQuery();
 }
 
-void FlexGCWorker::updateGCWorker() {
+void FlexGCWorker::Impl::updateGCWorker() {
   if (!getDRWorker()) {
     cout <<"Error: updateGCWorker expects a valid DRWorker" <<endl;
     exit(1);
@@ -881,6 +881,6 @@ void FlexGCWorker::updateGCWorker() {
 }
 
 void FlexGCWorker::updateDRNet(drNet* net) {
-  modifiedDRNets.push_back(net);
+  impl->modifiedDRNets.push_back(net);
 }
 

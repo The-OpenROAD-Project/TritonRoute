@@ -27,12 +27,27 @@
  */
 
 #include <iostream>
-#include "gc/FlexGC.h"
+#include "gc/FlexGC_impl.h"
 
 using namespace std;
 using namespace fr;
 
-bool FlexGCWorker::addMarker(std::unique_ptr<frMarker> in) {
+FlexGCWorker::FlexGCWorker(frDesign* designIn, FlexDRWorker* drWorkerIn)
+  : impl(std::make_unique<Impl>(designIn, drWorkerIn, this))
+{
+}
+
+FlexGCWorker::~FlexGCWorker() = default;
+
+FlexGCWorker::Impl::Impl(frDesign* designIn, FlexDRWorker* drWorkerIn, FlexGCWorker* gcWorkerIn)
+  : design(designIn), drWorker(drWorkerIn),
+    extBox(), drcBox(), owner2nets(), nets(), markers(), mapMarkers(), pwires(), rq(gcWorkerIn), printMarker(false), modifiedDRNets(),
+    targetNet(nullptr), minLayerNum(std::numeric_limits<frLayerNum>::min()), maxLayerNum(std::numeric_limits<frLayerNum>::max()),
+    targetObj(nullptr), ignoreDB(false), ignoreMinArea(false), surgicalFixEnabled(false)
+{
+}
+
+bool FlexGCWorker::Impl::addMarker(std::unique_ptr<frMarker> in) {
   frBox bbox;
   in->getBBox(bbox);
   auto layerNum = in->getLayerNum();
@@ -54,4 +69,83 @@ bool FlexGCWorker::addMarker(std::unique_ptr<frMarker> in) {
   return true;
 }
 
+void FlexGCWorker::addPAObj(frConnFig* obj, frBlockObject* owner) {
+  impl->addPAObj(obj, owner);
+}
 
+void FlexGCWorker::init()
+{
+  impl->init();
+}
+
+int FlexGCWorker::main()
+{
+  return impl->main();
+}
+
+void FlexGCWorker::end()
+{
+  impl->end();
+}
+
+void FlexGCWorker::initPA0()
+{
+  impl->initPA0();
+}
+
+void FlexGCWorker::initPA1()
+{
+  impl->initPA1();
+}
+
+void FlexGCWorker::setExtBox(const frBox &in)
+{
+  impl->extBox.set(in);
+}
+
+void FlexGCWorker::setDrcBox(const frBox &in)
+{
+  impl->drcBox.set(in);
+}
+
+const std::vector<std::unique_ptr<frMarker> >& FlexGCWorker::getMarkers() const {
+  return impl->markers;
+}
+
+const std::vector<std::unique_ptr<drPatchWire> >& FlexGCWorker::getPWires() const {
+  return impl->pwires;
+}
+
+bool FlexGCWorker::setTargetNet(frBlockObject* in) {
+  auto& owner2nets = impl->owner2nets;
+  if (owner2nets.find(in) != owner2nets.end()) {
+    impl->targetNet = owner2nets[in];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void FlexGCWorker::setEnableSurgicalFix(bool in) {
+  impl->surgicalFixEnabled = in;
+}
+
+void FlexGCWorker::resetTargetNet() {
+  impl->targetNet = nullptr;
+}
+
+void FlexGCWorker::setTargetObj(frBlockObject* in) {
+  impl->targetObj = in;
+}
+
+void FlexGCWorker::setIgnoreDB() {
+  impl->ignoreDB = true;
+}
+
+void FlexGCWorker::setIgnoreMinArea() {
+  impl->ignoreMinArea = true;
+}
+
+std::vector<std::unique_ptr<gcNet> >& FlexGCWorker::getNets() {
+  return impl->getNets();
+}
