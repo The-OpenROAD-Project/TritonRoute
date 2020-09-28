@@ -36,8 +36,7 @@
 #include <utility>
 
 #include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/algorithms/covered_by.hpp>
-#include <boost/geometry/algorithms/equals.hpp>
+#include <boost/geometry/geometries/box.hpp>
 
 namespace fr {
   using frLayerNum = int;

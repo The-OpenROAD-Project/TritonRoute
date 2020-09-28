@@ -28,6 +28,8 @@
 
 #include <iostream>
 #include "gc/FlexGC_impl.h"
+#include <boost/geometry/algorithms/equals.hpp>
+#include <boost/geometry/algorithms/covered_by.hpp>
 
 using namespace std;
 using namespace fr;

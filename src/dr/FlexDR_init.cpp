@@ -29,6 +29,7 @@
 #include "dr/FlexDR.h"
 #include <algorithm>
 #include <boost/polygon/polygon.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
 using namespace std;
 using namespace fr;
