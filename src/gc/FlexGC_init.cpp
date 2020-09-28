@@ -157,7 +157,6 @@ void FlexGCWorker::initDesign() {
   box_t queryBox(point_t(extBox.left(), extBox.bottom()), point_t(extBox.right(), extBox.top()));
   auto regionQuery = getDesign()->getRegionQuery();
   frRegionQuery::Objects<frBlockObject> queryResult;
-  frBox box;
   int cnt = 0;
   // init all non-dr objs from design
   // for (auto i = getDesign()->getTech()->getBottomLayerNum(); i <= design->getTech()->getTopLayerNum(); i++) {
@@ -165,11 +164,10 @@ void FlexGCWorker::initDesign() {
     queryResult.clear();
     // queryResult.clear();
     regionQuery->query(queryBox, i, queryResult);
-    for (auto &[boostB, obj]: queryResult) {
+    for (auto &[box, obj]: queryResult) {
       if (initDesign_skipObj(obj)) {
         continue;
       }
-      box.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
       initObj(box, i, obj, true);
       cnt++;
     }
@@ -185,11 +183,10 @@ void FlexGCWorker::initDesign() {
   for (auto i = getDesign()->getTech()->getBottomLayerNum(); i <= design->getTech()->getTopLayerNum(); i++) {
     queryResult.clear();
     regionQuery->queryDRObj(queryBox, i, queryResult);
-    for (auto &[boostB, obj]: queryResult) {
+    for (auto &[box, obj]: queryResult) {
       if (initDesign_skipObj(obj)) {
         continue;
       }
-      box.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
       initObj(box, i, obj, false);
       cnt++;
     }

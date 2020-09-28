@@ -253,16 +253,13 @@ namespace fr {
   };
 
   namespace bg  = boost::geometry;
-  namespace bgi = boost::geometry::index;
 
   typedef bg::model::d2::point_xy<frCoord, bg::cs::cartesian>  point_t;
   typedef bg::model::box<point_t>                              box_t;
   typedef bg::model::segment<point_t>                          segment_t;
 
-  template <typename T>
-  using rq_rptr_value_t = std::pair<box_t, T* >;
-
   class frBox;
+
   template <typename T>
   using rq_box_value_t = std::pair<frBox, T>;
 

@@ -38,28 +38,24 @@ namespace fr {
   class FlexGCWorker;
   class FlexGCWorkerRegionQuery {
   public:
-      FlexGCWorkerRegionQuery(FlexGCWorker* in): gcWorker(in) {}
-      FlexGCWorker* getGCWorker() const {
-        return gcWorker;
-      }
+      FlexGCWorkerRegionQuery(FlexGCWorker* in);
+      ~FlexGCWorkerRegionQuery();
+      FlexGCWorker* getGCWorker() const;
       void addPolygonEdge(gcSegment* edge);
-      void addPolygonEdge(gcSegment* edge, std::vector<std::vector<std::pair<segment_t, gcSegment*> > > &allShapes);
       void addMaxRectangle(gcRect* rect);
-      void addMaxRectangle(gcRect* rect, std::vector<std::vector<rq_rptr_value_t<gcRect> > > &allShapes);
       void removePolygonEdge(gcSegment* connFig);
       void removeMaxRectangle(gcRect* connFig);
       void queryPolygonEdge(const box_t &box, frLayerNum layerNum, std::vector<std::pair<segment_t, gcSegment*> > &result);
       void queryPolygonEdge(const frBox &box, frLayerNum layerNum, std::vector<std::pair<segment_t, gcSegment*> > &result);
-      void queryMaxRectangle(const box_t &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<gcRect> > &result);
-      void queryMaxRectangle(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<gcRect> > &result);
-      void queryMaxRectangle(const gtl::rectangle_data<frCoord> &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<gcRect> > &result);
+      void queryMaxRectangle(const box_t &box, frLayerNum layerNum, std::vector<rq_box_value_t<gcRect*> > &result);
+      void queryMaxRectangle(const frBox &box, frLayerNum layerNum, std::vector<rq_box_value_t<gcRect*> > &result);
+      void queryMaxRectangle(const gtl::rectangle_data<frCoord> &box, frLayerNum layerNum, std::vector<rq_box_value_t<gcRect*> > &result);
       void init(int numLayers);
       void addToRegionQuery(gcNet* net);
       void removeFromRegionQuery(gcNet* net);
-  protected:
-      FlexGCWorker* gcWorker;
-      std::vector<bgi::rtree<std::pair<segment_t, gcSegment*>, bgi::quadratic<16> > > polygon_edges; // merged
-      std::vector<bgi::rtree<rq_rptr_value_t<gcRect>,          bgi::quadratic<16> > > max_rectangles; // merged
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> impl;
   };
 
   class drConnFig;
@@ -298,7 +294,7 @@ namespace fr {
     void patchMetalShape_helper();
   
     // utility
-    bool isCornerOverlap(gcCorner* corner, const box_t &box);
+    bool isCornerOverlap(gcCorner* corner, const frBox &box);
     bool isCornerOverlap(gcCorner* corner, const gtl::rectangle_data<frCoord> &rect);
     bool isOppositeDir(gcCorner* corner, gcSegment* seg);
   };

@@ -195,24 +195,19 @@ namespace fr {
   class FlexDRWorker;
   class FlexDRWorkerRegionQuery {
   public:
-      FlexDRWorkerRegionQuery(FlexDRWorker* in): drWorker(in) {}
+      FlexDRWorkerRegionQuery(FlexDRWorker* in);
+      ~FlexDRWorkerRegionQuery();
       frDesign* getDesign() const;
-      FlexDRWorker* getDRWorker() const {
-        return drWorker;
-      }
+      FlexDRWorker* getDRWorker() const;
       void add(drConnFig* connFig);
-      void add(drConnFig* connFig, std::vector<std::vector<rq_rptr_value_t<drConnFig> > > &allShapes);
       void remove(drConnFig* connFig);
       void query(const frBox &box, frLayerNum layerNum, std::vector<drConnFig*> &result);
-      void query(const frBox &box, frLayerNum layerNum, std::vector<rq_rptr_value_t<drConnFig> > &result);
+      void query(const frBox &box, frLayerNum layerNum, std::vector<rq_box_value_t<drConnFig*> > &result);
       void init();
-      void cleanup() {
-        shapes.clear();
-        shapes.shrink_to_fit();
-      }
-  protected:
-      FlexDRWorker* drWorker;
-      std::vector<bgi::rtree<rq_rptr_value_t<drConnFig>, bgi::quadratic<16> > > shapes; // only for drXXX in dr worker
+      void cleanup();
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> impl;
   };
 
   class FlexDRMinAreaVio {

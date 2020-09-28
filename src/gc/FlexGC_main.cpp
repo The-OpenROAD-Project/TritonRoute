@@ -33,27 +33,27 @@
 using namespace std;
 using namespace fr;
 
-bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const box_t &box) {
+bool FlexGCWorker::isCornerOverlap(gcCorner* corner, const frBox &box) {
   frCoord cornerX = corner->getNextEdge()->low().x();
   frCoord cornerY = corner->getNextEdge()->low().y();
   switch (corner->getDir()) {
     case frCornerDirEnum::NE:
-      if (cornerX == box.max_corner().get<0>() && cornerY == box.max_corner().get<1>()) {
+      if (cornerX == box.right() && cornerY == box.top()) {
         return true;
       }
       break;
     case frCornerDirEnum::SE:
-      if (cornerX == box.max_corner().get<0>() && cornerY == box.min_corner().get<1>()) {
+      if (cornerX == box.right() && cornerY == box.bottom()) {
         return true;
       }
       break;
     case frCornerDirEnum::SW:
-      if (cornerX == box.min_corner().get<0>() && cornerY == box.min_corner().get<1>()) {
+      if (cornerX == box.left() && cornerY == box.bottom()) {
         return true;
       }
       break;
     case frCornerDirEnum::NW:
-      if (cornerX == box.min_corner().get<0>() && cornerY == box.max_corner().get<1>()) {
+      if (cornerX == box.left() && cornerY == box.top()) {
         return true;
       }
       break;
@@ -548,7 +548,7 @@ void FlexGCWorker::checkMetalSpacing_short(gcRect* rect1, gcRect* rect2, const g
     myBloat(bloatMarkerRect, minWidth, queryBox);
 
     auto &workerRegionQuery = getWorkerRegionQuery();
-    vector<rq_rptr_value_t<gcRect> > result;
+    vector<rq_box_value_t<gcRect*> > result;
     workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
     //cout <<"3rd obj" <<endl;
     for (auto &[objBox, objPtr]: result) {
@@ -732,7 +732,7 @@ void FlexGCWorker::checkMetalSpacing_main(gcRect* rect) {
   }
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   // Short, metSpc, NSMetal here
   for (auto &[objBox, ptr]: result) {
@@ -816,7 +816,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcRect* rect, 
   auto layerNum = corner->getNextEdge()->getLayerNum();
   auto net = corner->getNextEdge()->getNet();
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   box_t queryBox(point_t(cornerX, cornerY), point_t(cornerX, cornerY));
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   for (auto &[objBox, objPtr]: result) {
@@ -1005,7 +1005,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner, gcSegment* seg
   auto net = corner->getNextEdge()->getNet();
   auto segNet = seg->getNet();
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   box_t queryBox(point_t(cornerX, cornerY), point_t(cornerX, cornerY));
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   for (auto &[objBox, objPtr]: result) {
@@ -1103,7 +1103,7 @@ void FlexGCWorker::checkMetalCornerSpacing_main(gcCorner* corner) {
   box_t queryBox = checkMetalCornerSpacing_getQueryBox(corner, maxSpcValX, maxSpcValY);
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   // LEF58CornerSpacing
   auto &cons = getDesign()->getTech()->getLayer(layerNum)->getLef58CornerSpacingConstraints();
@@ -2127,7 +2127,7 @@ void FlexGCWorker::checkMetalEndOfLine_eol_hasEol_helper(gcSegment *edge1, gcSeg
   gtl::generalized_intersect(markerRect, rect2);
   // skip if markerRect contains anything
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   gtl::rectangle_data<frCoord> bloatMarkerRect(markerRect);
   if (gtl::area(markerRect) == 0) {
     if (edge1->getDir() == frDirEnum::W || edge1->getDir() == frDirEnum::E) {
@@ -2503,9 +2503,8 @@ void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::
     } else {
       box_t queryBox;
       myBloat(markerRect, 0, queryBox);
-      vector<rq_rptr_value_t<gcRect> > results;
       auto &workerRegionQuery = getWorkerRegionQuery();
-      vector<rq_rptr_value_t<gcRect> > result;
+      vector<rq_box_value_t<gcRect*> > result;
       auto secondLayerNum = rect1->getLayerNum() - 1;
       if (secondLayerNum >= getDesign()->getTech()->getBottomLayerNum() &&
           secondLayerNum <= getDesign()->getTech()->getTopLayerNum()) {
@@ -2517,7 +2516,7 @@ void FlexGCWorker::checkCutSpacing_spc(gcRect* rect1, gcRect* rect2, const gtl::
         workerRegionQuery.queryMaxRectangle(queryBox, secondLayerNum, result);
       }
       for (auto &[objBox, objPtr]: result) {
-        if ((objPtr->getNet() == net1 || objPtr->getNet() == net2) && bg::covered_by(queryBox, objBox)) {
+        if ((objPtr->getNet() == net1 || objPtr->getNet() == net2) && objBox.contains(queryBox)) {
           return;
         }
       }
@@ -2753,7 +2752,7 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasAdjCuts(gcRect* rect, frLef58CutS
   myBloat(*rect, cutWithinSquare, queryBox);
   cutWithinSquare *= cutWithinSquare;
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   int reqNumCut = con->getAdjacentCuts();
   int cnt = -1;
@@ -2806,7 +2805,7 @@ bool FlexGCWorker::checkLef58CutSpacing_spc_hasTwoCuts_helper(gcRect* rect,
   myBloat(*rect, cutWithinSquare, queryBox);
   cutWithinSquare *= cutWithinSquare;
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   int reqNumCut = con->getTwoCuts();
   int cnt = -1;
@@ -3420,7 +3419,7 @@ bool FlexGCWorker::checkCutSpacing_main_hasAdjCuts(gcRect* rect, frCutSpacingCon
   myBloat(*rect, cutWithinSquare, queryBox);
   cutWithinSquare *= cutWithinSquare;
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   workerRegionQuery.queryMaxRectangle(queryBox, layerNum, result);
   int reqNumCut = con->getAdjacentCuts();
   int cnt = -1;
@@ -3463,7 +3462,7 @@ void FlexGCWorker::checkLef58CutSpacing_main(gcRect* rect, frLef58CutSpacingCons
   myBloat(*rect, maxSpcVal, queryBox);
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   if (con->hasSecondLayer()) {
     workerRegionQuery.queryMaxRectangle(queryBox, con->getSecondLayerNum(), result);
   } else {
@@ -3526,7 +3525,7 @@ void FlexGCWorker::checkCutSpacing_main(gcRect* rect, frCutSpacingConstraint* co
   }
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<gcRect> > result;
+  vector<rq_box_value_t<gcRect*> > result;
   if (con->hasSecondLayer()) {
     workerRegionQuery.queryMaxRectangle(queryBox, con->getSecondLayerNum(), result);
   } else {

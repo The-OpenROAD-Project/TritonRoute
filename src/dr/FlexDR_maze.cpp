@@ -1127,9 +1127,7 @@ void FlexDRWorker::modAdjCutSpacingCost_fixedObj(const frBox &origCutBox, frVia 
     frRegionQuery::Objects<frBlockObject> result;
     getRegionQuery()->query(queryBox, lNum, result);
 
-    frBox box;
-    for (auto &[boostb, obj]:result) {
-      box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
+    for (auto &[box, obj]:result) {
       if (obj->typeId() == frcVia) {
         auto via = static_cast<frVia*>(obj);
         if (via->getNet()->getType() != frNetEnum::frcPowerNet && via->getNet()->getType() != frNetEnum::frcGroundNet) {
@@ -1884,7 +1882,7 @@ bool FlexDRWorker::route_2_x2_addHistoryCost(const frMarker &marker) {
   //bool enableOutput = true;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
 
@@ -1893,13 +1891,11 @@ bool FlexDRWorker::route_2_x2_addHistoryCost(const frMarker &marker) {
 
   workerRegionQuery.query(mBox, lNum, results);
   frPoint bp, ep;
-  frBox objBox;
   frCoord width;
   frSegStyle segStyle;
   FlexMazeIdx objMIdx1, objMIdx2;
   bool fixable = false;
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     if (connFig->typeId() == drcPathSeg) {
       auto obj = static_cast<drPathSeg*>(connFig);
       // skip if unfixable obj
@@ -1959,7 +1955,7 @@ void FlexDRWorker::route_2_x2_ripupNets(const frMarker &marker, drNet* net) {
   bool enableOutput = false;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
 
@@ -1989,9 +1985,7 @@ void FlexDRWorker::route_2_x2_ripupNets(const frMarker &marker, drNet* net) {
   }
 
   workerRegionQuery.query(bloatBox, lNum, results);
-  frBox objBox;
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     // for pathseg-related marker, bloat marker by half width and add marker cost planar
     if (connFig->typeId() == drcPathSeg) {
       //cout <<"@@pathseg" <<endl;

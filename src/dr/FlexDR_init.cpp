@@ -32,6 +32,9 @@
 using namespace std;
 using namespace fr;
 
+template <typename T>
+using rq_rptr_value_t = std::pair<box_t, T* >;
+
 void FlexDRWorker::initNetObjs_pathSeg(frPathSeg* pathSeg,
                                        set<frNet*, frBlockObjectComp> &nets, 
                                        map<frNet*, vector<unique_ptr<drConnFig> >, frBlockObjectComp> &netRouteObjs,
@@ -346,17 +349,14 @@ void FlexDRWorker::initNetObjs(set<frNet*, frBlockObjectComp> &nets,
   if (isFollowGuide()) {
     frRegionQuery::Objects<frNet> origGuides;
     frRect rect;
-    frBox  box;
     for (auto lNum = getDesign()->getTech()->getBottomLayerNum(); 
          lNum <= getDesign()->getTech()->getTopLayerNum(); lNum++) {
       origGuides.clear();
       getRegionQuery()->queryOrigGuide(getRouteBox(), lNum, origGuides);
-      for (auto &[boostb, net]: origGuides) {
+      for (auto &[box, net]: origGuides) {
         if (nets.find(net) == nets.end()) {
           continue;
         }
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), 
-                boostb.max_corner().x(), boostb.max_corner().y());
         //if (getExtBox().overlaps(box, false)) {
         //  continue;
         //}
@@ -1715,13 +1715,12 @@ void FlexDRWorker::initNets_boundaryArea() {
   frPoint bp, psBp, psEp, pt2/*, psBp2, psEp2*/;
   frLayerNum lNum;
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
-  vector<rq_rptr_value_t<drConnFig> > results2;
+  vector<rq_box_value_t<drConnFig*> > results;
+  vector<rq_box_value_t<drConnFig*> > results2;
   frBox queryBox;
   frBox queryBox2;
   frCoord currArea = 0;
   frSegStyle segStyle;
-  frBox viaBox2;
 
   for (auto &uNet: nets) {
     auto net = uNet.get();
@@ -1738,7 +1737,7 @@ void FlexDRWorker::initNets_boundaryArea() {
         lNum = ap->getBeginLayerNum();
         queryBox.set(bp, bp);
         workerRegionQuery.query(queryBox, lNum, results);
-        for (auto &[boostB, connFig]: results) {
+        for (auto &[ignored, connFig]: results) {
           if (connFig->getNet() != net) {
             continue;
           }
@@ -1753,7 +1752,7 @@ void FlexDRWorker::initNets_boundaryArea() {
               results2.clear();
               queryBox2.set(psEp, psEp);
               workerRegionQuery.query(queryBox2, lNum, results2);
-              for (auto &[boostB2, connFig2]: results) {
+              for (auto &[viaBox2, connFig2]: results) {
                 if (connFig2->getNet() != net) {
                   continue;
                 }
@@ -1761,8 +1760,6 @@ void FlexDRWorker::initNets_boundaryArea() {
                   auto obj2 = static_cast<drVia*>(connFig2);
                   obj2->getOrigin(pt2);
                   if (pt2 == psEp) {
-                    viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
-                                boostB2.max_corner().x(), boostB2.max_corner().y());
                     currArea += viaBox2.width() * viaBox2.length() / 2;
                     break;
                   }
@@ -1770,8 +1767,6 @@ void FlexDRWorker::initNets_boundaryArea() {
                   auto obj2 = static_cast<drPatchWire*>(connFig2);
                   obj2->getOrigin(pt2);
                   if (pt2 == psEp) {
-                    viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
-                                boostB2.max_corner().x(), boostB2.max_corner().y());
                     currArea += viaBox2.width() * viaBox2.length(); // patch wire no need / 2
                     break;
                   }
@@ -1786,7 +1781,7 @@ void FlexDRWorker::initNets_boundaryArea() {
               results2.clear();
               queryBox2.set(psEp, psEp);
               workerRegionQuery.query(queryBox2, lNum, results2);
-              for (auto &[boostB2, connFig2]: results) {
+              for (auto &[viaBox2, connFig2]: results) {
                 if (connFig2->getNet() != net) {
                   continue;
                 }
@@ -1794,8 +1789,6 @@ void FlexDRWorker::initNets_boundaryArea() {
                   auto obj2 = static_cast<drVia*>(connFig2);
                   obj2->getOrigin(pt2);
                   if (pt2 == psBp) {
-                    viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
-                                boostB2.max_corner().x(), boostB2.max_corner().y());
                     currArea += viaBox2.width() * viaBox2.length() / 2;
                     break;
                   }
@@ -1803,8 +1796,6 @@ void FlexDRWorker::initNets_boundaryArea() {
                   auto obj2 = static_cast<drPatchWire*>(connFig2);
                   obj2->getOrigin(pt2);
                   if (pt2 == psBp) {
-                    viaBox2.set(boostB2.min_corner().x(), boostB2.min_corner().y(), 
-                                boostB2.max_corner().x(), boostB2.max_corner().y());
                     currArea += viaBox2.width() * viaBox2.length();
                     break;
                   }
@@ -2382,7 +2373,7 @@ void FlexDRWorker::initMazeCost_ap() {
 void FlexDRWorker::initMazeCost_marker_fixMode_0(const frMarker &marker) {
   bool enableOutput = false;
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
   int xDim, yDim, zDim;
@@ -2409,9 +2400,7 @@ void FlexDRWorker::initMazeCost_marker_fixMode_0(const frMarker &marker) {
          <<endl;
   }
   workerRegionQuery.query(bloatBox, lNum, results);
-  frBox objBox;
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     // for pathseg-related marker, bloat marker by half width and add marker cost planar
     if (connFig->typeId() == drcPathSeg) {
       //cout <<"@@pathseg" <<endl;
@@ -2506,7 +2495,7 @@ void FlexDRWorker::initMazeCost_marker_fixMode_1(const frMarker &marker, bool ke
   bool enableOutput = true;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
   int xDim, yDim, zDim;
@@ -2550,7 +2539,6 @@ void FlexDRWorker::initMazeCost_marker_fixMode_1(const frMarker &marker, bool ke
   bool hasFatVia = false;
   results.clear();
   workerRegionQuery.query(mBox, lNum, results);
-  frBox objBox;
   bool bloatXp = false; // bloat to x+ dir
   bool bloatXn = false; // bloat to x- dir
   bool bloatYp = false; // bloat to y+ dir
@@ -2560,10 +2548,9 @@ void FlexDRWorker::initMazeCost_marker_fixMode_1(const frMarker &marker, bool ke
   frCoord viaWidth = 0;
   bool isLayerH = (getDesign()->getTech()->getLayer(lNum)->getDir() == frcHorzPrefRoutingDir);
   drNet* viaNet = nullptr;
-  for (auto &[boostB, connFig]: results) {
+  for (auto &[objBox, connFig]: results) {
     if (connFig->typeId() == drcVia) {
       //cout <<"@@via" <<endl;
-      objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
       viaNet = connFig->getNet();
       if (marker.hasDir()) { // spacing violation
         if (marker.isH() && isLayerH) {
@@ -2644,8 +2631,7 @@ void FlexDRWorker::initMazeCost_marker_fixMode_1(const frMarker &marker, bool ke
   // get all objs
   results.clear();
   workerRegionQuery.query(bloatBox, lNum, results);
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     // do not add marker cost for ps, rely on DRCCOST
     if (connFig->typeId() == drcPathSeg) {
       //cout <<"@@pathseg" <<endl;
@@ -2689,7 +2675,7 @@ void FlexDRWorker::initMazeCost_marker_route_queue_addHistoryCost(const frMarker
   //bool enableOutput = true;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
   set<drNet*> vioNets; // for self-violation, only add cost for one side (experiment with self cut spacing)
@@ -2699,13 +2685,11 @@ void FlexDRWorker::initMazeCost_marker_route_queue_addHistoryCost(const frMarker
 
   workerRegionQuery.query(mBox, lNum, results);
   frPoint bp, ep;
-  frBox objBox;
   frCoord width;
   frSegStyle segStyle;
   FlexMazeIdx objMIdx1, objMIdx2;
 
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     if (connFig->typeId() == drcPathSeg) {
       auto obj = static_cast<drPathSeg*>(connFig);
       // skip if unfixable obj
@@ -2897,7 +2881,7 @@ bool FlexDRWorker::initMazeCost_marker_fixMode_3_addHistoryCost(const frMarker &
   //bool enableOutput = true;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
 
@@ -2906,13 +2890,11 @@ bool FlexDRWorker::initMazeCost_marker_fixMode_3_addHistoryCost(const frMarker &
 
   workerRegionQuery.query(mBox, lNum, results);
   frPoint bp, ep;
-  frBox objBox;
   frCoord width;
   frSegStyle segStyle;
   FlexMazeIdx objMIdx1, objMIdx2;
   bool fixable = false;
-  for (auto &[boostB, connFig]: results) {
-    objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+  for (auto &[objBox, connFig]: results) {
     if (connFig->typeId() == drcPathSeg) {
       auto obj = static_cast<drPathSeg*>(connFig);
       // skip if unfixable obj
@@ -3049,7 +3031,7 @@ void FlexDRWorker::initMazeCost_marker_fixMode_3_ripupNets(const frMarker &marke
   bool enableOutput = false;
 
   auto &workerRegionQuery = getWorkerRegionQuery();
-  vector<rq_rptr_value_t<drConnFig> > results;
+  vector<rq_box_value_t<drConnFig*> > results;
   frBox mBox, bloatBox;
   FlexMazeIdx mIdx1, mIdx2;
   frPoint bp, ep;
@@ -3071,9 +3053,7 @@ void FlexDRWorker::initMazeCost_marker_fixMode_3_ripupNets(const frMarker &marke
   auto currLNum = lNum;
     results.clear();
     workerRegionQuery.query(bloatBox, currLNum, results);
-    frBox objBox;
-    for (auto &[boostB, connFig]: results) {
-      objBox.set(boostB.min_corner().x(), boostB.min_corner().y(), boostB.max_corner().x(), boostB.max_corner().y());
+    for (auto &[objBox, connFig]: results) {
       bool isEnter = false;
       if (getFixMode() == 3) {
         isEnter = true;
@@ -3552,7 +3532,6 @@ void FlexDRWorker::initMazeCost_pin_helper(const frBox &box, frCoord bloatDist, 
 // init maze cost for snet objs and blockages
 void FlexDRWorker::initMazeCost_fixedObj() {
   frRegionQuery::Objects<frBlockObject> result;
-  frBox box;
   frMIdx zIdx = 0;
   map<frNet*, set<frBlockObject*> > frNet2Terms;
   for (auto layerNum = getTech()->getBottomLayerNum(); layerNum <= getTech()->getTopLayerNum(); ++layerNum) {
@@ -3573,12 +3552,11 @@ void FlexDRWorker::initMazeCost_fixedObj() {
     }
     getRegionQuery()->query(getExtBox(), layerNum, result);
     // process blockage first, then unblock based on pin shape
-    for (auto &[boostb, obj]: result) {
+    for (auto &[box, obj]: result) {
       if (obj->typeId() == frcBlockage) {
         if (QUICKDRCTEST) {
           cout <<"  initMazeCost_blockage block" <<endl;
         }
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
         if (isRoutingLayer) {
           // assume only routing layer
           modMinSpacingCostPlaner(box, zIdx, 3, true);
@@ -3598,7 +3576,6 @@ void FlexDRWorker::initMazeCost_fixedObj() {
           auto blk = static_cast<frInstBlockage*>(obj);
           cout <<"  initMazeCost_instBlockage " <<blk->getInst()->getName() <<"/OBS" <<endl;
         }
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
 
         if (isRoutingLayer) {
           // assume only routing layer
@@ -3616,13 +3593,12 @@ void FlexDRWorker::initMazeCost_fixedObj() {
         }
       } 
     }
-    for (auto &[boostb, obj]: result) {
+    for (auto &[box, obj]: result) {
       // term no bloat
       if (obj->typeId() == frcTerm) {
         frNet2Terms[static_cast<frTerm*>(obj)->getNet()].insert(obj);
       } else if (obj->typeId() == frcInstTerm) {
         frNet2Terms[static_cast<frInstTerm*>(obj)->getNet()].insert(obj);
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
         if (isRoutingLayer) {
           // unblock planar edge for obs over pin, ap will unblock via edge for legal pin access
           modBlockedPlanar(box, zIdx, false);
@@ -3641,7 +3617,6 @@ void FlexDRWorker::initMazeCost_fixedObj() {
         if (QUICKDRCTEST) {
           cout <<"  initMazeCost_snet " <<ps->getNet()->getName() <<endl;
         }
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
         // assume only routing layer
         modMinSpacingCostPlaner(box, zIdx, 3);
         modMinSpacingCostVia(box, zIdx, 3, true,  true);
@@ -3658,7 +3633,6 @@ void FlexDRWorker::initMazeCost_fixedObj() {
           auto via = static_cast<frVia*>(obj);
           cout <<"  initMazeCost_snet " <<via->getNet()->getName() <<endl;
         }
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
         if (isRoutingLayer) {
           // assume only routing layer
           modMinSpacingCostPlaner(box, zIdx, 3);
@@ -3819,7 +3793,6 @@ void FlexDRWorker::initMazeCost_terms(const set<frBlockObject*> &objs, bool isAd
 
 void FlexDRWorker::initMazeCost_planarTerm() {
   frRegionQuery::Objects<frBlockObject> result;
-  frBox box;
   frMIdx  zIdx = 0;
   for (auto layerNum = getTech()->getBottomLayerNum(); layerNum <= getTech()->getTopLayerNum(); ++layerNum) {
     result.clear();
@@ -3828,10 +3801,9 @@ void FlexDRWorker::initMazeCost_planarTerm() {
     }
     zIdx = gridGraph.getMazeZIdx(layerNum);
     getRegionQuery()->query(getExtBox(), layerNum, result);
-    for (auto &[boostb, obj]: result) {
+    for (auto &[box, obj]: result) {
       // term no bloat
       if (obj->typeId() == frcTerm) {
-        box.set(boostb.min_corner().x(), boostb.min_corner().y(), boostb.max_corner().x(), boostb.max_corner().y());
         FlexMazeIdx mIdx1, mIdx2;
         gridGraph.getIdxBox(mIdx1, mIdx2, box);
         bool isPinRectHorz = (box.right() - box.left()) > (box.top() - box.bottom());

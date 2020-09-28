@@ -97,12 +97,12 @@ namespace fr {
     frCoord width() const {
       frCoord xSpan = right() - left();
       frCoord ySpan = top()   - bottom();
-      return (xSpan > ySpan) ? ySpan : xSpan;
+      return std::min(xSpan, ySpan);
     }
     frCoord length() const {
       frCoord xSpan = right() - left();
       frCoord ySpan = top()   - bottom();
-      return (xSpan > ySpan) ? xSpan : ySpan;
+      return std::max(xSpan, ySpan);
     }
     bool contains(const frBox &box, bool incEdges = true) const {;
       if (incEdges) {

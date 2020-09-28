@@ -36,13 +36,13 @@ namespace fr {
   class frRegionQuery {
   public:
     template<typename T>
-    using Objects = std::vector<rq_rptr_value_t<T>>;
+    using Objects = std::vector<rq_box_value_t<T*>>;
 
-    frRegionQuery(frDesign* designIn): design(designIn) {}
+    frRegionQuery(frDesign* designIn);
+    ~frRegionQuery();
     // getters
-    frDesign* getDesign() const {
-      return design;
-    }
+    frDesign* getDesign() const;
+
     // setters
     void addDRObj(frShape* in);
     void addDRObj(frVia* in);
@@ -78,31 +78,9 @@ namespace fr {
     void printGuide();
     void printDRObj();
 
-  protected:
-    template<typename T>
-    using rtree = bgi::rtree<rq_rptr_value_t<T>, bgi::quadratic<16>>;
-
-    template<typename T>
-    using ObjectsByLayer = std::vector<Objects<T>>;
-
-    frDesign*         design;
-    std::vector<rtree<frBlockObject>> shapes; // only for pin shapes, obs and snet
-    std::vector<rtree<frGuide>>       guides;
-    std::vector<rtree<frNet>>         origGuides; // non-processed guides;
-    rtree<frBlockObject>              grPins;
-    std::vector<rtree<frBlockObject>> drObjs; // only for dr objs, via only in via layer
-    std::vector<rtree<frMarker>>      markers; // use init()
-
-    void add(frShape* in,    ObjectsByLayer<frBlockObject> &allShapes);
-    void add(frVia* in,      ObjectsByLayer<frBlockObject> &allShapes);
-    void add(frInstTerm* in, ObjectsByLayer<frBlockObject> &allShapes);
-    void add(frTerm* in,     ObjectsByLayer<frBlockObject> &allShapes);
-    void add(frBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
-    void add(frInstBlockage* in, ObjectsByLayer<frBlockObject> &allShapes);
-    void addGuide(frGuide* in, ObjectsByLayer<frGuide> &allShapes);
-    void addOrigGuide(frNet* net, const frRect &rect, ObjectsByLayer<frNet> &allShapes);
-    void addDRObj(frShape* in, ObjectsByLayer<frBlockObject> &allShapes);
-    void addDRObj(frVia* in,   ObjectsByLayer<frBlockObject> &allShapes);
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> impl;
   };
 }
 

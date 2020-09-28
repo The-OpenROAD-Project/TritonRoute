@@ -192,8 +192,8 @@ namespace fr {
     //// others
     void init();
     void initFixedObjs();
-    frCoord initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const box_t &boostb);
-    frCoord initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const box_t &boostb, bool isOBS = true);
+    frCoord initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const frBox &box);
+    frCoord initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const frBox &box, bool isOBS = true);
     void initFixedObjs_helper(const frBox &box, frCoord bloatDist, frLayerNum lNum, frNet* net);
     void initTracks();
     void initIroutes();

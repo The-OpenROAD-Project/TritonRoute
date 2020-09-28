@@ -39,7 +39,6 @@ namespace fr {
   public:
     // getters
     virtual void getBBox(frBox &box) const = 0;
-    //virtual void getBBox(box_t &box) const = 0;
     // setters
     // others
     virtual void move(const frTransform &xform) = 0;

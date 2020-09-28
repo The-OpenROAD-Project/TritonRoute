@@ -718,10 +718,10 @@ void FlexTAWorker::initFixedObjs() {
     }
     width = getTech()->getLayer(layerNum)->getWidth();
     getRegionQuery()->query(getExtBox(), layerNum, result);
-    for (auto &[boostb, obj]: result) {
+    for (auto &[bounds, obj]: result) {
+      bounds.bloat(-1, box);
       // instterm term
       if (obj->typeId() == frcTerm || obj->typeId() == frcInstTerm) {
-        box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
         bloatDist = TASHAPEBLOATWIDTH * width;
         frNet* netPtr = nullptr;
         if (obj->typeId() == frcTerm) {
@@ -732,8 +732,7 @@ void FlexTAWorker::initFixedObjs() {
         initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
       // snet
       } else if (obj->typeId() == frcPathSeg || obj->typeId() == frcVia) {
-        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, boostb);
-        box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
+        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, bounds);
         frNet* netPtr = nullptr;
         if (obj->typeId() == frcPathSeg) {
           netPtr = static_cast<frPathSeg*>(obj)->getNet();
@@ -752,7 +751,7 @@ void FlexTAWorker::initFixedObjs() {
             frCoord viaWidth = viaBox.width();
             // only add for fat via
             if (viaWidth > width) {
-              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb, false);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, bounds, false);
               initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
             }
           }
@@ -766,14 +765,13 @@ void FlexTAWorker::initFixedObjs() {
             frCoord viaWidth = viaBox.width();
             // only add for fat via
             if (viaWidth > width) {
-              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb, false);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, bounds, false);
               initFixedObjs_helper(box, bloatDist, layerNum, netPtr);
             }
           }
         }
       } else if (obj->typeId() == frcBlockage || obj->typeId() == frcInstBlockage) {
-        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, boostb);
-        box.set(boostb.min_corner().x()+1, boostb.min_corner().y()+1, boostb.max_corner().x()-1, boostb.max_corner().y()-1);
+        bloatDist = initFixedObjs_calcBloatDist(obj, layerNum, bounds);
         initFixedObjs_helper(box, bloatDist, layerNum, nullptr);
 
         if (DBPROCESSNODE == "GF14_13M_3Mx_2Cx_4Kx_2Hx_2Gx_LB") {
@@ -791,7 +789,7 @@ void FlexTAWorker::initFixedObjs() {
             }
           }
           bool isFatOBS = true;
-          if (min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y()) <= 2 * width) {
+          if (bounds.width() <= 2 * width) {
             isFatOBS = false;
           } 
           if (isMacro && isFatOBS) {
@@ -799,14 +797,14 @@ void FlexTAWorker::initFixedObjs() {
             if (layerNum - 2 >= getDesign()->getTech()->getBottomLayerNum() && 
                 getTech()->getLayer(layerNum - 2)->getType() == frLayerTypeEnum::ROUTING) {
               auto cutLayer = getTech()->getLayer(layerNum - 1);
-              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, bounds);
               initFixedObjs_helper(box, bloatDist, layerNum - 2, nullptr);
             }
             // up-via
             if (layerNum + 2 < (int)design->getTech()->getLayers().size() && 
                 getTech()->getLayer(layerNum + 2)->getType() == frLayerTypeEnum::ROUTING) {
               auto cutLayer = getTech()->getLayer(layerNum + 1);
-              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, boostb);
+              bloatDist = initFixedObjs_calcOBSBloatDistVia(cutLayer->getDefaultViaDef(), layerNum, bounds);
               initFixedObjs_helper(box, bloatDist, layerNum + 2, nullptr);
             }
           }
@@ -818,7 +816,7 @@ void FlexTAWorker::initFixedObjs() {
   }
 }
 
-frCoord FlexTAWorker::initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const box_t &boostb, bool isOBS) {
+frCoord FlexTAWorker::initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const frLayerNum lNum, const frBox &box, bool isOBS) {
   auto layer = getTech()->getLayer(lNum);
   frBox viaBox;
   auto via = make_unique<frVia>(viaDef);
@@ -830,7 +828,7 @@ frCoord FlexTAWorker::initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const 
   frCoord viaWidth = viaBox.width();
   frCoord viaLength = viaBox.length();
 
-  frCoord obsWidth = min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y());
+  frCoord obsWidth = box.width();
   if (USEMINSPACING_OBS && isOBS) {
     obsWidth = layer->getWidth();
   }
@@ -856,14 +854,14 @@ frCoord FlexTAWorker::initFixedObjs_calcOBSBloatDistVia(frViaDef *viaDef, const 
   return bloatDist;
 }
 
-frCoord FlexTAWorker::initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const box_t &boostb) {
+frCoord FlexTAWorker::initFixedObjs_calcBloatDist(frBlockObject *obj, const frLayerNum lNum, const frBox &box) {
   auto layer = getTech()->getLayer(lNum);
   frCoord width = layer->getWidth();
   // use width if minSpc does not exist
   frCoord bloatDist = width;
-  frCoord objWidth = min(boostb.max_corner().x() - boostb.min_corner().x(), boostb.max_corner().y() - boostb.min_corner().y());
-  frCoord prl = (layer->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir) ? (boostb.max_corner().x() - boostb.min_corner().x()) :
-                                                                                   (boostb.max_corner().y() - boostb.min_corner().y());
+  frCoord objWidth = box.width();
+  frCoord prl = (layer->getDir() == frPrefRoutingDirEnum::frcHorzPrefRoutingDir) ? (box.right() - box.left()) :
+                                                                                   (box.top() - box.bottom());
   if (obj->typeId() == frcBlockage || obj->typeId() == frcInstBlockage) {
     if (USEMINSPACING_OBS) {
       objWidth = width;

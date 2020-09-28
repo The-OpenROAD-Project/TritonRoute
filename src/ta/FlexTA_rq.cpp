@@ -34,6 +34,9 @@ using namespace fr;
 template <typename T>
 using rq_generic_value_t = std::pair<box_t, T>;
 
+template <typename T>
+using rq_rptr_value_t = std::pair<box_t, T* >;  
+
 struct FlexTAWorkerRegionQuery::Impl
 {
     FlexTAWorker* taWorker;
