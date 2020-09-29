@@ -2035,6 +2035,10 @@ void FlexDRWorker::route_queue() {
   bool enableOutput = false;
   deque<pair<frBlockObject*, pair<bool, int> > > rerouteQueue; // <drNet*, <isRoute, #reroute cnt> >
 
+  if (skipRouting) {
+    return;
+  }
+
   // init GC
   FlexGCWorker gcWorker(getDesign(), this);
   gcWorker.setExtBox(getExtBox());
