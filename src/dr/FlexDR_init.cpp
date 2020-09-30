@@ -4018,6 +4018,9 @@ void FlexDRWorker::init() {
   //using namespace std::chrono;
   initMarkers();
   if (!DRCTEST && isEnableDRC() && getDRIter() && getInitNumMarkers() == 0 && !needRecheck) {
+    skipRouting = true;
+  }
+  if (skipRouting) {
     return;
   }
   initFixedObjs();

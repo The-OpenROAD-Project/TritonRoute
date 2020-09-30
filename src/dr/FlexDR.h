@@ -255,7 +255,7 @@ namespace fr {
     FlexDRWorker(FlexDR* drIn): 
                  design(drIn->getDesign()), dr(drIn), routeBox(), extBox(), drcBox(), drIter(0), mazeEndIter(1), 
                  TEST(false), DRCTEST(false), QUICKDRCTEST(false), enableDRC(true), 
-                 followGuide(false), needRecheck(false), ripupMode(1), fixMode(0), workerDRCCost(DRCCOST), 
+                 followGuide(false), needRecheck(false), skipRouting(false), ripupMode(1), fixMode(0), workerDRCCost(DRCCOST),
                  workerMarkerCost(MARKERCOST), workerMarkerBloatWidth(0), 
                  workerMarkerBloatDepth(0), boundaryPin(), 
                  pinCnt(0), initNumMarkers(0),
@@ -484,6 +484,7 @@ namespace fr {
     bool      enableDRC:1;
     bool      followGuide:1;
     bool      needRecheck:1;
+    bool      skipRouting:1;
     int       ripupMode;
     int       fixMode;
     //drNetOrderingEnum netOrderingMode;

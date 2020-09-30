@@ -517,6 +517,9 @@ void FlexDRWorker::cleanup() {
 }
 
 void FlexDRWorker::end() {
+  if (skipRouting == true) {
+    return;
+  }
   // skip if current clip does not have input DRCs
   // ripupMode = 0 must have enableDRC = true in previous iteration
   if (isEnableDRC() && getDRIter() && getInitNumMarkers() == 0 && !needRecheck) {
