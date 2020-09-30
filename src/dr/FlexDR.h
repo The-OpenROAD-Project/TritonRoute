@@ -119,46 +119,52 @@ namespace fr {
 
     void removeGCell2BoundaryPin();
     void checkConnectivity(int iter = -1);
-    void checkConnectivity_initDRObjs(frNet* net, std::vector<frConnFig*> &netDRObjs);
-    void checkConnectivity_pin2epMap(frNet* net, std::vector<frConnFig*> &netDRObjs,
+    void checkConnectivity_initDRObjs(const frNet* net, std::vector<frConnFig*> &netDRObjs);
+    void checkConnectivity_pin2epMap(const frNet* net,
+                                     const std::vector<frConnFig*> &netDRObjs,
                                      std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap);
-    void checkConnectivity_pin2epMap_helper(frNet* net, const frPoint &bp, frLayerNum lNum, 
+    void checkConnectivity_pin2epMap_helper(const frNet* net, const frPoint &bp, frLayerNum lNum, 
                                             std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap);
-    void checkConnectivity_nodeMap(frNet* net, 
-                                   std::vector<frConnFig*> &netDRObjs,
+    void checkConnectivity_nodeMap(const frNet* net, 
+                                   const std::vector<frConnFig*> &netDRObjs,
                                    std::vector<frBlockObject*> &netPins,
-                                   std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
+                                   const std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
                                    std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
-    void checkConnectivity_nodeMap_routeObjEnd(frNet* net, std::vector<frConnFig*> &netRouteObjs,
+    void checkConnectivity_nodeMap_routeObjEnd(const frNet* net,
+                                               const std::vector<frConnFig*> &netRouteObjs,
                                                std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
-    void checkConnectivity_nodeMap_routeObjSplit(frNet* net, std::vector<frConnFig*> &netRouteObjs,
+    void checkConnectivity_nodeMap_routeObjSplit(const frNet* net,
+                                                 const std::vector<frConnFig*> &netRouteObjs,
                                                  std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
     void checkConnectivity_nodeMap_routeObjSplit_helper(const frPoint &crossPt, 
                    frCoord trackCoord, frCoord splitCoord, frLayerNum lNum, 
-                   std::vector<std::map<frCoord, std::map<frCoord, std::pair<frCoord, int> > > > &mergeHelper,
+                   const std::vector<std::map<frCoord,
+                   std::map<frCoord, std::pair<frCoord, int> > > > &mergeHelper,
                    std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
-    void checkConnectivity_nodeMap_pin(frNet* net, 
-                                       std::vector<frConnFig*> &netRouteObjs,
+    void checkConnectivity_nodeMap_pin(const std::vector<frConnFig*> &netRouteObjs,
                                        std::vector<frBlockObject*> &netPins,
-                                       std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
+                                       const std::map<frBlockObject*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
                                        std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
-    void checkConnectivity_merge1(frNet *net, std::vector<frConnFig*> &netRouteObjs,
+    void checkConnectivity_merge1(const frNet *net,
+                                  const std::vector<frConnFig*> &netRouteObjs,
                                   std::vector<std::map<frCoord, std::vector<int> > > &horzPathSegs,
                                   std::vector<std::map<frCoord, std::vector<int> > > &vertPathSegs);
-    void checkConnectivity_merge2(frNet *net, std::vector<frConnFig*> &netRouteObjs,
-                                  std::vector<std::map<frCoord, std::vector<int> > > &horzPathSegs,
-                                  std::vector<std::map<frCoord, std::vector<int> > > &vertPathSegs,
+    void checkConnectivity_merge2(frNet *net,
+                                  const std::vector<frConnFig*> &netRouteObjs,
+                                  const std::vector<std::map<frCoord, std::vector<int> > > &horzPathSegs,
+                                  const std::vector<std::map<frCoord, std::vector<int> > > &vertPathSegs,
                                   std::vector<std::vector<std::vector<int> > > &horzVictims,
                                   std::vector<std::vector<std::vector<int> > > &vertVictims,
                                   std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &horzNewSegSpans,
                                   std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &vertNewSegSpans);
-    void checkConnectivity_merge3(frNet *net, std::vector<frConnFig*> &netRouteObjs,
-                                  std::vector<std::map<frCoord, std::vector<int> > > &horzPathSegs,
-                                  std::vector<std::map<frCoord, std::vector<int> > > &vertPathSegs,
-                                  std::vector<std::vector<std::vector<int> > > &horzVictims,
-                                  std::vector<std::vector<std::vector<int> > > &vertVictims,
-                                  std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &horzNewSegSpans,
-                                  std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &vertNewSegSpans);
+    void checkConnectivity_merge3(frNet *net,
+                                  std::vector<frConnFig*> &netRouteObjs,
+                                  const std::vector<std::map<frCoord, std::vector<int> > > &horzPathSegs,
+                                  const std::vector<std::map<frCoord, std::vector<int> > > &vertPathSegs,
+                                  const std::vector<std::vector<std::vector<int> > > &horzVictims,
+                                  const std::vector<std::vector<std::vector<int> > > &vertVictims,
+                                  const std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &horzNewSegSpans,
+                                  const std::vector<std::vector<std::vector<std::pair<frCoord, frCoord> > > > &vertNewSegSpans);
     void checkConnectivity_addMarker(frNet* net, frLayerNum lNum, const frBox &bbox);
     void checkConnectivity_merge_perform(const std::vector<frConnFig*> &netRouteObjs,
                                          const std::vector<int> &indices,
@@ -176,9 +182,9 @@ namespace fr {
                                         const std::vector<std::pair<frCoord, frCoord> > &newSegSpans,
                                         bool isHorz);
     bool checkConnectivity_astar(frNet* net, std::vector<bool> &adjVisited, std::vector<int> &adjPrevIdx, 
-                                 std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap, int &gCnt, int &nCnt);
+                                 const std::map<std::pair<frPoint, frLayerNum>, std::set<int>> &nodeMap, const int &gCnt, const int &nCnt);
     void checkConnectivity_final(frNet *net, std::vector<frConnFig*> &netRouteObjs, std::vector<frBlockObject*> &netPins,
-                                 std::vector<bool> &adjVisited, int gCnt, int nCnt,
+                                 const std::vector<bool> &adjVisited, int gCnt, int nCnt,
                                  std::map<std::pair<frPoint, frLayerNum>, std::set<int> > &nodeMap);
     void initDR(int size, bool enableDRC = false);
     std::map<frNet*, std::set<std::pair<frPoint, frLayerNum> >, frBlockObjectComp> initDR_mergeBoundaryPin(int i, int j, int size, const frBox &routeBox);

@@ -35,7 +35,7 @@ using namespace std;
 using namespace fr;
 
 // copied from FlexDRWorker::initNets_searchRepair_pin2epMap_helper
-void FlexDR::checkConnectivity_pin2epMap_helper(frNet *net, const frPoint &bp, frLayerNum lNum, 
+void FlexDR::checkConnectivity_pin2epMap_helper(const frNet *net, const frPoint &bp, frLayerNum lNum, 
                                                 map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap) {
   bool enableOutput = false;
   //bool enableOutput = true;
@@ -73,7 +73,8 @@ void FlexDR::checkConnectivity_pin2epMap_helper(frNet *net, const frPoint &bp, f
 }
 
 
-void FlexDR::checkConnectivity_pin2epMap(frNet* net, vector<frConnFig*> &netDRObjs,
+void FlexDR::checkConnectivity_pin2epMap(const frNet* net,
+                                         const vector<frConnFig*> &netDRObjs,
                                          map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap) {
   bool enableOutput = false;
   //bool enableOutput = true;
@@ -138,7 +139,7 @@ void FlexDR::checkConnectivity_pin2epMap(frNet* net, vector<frConnFig*> &netDROb
 
 }
 
-void FlexDR::checkConnectivity_initDRObjs(frNet* net, vector<frConnFig*> &netDRObjs) {
+void FlexDR::checkConnectivity_initDRObjs(const frNet* net, vector<frConnFig*> &netDRObjs) {
   bool enableOutput = false;
   //bool enableOutput = true;
   for (auto &uPtr: net->getShapes()) {
@@ -178,7 +179,8 @@ void FlexDR::checkConnectivity_initDRObjs(frNet* net, vector<frConnFig*> &netDRO
   }
 }
 
-void FlexDR::checkConnectivity_nodeMap_routeObjEnd(frNet* net, vector<frConnFig*> &netRouteObjs,
+void FlexDR::checkConnectivity_nodeMap_routeObjEnd(const frNet* net,
+                                                   const vector<frConnFig*> &netRouteObjs,
                                                    map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   bool enableOutput = false;
   frPoint bp, ep;
@@ -214,7 +216,7 @@ void FlexDR::checkConnectivity_nodeMap_routeObjEnd(frNet* net, vector<frConnFig*
 
 void FlexDR::checkConnectivity_nodeMap_routeObjSplit_helper(const frPoint &crossPt, 
              frCoord trackCoord, frCoord splitCoord, frLayerNum lNum, 
-             vector<map<frCoord, map<frCoord, pair<frCoord, int> > > > &mergeHelper,
+             const vector<map<frCoord, map<frCoord, pair<frCoord, int> > > > &mergeHelper,
              map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   auto it1 = mergeHelper[lNum].find(trackCoord);
   if (it1 != mergeHelper[lNum].end()) {
@@ -230,7 +232,8 @@ void FlexDR::checkConnectivity_nodeMap_routeObjSplit_helper(const frPoint &cross
   }
 }
 
-void FlexDR::checkConnectivity_nodeMap_routeObjSplit(frNet* net, vector<frConnFig*> &netRouteObjs,
+void FlexDR::checkConnectivity_nodeMap_routeObjSplit(const frNet* net,
+                                                     const vector<frConnFig*> &netRouteObjs,
                                                      map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   frPoint bp, ep;
   // vector<map<track, map<ep, pair<bp, objIdx> > > > interval_map
@@ -313,10 +316,9 @@ void FlexDR::checkConnectivity_nodeMap_routeObjSplit(frNet* net, vector<frConnFi
   }
 }
 
-void FlexDR::checkConnectivity_nodeMap_pin(frNet* net, 
-                                           vector<frConnFig*> &netRouteObjs,
+void FlexDR::checkConnectivity_nodeMap_pin(const vector<frConnFig*> &netRouteObjs,
                                            vector<frBlockObject*> &netPins,
-                                           map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
+                                           const map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
                                            map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   bool enableOutput = false;
   int currCnt = (int)netRouteObjs.size();
@@ -333,16 +335,16 @@ void FlexDR::checkConnectivity_nodeMap_pin(frNet* net,
   }
 }
 
-void FlexDR::checkConnectivity_nodeMap(frNet* net, 
-                                       vector<frConnFig*> &netRouteObjs,
+void FlexDR::checkConnectivity_nodeMap(const frNet* net, 
+                                       const vector<frConnFig*> &netRouteObjs,
                                        vector<frBlockObject*> &netPins,
-                                       map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
+                                       const map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> &pin2epMap,
                                        map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   bool enableOutput = false;
   //bool enableOutput = true;
   checkConnectivity_nodeMap_routeObjEnd(net, netRouteObjs, nodeMap);
   checkConnectivity_nodeMap_routeObjSplit(net, netRouteObjs, nodeMap);
-  checkConnectivity_nodeMap_pin(net, netRouteObjs, netPins, pin2epMap, nodeMap);
+  checkConnectivity_nodeMap_pin(netRouteObjs, netPins, pin2epMap, nodeMap);
   if (enableOutput) {
     int idx = 0;
     for (auto connFig: netRouteObjs) {
@@ -384,7 +386,7 @@ void FlexDR::checkConnectivity_nodeMap(frNet* net,
 }
 
 bool FlexDR::checkConnectivity_astar(frNet* net, vector<bool> &adjVisited, vector<int> &adjPrevIdx, 
-                                     map<pair<frPoint, frLayerNum>, set<int> > &nodeMap, int &gCnt, int &nCnt) {
+                                     const map<pair<frPoint, frLayerNum>, set<int>> &nodeMap, const int &gCnt, const int &nCnt) {
   //bool enableOutput = true;
   bool enableOutput = false;
   // a star search
@@ -521,7 +523,7 @@ bool FlexDR::checkConnectivity_astar(frNet* net, vector<bool> &adjVisited, vecto
 }
 
 void FlexDR::checkConnectivity_final(frNet *net, vector<frConnFig*> &netRouteObjs, vector<frBlockObject*> &netPins,
-                                     vector<bool> &adjVisited, int gCnt, int nCnt,
+                                     const vector<bool> &adjVisited, int gCnt, int nCnt,
                                      map<pair<frPoint, frLayerNum>, set<int> > &nodeMap) {
   //bool enableOutput = true;
   bool enableOutput = false;
@@ -790,7 +792,8 @@ void FlexDR::checkConnectivity_final(frNet *net, vector<frConnFig*> &netRouteObj
   }
 }
 
-void FlexDR::checkConnectivity_merge1(frNet *net, vector<frConnFig*> &netRouteObjs,
+void FlexDR::checkConnectivity_merge1(const frNet *net,
+                                      const vector<frConnFig*> &netRouteObjs,
                                       vector<map<frCoord, vector<int> > > &horzPathSegs,
                                       vector<map<frCoord, vector<int> > > &vertPathSegs) {
   //bool enableOutput = false;
@@ -824,9 +827,10 @@ void FlexDR::checkConnectivity_merge1(frNet *net, vector<frConnFig*> &netRouteOb
   }
 }
 
-void FlexDR::checkConnectivity_merge2(frNet *net, vector<frConnFig*> &netRouteObjs,
-                                      vector<map<frCoord, vector<int> > > &horzPathSegs,
-                                      vector<map<frCoord, vector<int> > > &vertPathSegs,
+void FlexDR::checkConnectivity_merge2(frNet *net,
+                                      const vector<frConnFig*> &netRouteObjs,
+                                      const vector<map<frCoord, vector<int> > > &horzPathSegs,
+                                      const vector<map<frCoord, vector<int> > > &vertPathSegs,
                                       vector<vector<vector<int> > > &horzVictims,
                                       vector<vector<vector<int> > > &vertVictims,
                                       vector<vector<vector<pair<frCoord, frCoord> > > > &horzNewSegSpans,
@@ -859,13 +863,14 @@ void FlexDR::checkConnectivity_merge2(frNet *net, vector<frConnFig*> &netRouteOb
   }
 }
 
-void FlexDR::checkConnectivity_merge3(frNet *net, vector<frConnFig*> &netRouteObjs,
-                                      vector<map<frCoord, vector<int> > > &horzPathSegs,
-                                      vector<map<frCoord, vector<int> > > &vertPathSegs,
-                                      vector<vector<vector<int> > > &horzVictims,
-                                      vector<vector<vector<int> > > &vertVictims,
-                                      vector<vector<vector<pair<frCoord, frCoord> > > > &horzNewSegSpans,
-                                      vector<vector<vector<pair<frCoord, frCoord> > > > &vertNewSegSpans) {
+void FlexDR::checkConnectivity_merge3(frNet *net,
+                                      vector<frConnFig*> &netRouteObjs,
+                                      const vector<map<frCoord, vector<int> > > &horzPathSegs,
+                                      const vector<map<frCoord, vector<int> > > &vertPathSegs,
+                                      const vector<vector<vector<int> > > &horzVictims,
+                                      const vector<vector<vector<int> > > &vertVictims,
+                                      const vector<vector<vector<pair<frCoord, frCoord> > > > &horzNewSegSpans,
+                                      const vector<vector<vector<pair<frCoord, frCoord> > > > &vertNewSegSpans) {
 
   for (auto lNum = 0; lNum < (int)horzPathSegs.size(); lNum++) {
     auto &track2Segs = horzPathSegs[lNum];
@@ -1054,13 +1059,18 @@ void FlexDR::checkConnectivity(int iter) {
     vector<vector<vector<pair<frCoord, frCoord> > > > tVertNewSegSpans(getTech()->getLayers().size());
     
     // prefix a = all batch
+    // net->figs
     vector<vector<frConnFig*> >                       aNetDRObjs(batchSize);
+    // net->layer->track->indices of DRObj
     vector<vector<map<frCoord, vector<int> > > >      aHorzPathSegs(batchSize, tHorzPathSegs);
     vector<vector<map<frCoord, vector<int> > > >      aVertPathSegs(batchSize, tVertPathSegs);
+    // net->lnum->trackIdx->objIdxs
     vector<vector<vector<vector<int> > > >            aHorzVictims(batchSize, tHorzVictims);
     vector<vector<vector<vector<int> > > >            aVertVictims(batchSize, tVertVictims);
+    // net->lnum->trackIdx->seg_start_end_pairs
     vector<vector<vector<vector<pair<frCoord, frCoord> > > > > aHorzNewSegSpans(batchSize, tHorzNewSegSpans);
     vector<vector<vector<vector<pair<frCoord, frCoord> > > > > aVertNewSegSpans(batchSize, tVertNewSegSpans);
+    // net->term/instTerm->pt_layer
     vector<map<frBlockObject*, set<pair<frPoint, frLayerNum> >, frBlockObjectComp> > aPin2epMap(batchSize);
     vector<vector<frBlockObject*> >                    aNetPins(batchSize);
     vector<map<pair<frPoint, frLayerNum>, set<int> > > aNodeMap(batchSize);
