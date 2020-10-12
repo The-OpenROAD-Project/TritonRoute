@@ -2029,7 +2029,7 @@ void FlexDRWorker::route_2_x2_ripupNets(const frMarker &marker, drNet* net) {
 void FlexDRWorker::route_queue() {
   // bool enableOutput = true;
   bool enableOutput = false;
-  deque<pair<frBlockObject*, pair<bool, int> > > rerouteQueue; // <drNet*, <isRoute, #reroute cnt> >
+  queue<RouteQueueEntry> rerouteQueue;
 
   if (skipRouting) {
     return;
@@ -2102,14 +2102,16 @@ void FlexDRWorker::route_queue() {
   setBestMarkers();
 }
 
-void FlexDRWorker::route_queue_main(deque<pair<frBlockObject*, pair<bool, int> > > &rerouteQueue) {
+void FlexDRWorker::route_queue_main(queue<RouteQueueEntry> &rerouteQueue) {
   auto &workerRegionQuery = getWorkerRegionQuery();
   while (!rerouteQueue.empty()) {
     // cout << "rerouteQueue size = " << rerouteQueue.size() << endl;
-    auto [obj, statusPair] = rerouteQueue.front();
-    bool doRoute = statusPair.first;
-    int numReroute = statusPair.second;
-    rerouteQueue.pop_front();
+    auto& entry = rerouteQueue.front();
+    frBlockObject* obj = entry.block;
+    bool doRoute = entry.doRoute;
+    int numReroute = entry.numReroute;
+
+    rerouteQueue.pop();
     bool didRoute = false;
     bool didCheck = false;
 

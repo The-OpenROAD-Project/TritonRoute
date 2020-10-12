@@ -39,6 +39,7 @@
 
 namespace fr {
 
+
   class FlexDR {
   public:
     // constructors
@@ -477,6 +478,12 @@ namespace fr {
     int getNumQuickMarkers();
     
   protected:
+    typedef struct {
+      frBlockObject* block;
+      int            numReroute;
+      bool           doRoute;
+    } RouteQueueEntry;
+
     frDesign* design;
     FlexDR*   dr;
     frBox     routeBox;
@@ -651,22 +658,22 @@ namespace fr {
 
     // route_queue
     void route_queue();
-    void route_queue_main(std::deque<std::pair<frBlockObject*, std::pair<bool, int> > > &rerouteQueue);
+    void route_queue_main(std::queue<RouteQueueEntry> &rerouteQueue);
     void route_queue_resetRipup();
     void route_queue_markerCostDecay();
     void route_queue_addMarkerCost(const std::vector<std::unique_ptr<frMarker> > &markers);
     void route_queue_addMarkerCost();
-    void route_queue_init_queue(std::deque<std::pair<frBlockObject*, std::pair<bool, int> > > &rerouteQueue);
+    void route_queue_init_queue(std::queue<RouteQueueEntry> &rerouteQueue);
     void route_queue_update_from_marker(frMarker *marker,
                                         std::set<frBlockObject*> &uniqueVictims,
                                         std::set<frBlockObject*> &uniqueAggressors,
-                                        std::vector<std::pair<frBlockObject*, std::pair<bool, int> > > &checks,
-                                        std::vector<std::pair<frBlockObject*, std::pair<bool, int> > > &routes);
-    void route_queue_update_queue(const std::vector<std::pair<frBlockObject*, std::pair<bool, int> > > &checks,
-                                  const std::vector<std::pair<frBlockObject*, std::pair<bool, int> > > &routes,
-                                  std::deque<std::pair<frBlockObject*, std::pair<bool, int> > > &rerouteQueue);
+                                        std::vector<RouteQueueEntry> &checks,
+                                        std::vector<RouteQueueEntry> &routes);
+    void route_queue_update_queue(const std::vector<RouteQueueEntry> &checks,
+                                  const std::vector<RouteQueueEntry> &routes,
+                                  std::queue<RouteQueueEntry> &rerouteQueue);
     void route_queue_update_queue(const std::vector<std::unique_ptr<frMarker> > &markers,
-                                  std::deque<std::pair<frBlockObject*, std::pair<bool, int> > > &rerouteQueue);
+                                  std::queue<RouteQueueEntry> &rerouteQueue);
 
     // route
     void route();

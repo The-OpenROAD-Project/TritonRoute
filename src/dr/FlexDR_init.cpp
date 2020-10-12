@@ -3185,11 +3185,11 @@ void FlexDRWorker::route_queue_addMarkerCost() {
   }
 }
 
-void FlexDRWorker::route_queue_init_queue(deque<pair<frBlockObject*, pair<bool, int> > > &rerouteQueue) {
+void FlexDRWorker::route_queue_init_queue(queue<RouteQueueEntry> &rerouteQueue) {
   set<frBlockObject*> uniqueVictims;
   set<frBlockObject*> uniqueAggressors;
-  vector<pair<frBlockObject*, pair<bool, int> > > checks;
-  vector<pair<frBlockObject*, pair<bool, int> > > routes;
+  vector<RouteQueueEntry> checks;
+  vector<RouteQueueEntry> routes;
   
   if (getRipupMode() == 0) {
     for (auto &marker: markers) {
@@ -3212,7 +3212,7 @@ void FlexDRWorker::route_queue_init_queue(deque<pair<frBlockObject*, pair<bool, 
     //   }
     // }
     for (auto &net: ripupNets) {
-      routes.push_back(make_pair(net, make_pair(true, 0)));
+      routes.push_back({net, 0, true});
       // reserve via because all nets are ripupped
       initMazeCost_via_helper(net, true);
       // no need to clear the net because route objs are not pushed to the net (See FlexDRWorker::initNet)
@@ -3223,14 +3223,14 @@ void FlexDRWorker::route_queue_init_queue(deque<pair<frBlockObject*, pair<bool, 
   route_queue_update_queue(checks, routes, rerouteQueue);
 }
 
-void FlexDRWorker::route_queue_update_queue(const vector<pair<frBlockObject*, pair<bool, int> > > &checks,
-                                            const vector<pair<frBlockObject*, pair<bool, int> > > &routes,
-                                            deque<pair<frBlockObject*, pair<bool, int> > > &rerouteQueue) {
+void FlexDRWorker::route_queue_update_queue(const vector<RouteQueueEntry> &checks,
+                                            const vector<RouteQueueEntry> &routes,
+                                            queue<RouteQueueEntry> &rerouteQueue) {
   for (auto &route: routes) {
-    rerouteQueue.push_back(route);
+    rerouteQueue.push(route);
   }
   for (auto &check: checks) {
-    rerouteQueue.push_back(check);
+    rerouteQueue.push(check);
   }
 }
 
@@ -3243,8 +3243,8 @@ void FlexDRWorker::route_queue_update_queue(const vector<pair<frBlockObject*, pa
 void FlexDRWorker::route_queue_update_from_marker(frMarker *marker, 
                                                   set<frBlockObject*> &uniqueVictims, 
                                                   set<frBlockObject*> &uniqueAggressors,
-                                                  vector<pair<frBlockObject*, pair<bool, int> > > &checks,
-                                                  vector<pair<frBlockObject*, pair<bool, int> > > &routes) {
+                                                  vector<RouteQueueEntry> &checks,
+                                                  vector<RouteQueueEntry> &routes) {
   // bool enableOutput = false;
 
   vector<frBlockObject*> uniqueVictimOwners;    // to maintain order
@@ -3372,7 +3372,7 @@ void FlexDRWorker::route_queue_update_from_marker(frMarker *marker,
             if (dNet->getNumReroutes() >= getMazeEndIter()) {
               continue;
             }
-            routes.push_back(make_pair(dNet, make_pair(true, dNet->getNumReroutes())));
+            routes.push_back({dNet, dNet->getNumReroutes(), true});
           }
         }
       }
@@ -3380,17 +3380,17 @@ void FlexDRWorker::route_queue_update_from_marker(frMarker *marker,
   }
 
   for (auto &victimOwner: uniqueVictimOwners) {
-    checks.push_back(make_pair(victimOwner, make_pair(false, -1)));
+    checks.push_back({victimOwner, -1, false});
   }
 
 }
 
 void FlexDRWorker::route_queue_update_queue(const vector<unique_ptr<frMarker> > &markers,
-                                            deque<pair<frBlockObject*, pair<bool, int> > > &rerouteQueue) {
+                                            queue<RouteQueueEntry> &rerouteQueue) {
   set<frBlockObject*> uniqueVictims;
   set<frBlockObject*> uniqueAggressors;
-  vector<pair<frBlockObject*, pair<bool, int> > > checks;
-  vector<pair<frBlockObject*, pair<bool, int> > > routes;
+  vector<RouteQueueEntry> checks;
+  vector<RouteQueueEntry> routes;
   
   for (auto &uMarker: markers) {
     auto marker = uMarker.get();
