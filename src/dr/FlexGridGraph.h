@@ -208,7 +208,7 @@ namespace fr {
         return false;
       }
     }
-    bool hasGridCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool hasGridCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       bool sol = false;
       correct(x, y, z, dir);
       switch(dir) {
@@ -223,7 +223,7 @@ namespace fr {
       }
       return sol;
     }
-    bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool hasShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       frUInt4 sol = 0;
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
         reverse(x, y, z, dir);
@@ -236,7 +236,7 @@ namespace fr {
       }
       return (sol);
     }
-    bool isOverrideShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool isOverrideShapeCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
         return false;
       } else {
@@ -245,7 +245,7 @@ namespace fr {
         return getBit(idx, 11);
       }
     }
-    bool hasDRCCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool hasDRCCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       frUInt4 sol = 0;
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
         reverse(x, y, z, dir);
@@ -258,7 +258,7 @@ namespace fr {
       }
       return (sol);
     }
-    bool hasMarkerCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool hasMarkerCost(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       frUInt4 sol = 0;
       // old
       if (dir != frDirEnum::D && dir != frDirEnum::U) {
@@ -288,7 +288,7 @@ namespace fr {
       return (sol);
     }
     // unsafe access
-    frCoord getEdgeLength(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    frCoord getEdgeLength(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       frCoord sol = 0;
       correct(x, y, z, dir);
       //if (isValid(x, y, z, dir)) {
@@ -308,7 +308,7 @@ namespace fr {
       //}
       return sol;
     }
-    bool isEdgeInBox(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir, const frBox &box, bool initDR) {
+    bool isEdgeInBox(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir, const frBox &box, bool initDR) const {
       bool sol = false;
       correct(x, y, z, dir);
       if (isValid(x, y, z, dir)) {
@@ -650,7 +650,7 @@ namespace fr {
       }
     }
 
-    bool hasGuide(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) {
+    bool hasGuide(frMIdx x, frMIdx y, frMIdx z, frDirEnum dir) const {
       reverse(x, y, z, dir);
       auto idx = getIdx(x, y, z);
       return guides[idx];
@@ -720,7 +720,7 @@ namespace fr {
               std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &xMap,
               std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &yMap,
               bool initDR, bool followGuide);
-    void print();
+    void print() const;
     void resetStatus();
     void resetAStarCosts();
     void resetPrevNodeDir();
@@ -912,7 +912,7 @@ namespace fr {
       return;
     }
     void getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, const frDirEnum dir) const;
-    void getNextGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, const frDirEnum dir);
+    void getNextGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, const frDirEnum dir) const;
     bool isValid(frMIdx x, frMIdx y, frMIdx z) const {
       if (x < 0 || y < 0 || z < 0 ||
           x >= (frMIdx)xCoords.size() || y >= (frMIdx)yCoords.size() || z >= (frMIdx)zCoords.size()) {
@@ -938,16 +938,16 @@ namespace fr {
                    const std::map<frCoord, std::map<frLayerNum, frTrackPattern* > > &yMap,
                    const std::map<frLayerNum, frPrefRoutingDirEnum> &zMap,
                    const frBox &bbox, bool initDR);
-    frCost getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1, const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir);
-    frCost getNextPathCost(const FlexWavefrontGrid &currGrid, const frDirEnum &dir);
-    frDirEnum getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer);
+    frCost getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1, const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir) const;
+    frCost getNextPathCost(const FlexWavefrontGrid &currGrid, const frDirEnum &dir) const;
+    frDirEnum getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer) const;
     void traceBackPath(const FlexWavefrontGrid &currGrid, std::vector<FlexMazeIdx> &path, 
-                       std::vector<FlexMazeIdx> &root, FlexMazeIdx &ccMazeIdx1, FlexMazeIdx &ccMazeIdx2);
+                       std::vector<FlexMazeIdx> &root, FlexMazeIdx &ccMazeIdx1, FlexMazeIdx &ccMazeIdx2) const;
     void expandWavefront(FlexWavefrontGrid &currGrid, const FlexMazeIdx &dstMazeIdx1, 
                          const FlexMazeIdx &dstMazeIdx2, const frPoint &centerPt);
-    bool isExpandable(const FlexWavefrontGrid &currGrid, frDirEnum dir);
+    bool isExpandable(const FlexWavefrontGrid &currGrid, frDirEnum dir) const;
     //bool isOpposite(const frDirEnum &dir1, const frDirEnum &dir2);
-    FlexMazeIdx getTailIdx(const FlexMazeIdx &currIdx, const FlexWavefrontGrid &currGrid);
+    FlexMazeIdx getTailIdx(const FlexMazeIdx &currIdx, const FlexWavefrontGrid &currGrid) const;
     void expand(FlexWavefrontGrid &currGrid, const frDirEnum &dir, const FlexMazeIdx &dstMazeIdx1, const FlexMazeIdx &dstMazeIdx2,
                 const frPoint &centerPt);
   };

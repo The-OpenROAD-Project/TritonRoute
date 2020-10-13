@@ -231,7 +231,7 @@ void FlexGridGraph::expandWavefront(FlexWavefrontGrid &currGrid, const FlexMazeI
 }
 
 frCost FlexGridGraph::getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstMazeIdx1,
-                                const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir) {
+                                const FlexMazeIdx &dstMazeIdx2, const frDirEnum &dir) const {
   //bool enableOutput = true;
   bool enableOutput = false;
   if (enableOutput) {
@@ -297,12 +297,12 @@ frCost FlexGridGraph::getEstCost(const FlexMazeIdx &src, const FlexMazeIdx &dstM
 
 }
 
-frDirEnum FlexGridGraph::getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer) {
+frDirEnum FlexGridGraph::getLastDir(const std::bitset<WAVEFRONTBITSIZE> &buffer) const {
   auto currDirVal = buffer.to_ulong() & 0b111u;
   return static_cast<frDirEnum>(currDirVal);
 }
 
-void FlexGridGraph::getNextGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, const frDirEnum dir) {
+void FlexGridGraph::getNextGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, const frDirEnum dir) const {
   switch(dir) {
     case frDirEnum::E:
       ++gridX;
@@ -354,7 +354,7 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
   return;
 }
 
-/*inline*/ frCost FlexGridGraph::getNextPathCost(const FlexWavefrontGrid &currGrid, const frDirEnum &dir) {
+/*inline*/ frCost FlexGridGraph::getNextPathCost(const FlexWavefrontGrid &currGrid, const frDirEnum &dir) const {
   // bool enableOutput = true;
   bool enableOutput = false;
   frMIdx gridX = currGrid.x();
@@ -475,7 +475,7 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
 
 }
 
-/*inline*/ FlexMazeIdx FlexGridGraph::getTailIdx(const FlexMazeIdx &currIdx, const FlexWavefrontGrid &currGrid) {
+/*inline*/ FlexMazeIdx FlexGridGraph::getTailIdx(const FlexMazeIdx &currIdx, const FlexWavefrontGrid &currGrid) const {
   int gridX = currIdx.x();
   int gridY = currIdx.y();
   int gridZ = currIdx.z();
@@ -489,7 +489,7 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
   return FlexMazeIdx(gridX, gridY, gridZ);
 }
 
-/*inline*/ bool FlexGridGraph::isExpandable(const FlexWavefrontGrid &currGrid, frDirEnum dir) {
+/*inline*/ bool FlexGridGraph::isExpandable(const FlexWavefrontGrid &currGrid, frDirEnum dir) const {
   //bool enableOutput = true;
   bool enableOutput = false;
   frMIdx gridX = currGrid.x();
@@ -516,7 +516,7 @@ void FlexGridGraph::getPrevGrid(frMIdx &gridX, frMIdx &gridY, frMIdx &gridZ, con
 }
 
 void FlexGridGraph::traceBackPath(const FlexWavefrontGrid &currGrid, vector<FlexMazeIdx> &path, vector<FlexMazeIdx> &root,
-                                  FlexMazeIdx &ccMazeIdx1, FlexMazeIdx &ccMazeIdx2) {
+                                  FlexMazeIdx &ccMazeIdx1, FlexMazeIdx &ccMazeIdx2) const {
   //bool enableOutput = true;
   bool enableOutput = false;
   if (enableOutput) {

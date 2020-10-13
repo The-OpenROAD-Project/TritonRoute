@@ -423,7 +423,7 @@ void FlexGridGraph::resetPrevNodeDir() {
 }
 
 // print the grid graph with edge and vertex for debug purpose
-void FlexGridGraph::print() {
+void FlexGridGraph::print() const {
   ofstream mazeLog(OUT_MAZE_FILE.c_str());
   if (mazeLog.is_open()) {
     // print edges
