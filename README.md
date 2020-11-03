@@ -1,8 +1,8 @@
 # TritonRoute
 **TritonRoute** is an open source detailed router for modern industrial 
 designs. The router consists of several main building blocks, including 
-track assignment, initial detailed routing, search and repair, and a DRC 
-engine.  The initial development of the 
+pin access analysis, track assignment, initial detailed routing, 
+search and repair, and a DRC engine. The initial development of the 
 [router](https://vlsicad.ucsd.edu/Publications/Conferences/363/c363.pdf) 
 is inspired by the 
 [ISPD-2018 initial detailed routing contest](http://www.ispd.cc/contests/18/). 
@@ -47,10 +47,12 @@ $ ./TritonRoute -lef <LEF_FILE> -def <DEF_FILE> -guide <GUIDE_FILE> -output <OUT
 
 ## Supported Technologies ##
 * CLN65LP (with limited selection of standard cells, macros and floorplans)
-* ISPD-2018 Initial Detailed Routing Contest 
+* ISPD-2018 and ISPD-2019 Initial Detailed Routing Contests 
 
-## Acknowledgment ##
-Special thanks to the anonymous contributors of the new DRC engine and pin access analysis engine.
+## References ##
+Please cite the following paper(s) for publication:
+* A. B. Kahng, L. Wang and B. Xu, "TritonRoute: The Open Source Detailed Router", IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (2020), doi:10.1109/TCAD.2020.3003234.
+* A. B. Kahng, L. Wang and B. Xu, "The Tao of PAO: Anatomy of a Pin Access Oracle for Detailed Routing", Proc. ACM/IEEE Design Automation Conf., 2020, pp. 1-6.
 
 ## License ##
 * [BSD 3-clause License](LICENSE) 
