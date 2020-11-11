@@ -264,8 +264,7 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
         rect->setLayerNum(cutLayerNum);
         //cout <<"cutFig (" <<currX <<", " <<currY <<") (" <<currX+xSize <<"," <<currY+ySize <<") " <<cutLayer <<endl;
 
-        unique_ptr<frShape> tmp(std::move(rect));
-        cutFigs.push_back(std::move(tmp));
+        cutFigs.push_back(std::move(rect));
 
         currX += xSize + xCutSpacing;
       }
@@ -356,16 +355,15 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
         unique_ptr<frRect> pinFig = make_unique<frRect>();
         pinFig->setBBox(frBox(xl, yl, xh, yh));
         pinFig->setLayerNum(layerNum);
-        unique_ptr<frShape> tmp(std::move(pinFig));
         switch(cnt) {
           case 0 :
-            viaDef->addLayer1Fig(std::move(tmp));
+            viaDef->addLayer1Fig(std::move(pinFig));
             break;
           case 1 :
-            viaDef->addCutFig(std::move(tmp));
+            viaDef->addCutFig(std::move(pinFig));
             break;
           default:
-            viaDef->addLayer2Fig(std::move(tmp));
+            viaDef->addLayer2Fig(std::move(pinFig));
             break;
         }
       }
@@ -386,19 +384,18 @@ int io::Parser::Callbacks::getDefVias(defrCallbackType_e type, defiVia* via, def
       //  unique_ptr<frPolygon> pinFig = make_unique<frPolygon>();
       //  pinFig->setPoints(tmpPoints);
       //  pinFig->setLayerNum(layerNum);
-      //  unique_ptr<frShape> tmp(std::move(pinFig));
       //  if (enableOutput) {
       //    cout <<" ;" <<endl;
       //  }
       //  switch(cnt) {
       //    case 0 :
-      //      viaDef->addLayer1Fig(tmp);
+      //      viaDef->addLayer1Fig(pinFig);
       //      break;
       //    case 1 :
-      //      viaDef->addCutFig(tmp);
+      //      viaDef->addCutFig(pinFig);
       //      break;
       //    default:
-      //      viaDef->addLayer2Fig(tmp);
+      //      viaDef->addLayer2Fig(pinFig);
       //      break;
       //  }
       //}
@@ -4590,7 +4587,6 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
       unique_ptr<frRect> pinFig = make_unique<frRect>();
       pinFig->setBBox(frBox(xl, yl, xh, yh));
       pinFig->setLayerNum(layerNum);
-      unique_ptr<frShape> tmp(std::move(pinFig));
       if (enableOutput) {
         cout <<"    RECT "   <<xl * 1.0 / parser->tech->getDBUPerUU() <<" " 
                              <<yl * 1.0 / parser->tech->getDBUPerUU() <<" " 
@@ -4599,13 +4595,13 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
       }
       switch(cnt) {
         case 0 :
-          viaDef->addLayer1Fig(std::move(tmp));
+          viaDef->addLayer1Fig(std::move(pinFig));
           break;
         case 1 :
-          viaDef->addCutFig(std::move(tmp));
+          viaDef->addCutFig(std::move(pinFig));
           break;
         default:
-          viaDef->addLayer2Fig(std::move(tmp));
+          viaDef->addLayer2Fig(std::move(pinFig));
           break;
       }
     }
@@ -4626,19 +4622,18 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
       unique_ptr<frPolygon> pinFig = make_unique<frPolygon>();
       pinFig->setPoints(tmpPoints);
       pinFig->setLayerNum(layerNum);
-      unique_ptr<frShape> tmp(std::move(pinFig));
       if (enableOutput) {
         cout <<" ;" <<endl;
       }
       switch(cnt) {
         case 0 :
-          viaDef->addLayer1Fig(std::move(tmp));
+          viaDef->addLayer1Fig(std::move(pinFig));
           break;
         case 1 :
-          viaDef->addCutFig(std::move(tmp));
+          viaDef->addCutFig(std::move(pinFig));
           break;
         default:
-          viaDef->addLayer2Fig(std::move(tmp));
+          viaDef->addLayer2Fig(std::move(pinFig));
           break;
       }
     }
