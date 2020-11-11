@@ -4573,7 +4573,7 @@ int io::Parser::Callbacks::getLefVias(lefrCallbackType_e type, lefiVia* via, lef
 
   auto viaDef = make_unique<frViaDef>(via->name());
   if (via->hasDefault()) {
-    viaDef->setDefault(1);
+    viaDef->setDefault(true);
   }
   int cnt = 0;
   for (auto &m: lNum2Int) {
