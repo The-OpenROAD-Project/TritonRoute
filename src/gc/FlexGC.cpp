@@ -108,6 +108,11 @@ void FlexGCWorker::setDrcBox(const frBox &in)
   impl->drcBox.set(in);
 }
 
+frDesign* FlexGCWorker::getDesign() const
+{
+  return impl->getDesign();
+}
+
 const std::vector<std::unique_ptr<frMarker> >& FlexGCWorker::getMarkers() const {
   return impl->markers;
 }
